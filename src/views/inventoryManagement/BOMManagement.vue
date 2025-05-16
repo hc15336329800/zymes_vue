@@ -1,3 +1,4 @@
+<!--bom列表-->
 <template>
   <div class="app-container">
     <el-form :model="queryParams" ref="queryRef" class="query-form commen-search" :inline="true">

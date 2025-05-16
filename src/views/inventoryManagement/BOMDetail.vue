@@ -1,3 +1,4 @@
+<!--bom工序详情  -->
 <template>
   <div class="app-container">
     <el-form :model="titleForm" ref="queryRef" class="query-form commen-search" :inline="true">

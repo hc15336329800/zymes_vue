@@ -37,22 +37,22 @@
       </el-form-item>
       <el-form-item></el-form-item>
     </el-form>
-    <el-row class="flex_row pb_10 c_b fw_bold fs_24">
-      <el-button type="primary" class="commen-button" icon="el-icon-plus" @click="handleAdd">新增</el-button>
-      <upload-excel-component
-        text="物料导入"
-        :on-success="handleSuccess"
-        class="ml_20"
-        :loading="loading"
-        ref="uploadGong"
-      />
-      <div
-        @click="downLoadTemplate()"
-        style="color:#3145ec;font-size:14px;float:right;z-index:999;position:absolute;right:0px;top:16px;"
-      >
-        <span style="cursor:pointer;">下载模版</span>
-      </div>
-    </el-row>
+<!--    <el-row class="flex_row pb_10 c_b fw_bold fs_24">-->
+<!--      <el-button type="primary" class="commen-button" icon="el-icon-plus" @click="handleAdd">新增</el-button>-->
+<!--      <upload-excel-component-->
+<!--        text="物料导入"-->
+<!--        :on-success="handleSuccess"-->
+<!--        class="ml_20"-->
+<!--        :loading="loading"-->
+<!--        ref="uploadGong"-->
+<!--      />-->
+<!--      <div-->
+<!--        @click="downLoadTemplate()"-->
+<!--        style="color:#3145ec;font-size:14px;float:right;z-index:999;position:absolute;right:0px;top:16px;"-->
+<!--      >-->
+<!--        <span style="cursor:pointer;">下载模版</span>-->
+<!--      </div>-->
+<!--    </el-row>-->
     <el-table :data="pageList" class="commen-table mt_20">
       <el-table-column type="index" width="55" label="序号"></el-table-column>
       <el-table-column label="物料编码" align="center" prop="itemNo"/>

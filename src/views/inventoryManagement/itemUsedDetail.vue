@@ -1,3 +1,4 @@
+<!--bom用料详情-->
 <template>
   <div>
     <!--    <el-form :model="queryParams" class="commen-search" ref="queryRef" :inline="true" label-width="70px">-->

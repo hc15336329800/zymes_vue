@@ -1,5 +1,8 @@
 <template>
   <div class="app-container">
+
+
+    <!--订单列表-->
     <el-form :model="queryParams" ref="queryRef" class="query-form commen-search" :inline="true">
       <el-form-item label="订单号" class="condition">
         <el-input v-model="queryParams.params.orderNo" placeholder="请输入订单号" clearable/>
@@ -7,7 +10,7 @@
       <el-form-item label="客户" class="condition">
         <el-input v-model="queryParams.params.custName" placeholder="请输入名称" clearable/>
       </el-form-item>
-      <el-form-item label="图纸号" class="condition">
+      <el-form-item label="BOM号" class="condition">
         <BomNoSelect :item-no.sync="queryParams.params.itemNo"/>
       </el-form-item>
       <el-form-item label="是否可下单" class="condition">
@@ -83,12 +86,13 @@
     <el-table :data="pageList" class="commen-table mt_20" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55"></el-table-column>
       <el-table-column label="订单号" align="center" prop="orderNo"/>
+      <el-table-column label="BOM号" align="center" prop="itemNo"/>
       <el-table-column label="客户" align="center" prop="custName"/>
-      <el-table-column label="图纸号" align="center" prop="bomNo"/>
+      <el-table-column label="产品名称" align="center" prop="itemName"/>
       <el-table-column label="需求数量" align="center" prop="needNum"/>
-      <el-table-column label="已下单数量" align="center" prop="orderedNum"/>
-      <el-table-column label="待下单数量" align="center" prop="waitOrderedNum"/>
-      <el-table-column label="工序名称" align="center" prop="procedureName"/>
+<!--      <el-table-column label="已下单数量" align="center" prop="orderedNum"/>-->
+<!--      <el-table-column label="待下单数量" align="center" prop="waitOrderedNum"/>-->
+<!--      <el-table-column label="工序名称" align="center" prop="procedureName"/>-->
       <el-table-column label="创建时间" align="center" prop="createdTime"/>
       <el-table-column label="操作" align="center" width="310" class-name="small-padding fixed-width">
         <template slot-scope="scope">
@@ -108,325 +112,414 @@
       :limit.sync="queryParams.page.page_size"
       @pagination="getData"
     />
-    <!-- 下达 -->
+
+
+<!--新增订单-->
     <el-dialog
-      title="编辑销售订单"
+      :title="title + '销售订单'"
       :visible.sync="dialogShow"
-      width="460px"
-      top="10vh"
+      width="600px"
+      top="20vh"
       @close="beforeClose"
+      custom-class="dialog-round-top"
     >
-      <div>
-        <el-form ref="form" :model="form" :rules="rules" label-width="120px">
-          <el-form-item label="关联客户">
-            <el-input v-model="form.custName" :disabled="true"/>
-          </el-form-item>
-          <el-form-item label="图纸号" prop="bomNo">
-            <BomNoSelect :item-no.sync="form.itemNo" :disabled="true"/>
-          </el-form-item>
-          <el-form-item label="需求数量" prop="needNum">
-            <el-input v-model="form.needNum"/>
-          </el-form-item>
-        </el-form>
-        <div class="w_100 flex_row flex_x_center">
-          <el-button @click="cancel('dialogVisible1')">取消</el-button>
-          <el-button type="primary" plain class="ml_20" @click="submitForm()">确定</el-button>
-        </div>
+      <!-- ✅ 正确位置：form 放这里！ -->
+      <el-form ref="form" :model="form" :rules="rules" label-width="120px">
+        <el-form-item label="销售单号">
+          <el-input v-model="form.orderNo" :disabled="true" />
+        </el-form-item>
+        <el-form-item label="客户名称" prop="custName">
+          <el-input v-model="form.custName" :disabled="title !== '新增'" placeholder="请输入客户名称" />
+        </el-form-item>
+        <el-form-item label="产品名称" prop="itemName">
+          <el-input
+            v-model="form.itemName"
+
+            placeholder="点击产品"
+            readonly
+            @focus="openBomDialog"
+          />
+        </el-form-item>
+
+          <el-form-item label="BOM编号" prop="itemNo">
+            <el-input v-model="form.itemNo" :disabled="true" />
+
+        </el-form-item>
+
+        <el-form-item label="需求数量" prop="needNum">
+          <el-input-number v-model="form.needNum" :min="1" :max="100" />
+        </el-form-item>
+      </el-form>
+
+      <!-- 操作按钮 -->
+      <div class="w_100 flex_row flex_x_center mt_20">
+        <el-button @click="cancel">取消</el-button>
+        <el-button type="primary" plain class="ml_20" @click="submitForm">确定</el-button>
       </div>
     </el-dialog>
+
+
+    <BomDialog
+      :visible.sync="bomDialogVisible"
+      @selected="onBomSelected"
+      @cancel="bomDialogVisible = false"
+    />
+
+
+
   </div>
 </template>
 <script>
-  import UploadExcelComponent from '@/components/UploadExcel/index.vue'
-  import {get_new_export} from '@/api/common'
-  import {
-    deleteSales,
-    detailSales,
-    salesPageList,
-    updateSales
-  } from '@/api/sales/sales'
-  import {sales_import_order} from '@/api/sales'
-  import {mapGetters} from "vuex";
+import UploadExcelComponent from '@/components/UploadExcel/index.vue'
+import BomDialog from './BomDialog.vue'
 
-  export default {
-    components: {
-      UploadExcelComponent,
-      DateIntervals: () => import('@/components/DateIntervals'),
-      Pagination: () => import('@/components/Pagination'),
-      BomNoSelect: () => import('@/components/Item/BomNo')
-    },
-    data() {
-      return {
-        queryParams: {
-          params: {
-            canPlace: '01'
-          },
-          page: {
-            page_num: 1,
-            page_size: 10
-          }
+import {get_new_export} from '@/api/common'
+import {
+  deleteSales,
+  detailSales,
+  salesPageList,
+  updateSales
+} from '@/api/sales/sales'
+import {sales_import_order} from '@/api/sales'
+import {mapGetters} from "vuex";
+import { add} from '@/api/saleOrder'
+
+
+export default {
+  components: {
+    BomDialog,
+    UploadExcelComponent,
+    DateIntervals: () => import('@/components/DateIntervals'),
+    Pagination: () => import('@/components/Pagination'),
+    BomNoSelect: () => import('@/components/Item/BomNo')
+  },
+  data() {
+    return {
+      bomDialogVisible: false, //bom弹窗
+
+      queryParams: {
+        params: {
+          canPlace: '01'
         },
-        dialogVisible1: false,
-        canPlaceList: [
-          {code: '01', name: '可下单'},
-          {code: '00', name: '不可下单'}
-        ],
-        locationList: [],
-        loading: false,
-        selectList: [],
-        multipleSelection: [],
-        form: {},
-        pageTotal: 0,
-        pageList: [],
-        title: '',
-        dialogShow: false,
-        buttonShow: false,
-        currentHour: null,
-        rules: {
-          needNum: [{required: true, message: '请输入数量', trigger: 'blur'}]
+        page: {
+          page_num: 1,
+          page_size: 10
         }
-      }
+      },
+      dialogVisible1: false,
+      canPlaceList: [
+        {code: '01', name: '可下单'},
+        {code: '00', name: '不可下单'}
+      ],
+      locationList: [],
+      loading: false,
+      selectList: [],
+      multipleSelection: [],
+      form: {},
+      pageTotal: 0,
+      pageList: [],
+      title: '',
+      dialogShow: false,
+      buttonShow: false,
+      currentHour: null,
+      rules: {
+        custName: [{ required: true, message: '请输入客户名称', trigger: 'blur' }],
+        itemNo: [{ required: true, message: '请选择产品', trigger: 'change' }],
+        needNum: [
+          { required: true, message: '请输入数量', trigger: 'blur' },
+          { type: 'number', min: 1, max: 100, message: '数量必须为1-100的整数', trigger: 'blur' }
+        ]
+      },
+
+    }
+  },
+  created() {
+    const user = localStorage.getItem('user_info');
+    const name = JSON.parse(user).userName;
+    this.buttonShow = true;
+    // if(name ==='admin'){
+    //   this.buttonShow = true;
+    // }else{
+    //   this.currentHour = new Date().getHours();
+    //   if(this.currentHour === 18 || this.currentHour === 19 || this.currentHour === 20 || this.currentHour === 21){
+    //     this.buttonShow = true;
+    //   }
+    // }
+    this.getSelectOption()
+    this.getData()
+  },
+  methods: {
+
+    /** bom弹窗 */
+    openBomDialog() {
+      this.bomDialogVisible = true
     },
-    created() {
-      const user = localStorage.getItem('user_info');
-      const name = JSON.parse(user).userName;
-      this.buttonShow = true;
-      // if(name ==='admin'){
-      //   this.buttonShow = true;
-      // }else{
-      //   this.currentHour = new Date().getHours();
-      //   if(this.currentHour === 18 || this.currentHour === 19 || this.currentHour === 20 || this.currentHour === 21){
-      //     this.buttonShow = true;
-      //   }
-      // }
-      this.getSelectOption()
+    /** bom弹窗 */
+    onBomSelected(itemNo,itemName) {
+      this.form.itemNo = itemNo
+      this.form.itemName = itemName // ✅ 回填产品名称
+
+    },
+
+
+    /** 搜索按钮操作 */
+    handleQuery() {
+      this.queryParams.page.page_num = 1
       this.getData()
     },
-    methods: {
-      /** 搜索按钮操作 */
-      handleQuery() {
-        this.queryParams.page.page_num = 1
-        this.getData()
-      },
-      beforeClose() {
-        this.form = {}
-        this.$refs['form'].clearValidate()
-      },
-      getSelectOption() {
-      },
-      /** 重置操作表单 */
-      handleReset() {
-        this.queryParams = {
-          page: {
-            page_num: 1,
-            page_size: 10
-          },
-          params: {}
+    beforeClose() {
+      this.form = {}
+      this.$refs['form'].clearValidate()
+    },
+    getSelectOption() {
+    },
+    /** 重置操作表单 */
+    handleReset() {
+      this.queryParams = {
+        page: {
+          page_num: 1,
+          page_size: 10
+        },
+        params: {
+          itemType: "01"
         }
-        this.$refs.userInfoDateIntervals.initDateData()
-        this.getData()
-      },
-      getData() {
-        salesPageList(this.queryParams).then(res => {
-          this.pageList = res.data
-          this.pageTotal = Number(res.page.total_num)
-        })
-      },
-      handleAdd() {
-        this.$router.push({
-          name: 'addSaleList'
-        })
-      },
-      handleUpdate(row) {
-        detailSales({
-          params: {
-            id: row.id
-          }
-        }).then(res => {
-          this.form = res.data
-          this.dialogShow = true
-        })
+      }
+      this.$refs.userInfoDateIntervals.initDateData()
+      this.getData()
+    },
+    getData() {
+      salesPageList(this.queryParams).then(res => {
+        this.pageList = res.data
+        this.pageTotal = Number(res.page.total_num)
+      })
+    },
+    handleAdd() {
+      this.title = '新增'
+      this.form = {
+        orderNo: this.genOrderNo(), // 自动生成单号
+        custName: '',
+        itemNo: '',
+        needNum: 1
+      }
+      this.dialogShow = true
+    },
+    // 新增 genOrderNo() 方法（本地模拟销售单号）
+    genOrderNo() {
+      const now = new Date()
+      const ymd = now.getFullYear().toString()
+        + String(now.getMonth() + 1).padStart(2, '0')
+        + String(now.getDate()).padStart(2, '0')
+      const rand = Math.floor(Math.random() * 9000) + 1000
+      return ymd + rand
+    },
 
-        this.title = '编辑'
-      },
-      downLoadTemplate() {
-        let url = '/api/sales/sale_order/down_temp'
-        get_new_export(url, {
-          page: {page_num: 1, page_size: 1},
-          params: {}
-        })
-      },
-      handleDelete(row) {
-        this.$confirm('确认要删除数据吗?', {
-          confirmButtonText: '确定',
-          cancelButtonText: '取消',
-          type: 'warning'
-        })
-          .then(() => {
-            deleteSales({
-              params: {
-                list: [row.id]
-              }
-            }).then(res => {
-              this.getData()
-              this.$message({
-                type: 'success',
-                message: '删除成功'
-              })
+    handleUpdate(row) {
+      detailSales({
+        params: {
+          id: row.id
+        }
+      }).then(res => {
+        this.form = res.data
+        this.dialogShow = true
+      })
+
+      this.title = '编辑'
+    },
+    downLoadTemplate() {
+      let url = '/api/sales/sale_order/down_temp'
+      get_new_export(url, {
+        page: {page_num: 1, page_size: 1},
+        params: {}
+      })
+    },
+    handleDelete(row) {
+      this.$confirm('确认要删除数据吗?', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      })
+        .then(() => {
+          deleteSales({
+            params: {
+              list: [row.id]
+            }
+          }).then(res => {
+            this.getData()
+            this.$message({
+              type: 'success',
+              message: '删除成功'
             })
           })
-          .then(() => {
-          })
-      },
-      submitForm() {
-        this.$refs['form'].validate(valid => {
-          if (valid) {
-            if (this.form.id) {
-              updateSales({
-                params: this.form
-              }).then(res => {
-                this.$message({
-                  message: '修改成功',
-                  type: 'success'
-                })
-                this.getData()
-              })
-            }
-            this.dialogShow = false
-          }
         })
-      },
-      exportOrder() {
-        if (this.selectList.length == 0) {
-          this.$message.error('请勾选要导出的订单')
-          return
-        }
-        get_new_export('/api/sales/sale_order/export_order', {
-          page: {page_num: 1, page_size: 1},
-          params: {list: this.selectList}
+        .then(() => {
         })
-      },
-      async handleSuccess(file, type) {
-        let res
-        this.$refs.uploadGong.loading = false
-        console.log(file)
-        res = await sales_import_order(file)
+    },
+    // 增强 submitForm() 方法支持“新增模式”调用后端接口
+    submitForm() {
+      this.$refs['form'].validate(valid => {
+        if (!valid) return
 
-        if (res) {
-          this.$message({
-            type: 'success',
-            message: '导入成功'
+        const sale = {
+          custName: this.form.custName,
+          itemNo: this.form.itemNo,
+          needNum: this.form.needNum
+        }
+
+        if (this.title === '新增') {
+          add(sale).then(() => {
+            this.$message.success('新增成功')
+            this.dialogShow = false
+            this.getData()
           })
-          this.getData()
+        } else {
+          editSales({ params: { ...this.form } }).then(() => {
+            this.$message.success('修改成功')
+            this.dialogShow = false
+            this.getData()
+          })
         }
-      },
-      cancel() {
-        this.dialogShow = false
-        this.form = {}
-        this.$refs['form'].clearValidate()
-      },
-      handlePlace(row) {
-        this.toPlaces([row.id])
-      },
-      handlePlaces() {
-        this.toPlaces(this.selectList)
-      },
-      toPlaces(ids) {
-        if (ids.length == 0) {
-          this.$message.error('请勾选订单数据')
-          return
+      })
+    },
+    exportOrder() {
+      if (this.selectList.length == 0) {
+        this.$message.error('请勾选要导出的订单')
+        return
+      }
+      get_new_export('/api/sales/sale_order/export_order', {
+        page: {page_num: 1, page_size: 1},
+        params: {list: this.selectList}
+      })
+    },
+    async handleSuccess(file, type) {
+      let res
+      this.$refs.uploadGong.loading = false
+      console.log(file)
+      res = await sales_import_order(file)
+
+      if (res) {
+        this.$message({
+          type: 'success',
+          message: '导入成功'
+        })
+        this.getData()
+      }
+    },
+    cancel() {
+      this.dialogShow = false
+      this.form = {}
+      this.$refs['form'].clearValidate()
+    },
+    handlePlace(row) {
+      this.toPlaces([row.id])
+    },
+    handlePlaces() {
+      this.toPlaces(this.selectList)
+    },
+    toPlaces(ids) {
+      if (ids.length == 0) {
+        this.$message.error('请勾选订单数据')
+        return
+      }
+      this.$router.push({
+        name: 'placeProductionOrder',
+        query: {
+          id: JSON.stringify(ids)
         }
-        this.$router.push({
-          name: 'placeProductionOrder',
-          query: {
-            id: JSON.stringify(ids)
+      })
+    },
+    handleDetail(row) {
+      this.toDetails([row.id])
+    },
+    toDetails(ids) {
+      this.$router.push({
+        name: 'salesApprovalDetails',
+        query: {
+          id: JSON.stringify(ids)
+        }
+      })
+    },
+    handleSelectionChange(val) {
+      if (val.length == this.pageList.length) {
+        //当前页数据全选
+        val.forEach(item => {
+          if (this.selectList.every(it => it != item.id)) {
+            this.selectList.push(item.id)
+            this.multipleSelection.push(item)
           }
         })
-      },
-      handleDetail(row) {
-        this.toDetails([row.id])
-      },
-      toDetails(ids) {
-        this.$router.push({
-          name: 'salesApprovalDetails',
-          query: {
-            id: JSON.stringify(ids)
-          }
-        })
-      },
-      handleSelectionChange(val) {
-        if (val.length == this.pageList.length) {
-          //当前页数据全选
-          val.forEach(item => {
-            if (this.selectList.every(it => it != item.id)) {
+      } else if (val.length > 0) {
+        //当前页数据部分改动
+        this.pageList.forEach(item => {
+          let index = val.findIndex(it => it.id == item.id)
+          if (index > -1) {
+            if (this.selectList.every(i => i != item.id)) {
               this.selectList.push(item.id)
               this.multipleSelection.push(item)
             }
-          })
-        } else if (val.length > 0) {
-          //当前页数据部分改动
-          this.pageList.forEach(item => {
-            let index = val.findIndex(it => it.id == item.id)
-            if (index > -1) {
-              if (this.selectList.every(i => i != item.id)) {
-                this.selectList.push(item.id)
-                this.multipleSelection.push(item)
-              }
-            } else {
-              let i = this.selectList.findIndex(i => i == item.id)
-              if (i > -1) {
-                this.selectList.splice(i, 1)
-                this.multipleSelection.splice(i, 1)
-              }
+          } else {
+            let i = this.selectList.findIndex(i => i == item.id)
+            if (i > -1) {
+              this.selectList.splice(i, 1)
+              this.multipleSelection.splice(i, 1)
             }
-          })
-        } else if (val.length == 0) {
-          //当前页数据全删除
-          this.pageList.forEach(item => {
-            let index = this.selectList.findIndex(it => it == item.id)
-            if (index > -1) {
-              this.selectList.splice(index, 1)
-              this.multipleSelection.splice(index, 1)
-            }
-          })
-        }
-        console.log(this.multipleSelection, 'this.selectList')
+          }
+        })
+      } else if (val.length == 0) {
+        //当前页数据全删除
+        this.pageList.forEach(item => {
+          let index = this.selectList.findIndex(it => it == item.id)
+          if (index > -1) {
+            this.selectList.splice(index, 1)
+            this.multipleSelection.splice(index, 1)
+          }
+        })
       }
+      console.log(this.multipleSelection, 'this.selectList')
     }
   }
+}
 </script>
 
 <style lang="scss" scoped>
-  .input {
-    width: 380px;
+.input {
+  width: 380px;
+}
+
+::v-deep .el-form--inline .el-form-item {
+  margin-right: 20px;
+}
+
+::v-deep .my_label {
+  width: 120px;
+}
+
+.add_img {
+  width: 148px;
+  height: 148px;
+
+  img {
+    width: 100%;
+    height: 100%;
   }
 
-  ::v-deep .el-form--inline .el-form-item {
-    margin-right: 20px;
+  .delete_img {
+    width: 20px;
+    height: 20px;
+    right: -10px;
+    top: -15px;
   }
+}
 
-  ::v-deep .my_label {
-    width: 120px;
-  }
+.btn {
+  width: 200px;
+}
 
-  .add_img {
-    width: 148px;
-    height: 148px;
 
-    img {
-      width: 100%;
-      height: 100%;
-    }
+::v-deep(.el-dialog__header) {
+  border-top-left-radius: 10px;
+  border-top-right-radius: 10px;
+  overflow: hidden;
+}
 
-    .delete_img {
-      width: 20px;
-      height: 20px;
-      right: -10px;
-      top: -15px;
-    }
-  }
 
-  .btn {
-    width: 200px;
-  }
 </style>

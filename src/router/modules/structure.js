@@ -7,7 +7,7 @@ const structureRouter = [
     name: 'structure',
     redirect: 'noRedirect',
     meta: {
-      title: '组织管理',
+      title: '系统管理',
       icon: 'user',
       number: 11
     },

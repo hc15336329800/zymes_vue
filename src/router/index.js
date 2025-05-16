@@ -77,6 +77,9 @@ export const constantRoutes = [
   //   component: Layout,
   //   // redirect: '/salesManagesment',
   // },
+
+
+  //首页
   {
     path: '/dashboard',
     component: Layout,
@@ -96,96 +99,217 @@ export const constantRoutes = [
       }
     ]
   },
+  // 我的审批
   {
-    path: '/deviceManagement',
+    path: '/responsibleApproval',
+    component: Layout,
+    name: 'responsibleApproval',
+    meta: {
+      title: '我的审批',
+      number: 7,
+      icon: 'el-icon-folder-checked'
+    },
+    children: [
+      {
+        path: 'product',
+        component: () =>
+          import('@/views/approvalManagement/responsibleApproval/product'),
+        name: 'responsibleApprovalProduct',
+        meta: {
+          title: '生产下单审批'
+        }
+      },
+      {
+        path: 'workReport',
+        component: () =>
+          import('@/views/approvalManagement/responsibleApproval/workReport'),
+        name: 'responsibleApprovalWorkReport',
+        meta: {
+          title: '报工审批'
+        }
+      },
+      {
+        path: 'outsourcing',
+        component: () =>
+          import('@/views/approvalManagement/responsibleApproval/outsourcing'),
+        name: 'responsibleApprovalOutsourcing',
+        meta: {
+          title: '外协报工审批'
+        }
+      }
+    ]
+  },
+  // 基础资料
+  {
+    path: '/inventoryManagement',
     component: Layout,
     meta: {
-      title: '设备管理',
-      number: 10,
-      icon: 'el-icon-s-opportunity',
+      title: '基础资料',
+      number: 2,
+      icon: 'el-icon-wallet',
       roles: ['admin', 'editor'] // you can set roles in root nav
     },
     children: [
       {
         path: '',
-        component: () => import('@/views/deviceManagement/deviceType'),
-        name: 'deviceType',
+        component: () =>
+          import('@/views/inventoryManagement/rawMaterialManagement'),
+        name: 'rawMaterialManagement',
         meta: {
-          title: '设备类型设置'
+          title: '物料库存'
         }
       },
       {
-        path: 'machinery',
-        component: () => import('@/views/deviceManagement/machinery'),
-        name: 'machinery',
+        path: 'middlewareManagement',
+        component: () =>
+          import('@/views/inventoryManagement/middlewareManagement'),
+        name: 'middlewareManagement',
         meta: {
-          title: '设备台账'
+          title: '工序管理'
+        }
+      },
+
+      {
+        path: 'BOMManagement',
+        component: () => import('@/views/inventoryManagement/BOMManagement'),
+        name: 'BOMManagement',
+        meta: {
+          title: 'BOM明细'
+        }
+      },
+
+      {
+        path: 'BOMDetail',
+        hidden: true,
+        component: () => import('@/views/inventoryManagement/BOMDetail'),
+        name: 'BOMDetail',
+        meta: {
+          title: '工序详情'
         }
       },
       {
-        path: 'dvsubject',
-        component: () => import('@/views/deviceManagement/dvsubject'),
-        name: 'dvsubject',
+        path: 'itemUsedDetail',
+        hidden: true,
+        component: () => import('@/views/inventoryManagement/itemUsedDetail'),
+        name: 'itemUsedDetail',
         meta: {
-          title: '点检保养项目'
-        }
-      },
-      {
-        path: 'checkplan',
-        component: () => import('@/views/deviceManagement/checkplan'),
-        name: 'checkplan',
-        meta: {
-          title: '点检保养计划'
-        }
-      },
-      {
-        path: 'repair',
-        component: () => import('@/views/deviceManagement/repair'),
-        name: 'repair',
-        meta: {
-          title: '维修单'
+          title: '用料详情'
         }
       }
+    ]
+  },
+   // 半成品库 -->title
+  // {
+  //   path: '/cesi',
+  //   component: Layout,
+  //   meta: {
+  //     title: '半成品库',
+  //     number: 3,
+  //     icon: 'el-icon-shopping-cart-1',
+  //     roles: ['admin', 'editor'] // you can set roles in root nav
+  //   },
+  //   children: [
+  //     {
+  //       path: 'trayManage',
+  //       component: () => import('@/views/trayManagement/trayManage'),
+  //       name: 'trayManage',
+  //       meta: {
+  //         title: '测试菜单子集'
+  //       }
+  //     },
+  //     {
+  //       path: 'trayManage1',
+  //       component: () => import('@/views/trayManagement/trayManage'),
+  //       name: 'trayManage',
+  //       meta: {
+  //         title: '测试菜单子集1'
+  //       }
+  //     }
+  //   ]
+  // },
+
+  // 半成品库
+  {
+    path: '/outStoreOrder',
+    component: Layout,
+    meta: {
+      title: '半成品库',
+      number: 8,
+      icon: 'el-icon-shopping-cart-1',
+      roles: ['admin', 'editor'] // you can set roles in root nav
+    },
+    children: [
+      {
+        path: '',
+        component: () => import('@/views/outStore/list'),
+        name: 'outList',
+        meta: {
+          isBack: true,
+          keepAlive: true,
+          title: '领料单管理'
+        }
+      },
+
+      {
+        path: 'inOutManagement',
+        component: () => import('@/views/outStore/inOutManagement'),
+        name: 'inOutManagement',
+        meta: {
+          title: '出入库管理'
+        }
+      },
+      {
+        path: '/statistics',
+        component: () => import('@/views/outStore/statistics'),
+        name: 'statistics',
+        meta: {
+          title: '月度入库统计'
+        }
+      },
+      {
+        path: 'outStoreDetail',
+        hidden: true,
+        component: () => import('@/views/outStore/outStoreDetail'),
+        name: 'outStoreDetail',
+        meta: {
+          title: '领料详情'
+        }
+      },
+      {
+        path: 'storeMid',
+        hidden: true,
+        component: () => import('@/views/outStore/storeMid'),
+        name: 'storeMid',
+        meta: {
+          title: '中间件详情'
+        }
+      },
+
+      {
+        path: 'defective',
+        component: () => import('@/views/inventoryManagement/defective'),
+        name: 'defective',
+        meta: {
+          title: '不良品管理'
+        }
+      },
+      {
+        path: 'warehouseSetting',
+        component: () => import('@/views/inventoryManagement/warehouseSetting'),
+        name: 'warehouseSetting',
+        meta: {
+          title: '库位设置'
+        }
+      },
+
+
+
+
     ]
   },
 
-  {
-    path: '/purchaseForecast',
-    component: Layout,
-    meta: {
-      title: '采购管理',
-      icon: 'el-icon-notebook-1',
-      roles: ['admin', 'editor'] // you can set roles in root nav
-    },
-    children: [
-      {
-        path: '',
-        component: () => import('@/views/purchaseForecast/list'),
-        name: 'purchaseForecastList',
-        meta: {
-          title: '采购预测'
-        }
-      },
-      {
-        path: 'detail',
-        hidden: true,
-        component: () => import('@/views/purchaseForecast/edit'),
-        name: 'purchaseForecastDetail',
-        meta: {
-          title: '采购录入'
-        }
-      },
-      {
-        path: 'demandAnalysis',
-        component: () => import('@/views/purchaseForecast/demandAnalysis'),
-        name: 'demandAnalysis',
-        hidden: true,
-        meta: {
-          title: '需求分析'
-        }
-      }
-    ]
-  },
+
+  //工资管理
   {
     path: '/wages',
     component: Layout,
@@ -214,6 +338,7 @@ export const constantRoutes = [
       }
     ]
   },
+  // 销售管理
   {
     path: '/salesManagesment',
     component: Layout,
@@ -313,7 +438,7 @@ export const constantRoutes = [
       }
     ]
   },
-
+  // 车间管理
   {
     path: '/workshopManagement',
     component: Layout,
@@ -324,12 +449,21 @@ export const constantRoutes = [
       roles: ['admin', 'editor'] // you can set roles in root nav
     },
     children: [
+
       {
         path: '',
         component: () => import('@/views/workshopManagement/workOrder.vue'),
         name: 'wordList',
         meta: {
           title: '工单管理'
+        }
+      },
+      {
+        path: 'generalListOfParts',
+        component: () => import('@/views/tabularAnalysis/generalListOfParts.vue'),
+        name: 'generalListOfParts',
+        meta: {
+          title: '下料文件上报'
         }
       },
       {
@@ -385,85 +519,8 @@ export const constantRoutes = [
       }
     ]
   },
-  {
-    path: '/inventoryManagement',
-    component: Layout,
-    meta: {
-      title: '库存管理',
-      number: 4,
-      icon: 'el-icon-wallet',
-      roles: ['admin', 'editor'] // you can set roles in root nav
-    },
-    children: [
-      {
-        path: '',
-        component: () =>
-          import('@/views/inventoryManagement/rawMaterialManagement'),
-        name: 'rawMaterialManagement',
-        meta: {
-          title: '物料管理'
-        }
-      },
-      {
-        path: 'middlewareManagement',
-        component: () =>
-          import('@/views/inventoryManagement/middlewareManagement'),
-        name: 'middlewareManagement',
-        meta: {
-          title: '中间件管理'
-        }
-      },
-      {
-        path: 'defective',
-        component: () => import('@/views/inventoryManagement/defective'),
-        name: 'defective',
-        meta: {
-          title: '不良品管理'
-        }
-      },
-      {
-        path: 'BOMManagement',
-        component: () => import('@/views/inventoryManagement/BOMManagement'),
-        name: 'BOMManagement',
-        meta: {
-          title: 'BOM管理'
-        }
-      },
-      {
-        path: 'warehouseSetting',
-        component: () => import('@/views/inventoryManagement/warehouseSetting'),
-        name: 'warehouseSetting',
-        meta: {
-          title: '库位设置'
-        }
-      },{
-        path: 'deviceLocationSetting',
-        component: () => import('@/views/inventoryManagement/deviceLocationSetting'),
-        name: 'deviceLocationSetting',
-        meta: {
-          title: '设备工位设置'
-        }
-      },
-      {
-        path: 'BOMDetail',
-        hidden: true,
-        component: () => import('@/views/inventoryManagement/BOMDetail'),
-        name: 'BOMDetail',
-        meta: {
-          title: '工序详情'
-        }
-      },
-      {
-        path: 'itemUsedDetail',
-        hidden: true,
-        component: () => import('@/views/inventoryManagement/itemUsedDetail'),
-        name: 'itemUsedDetail',
-        meta: {
-          title: '用料详情'
-        }
-      }
-    ]
-  },
+
+  // 生产管理
   {
     path: '/orderManagement',
     component: Layout,
@@ -664,6 +721,7 @@ export const constantRoutes = [
       }
     ]
   },
+  // 外协管理
   {
     path: '/outsourcingManagement',
     component: Layout,
@@ -747,45 +805,7 @@ export const constantRoutes = [
     ]
   },
 
-  {
-    path: '/responsibleApproval',
-    component: Layout,
-    name: 'responsibleApproval',
-    meta: {
-      title: '审批',
-      number: 7,
-      icon: 'el-icon-folder-checked'
-    },
-    children: [
-      {
-        path: 'product',
-        component: () =>
-          import('@/views/approvalManagement/responsibleApproval/product'),
-        name: 'responsibleApprovalProduct',
-        meta: {
-          title: '生产下单审批'
-        }
-      },
-      {
-        path: 'workReport',
-        component: () =>
-          import('@/views/approvalManagement/responsibleApproval/workReport'),
-        name: 'responsibleApprovalWorkReport',
-        meta: {
-          title: '报工审批'
-        }
-      },
-      {
-        path: 'outsourcing',
-        component: () =>
-          import('@/views/approvalManagement/responsibleApproval/outsourcing'),
-        name: 'responsibleApprovalOutsourcing',
-        meta: {
-          title: '外协报工审批'
-        }
-      }
-    ]
-  },
+  // AGV叉车管理
   {
     path: '/agvCarManagement',
     component: Layout,
@@ -814,6 +834,7 @@ export const constantRoutes = [
       }
     ]
   },
+  // 托盘管理
   {
     path: '/trayManagement',
     component: Layout,
@@ -835,86 +856,122 @@ export const constantRoutes = [
     ]
   },
 
+  // 下料文件上报
+  // {
+  //   path: '/tabularAnalysis',
+  //   component: Layout,
+  //   meta: {
+  //     title: '下料文件上报',
+  //     number: 13,
+  //     icon: 'el-icon-shopping-cart-1',
+  //     roles: ['admin', 'editor'] // you can set roles in root nav
+  //   },
+  //   children: [
+  //     {
+  //       path: '',
+  //       component: () => import('@/views/tabularAnalysis/generalListOfParts.vue'),
+  //         name: 'generalListOfParts',
+  //       meta: {
+  //         title: '零件总表信息'
+  //       }
+  //     }
+  //   ]
+  // },
 
+
+  //采购管理
   {
-    path: '/tabularAnalysis',
+    path: '/purchaseForecast',
     component: Layout,
     meta: {
-      title: '表格导入',
-      number: 13,
-      icon: 'el-icon-shopping-cart-1',
+      title: '采购管理',
+      icon: 'el-icon-notebook-1',
       roles: ['admin', 'editor'] // you can set roles in root nav
     },
     children: [
       {
         path: '',
-        component: () => import('@/views/tabularAnalysis/generalListOfParts.vue'),
-        name: 'generalListOfParts',
+        component: () => import('@/views/purchaseForecast/list'),
+        name: 'purchaseForecastList',
         meta: {
-          title: '零件总表信息'
+          title: '采购预测'
+        }
+      },
+      {
+        path: 'detail',
+        hidden: true,
+        component: () => import('@/views/purchaseForecast/edit'),
+        name: 'purchaseForecastDetail',
+        meta: {
+          title: '采购录入'
+        }
+      },
+      {
+        path: 'demandAnalysis',
+        component: () => import('@/views/purchaseForecast/demandAnalysis'),
+        name: 'demandAnalysis',
+        hidden: true,
+        meta: {
+          title: '需求分析'
         }
       }
     ]
   },
 
-
+  //设备管理
   {
-    path: '/outStoreOrder',
+    path: '/deviceManagement',
     component: Layout,
     meta: {
-      title: '仓库管理',
-      number: 8,
-      icon: 'el-icon-shopping-cart-1',
+      title: '设备管理',
+      number: 10,
+      icon: 'el-icon-s-opportunity',
       roles: ['admin', 'editor'] // you can set roles in root nav
     },
     children: [
       {
         path: '',
-        component: () => import('@/views/outStore/list'),
-        name: 'outList',
+        component: () => import('@/views/deviceManagement/deviceType'),
+        name: 'deviceType',
         meta: {
-          isBack: true,
-          keepAlive: true,
-          title: '领料单管理'
-        }
-      },
-
-      {
-        path: 'inOutManagement',
-        component: () => import('@/views/outStore/inOutManagement'),
-        name: 'inOutManagement',
-        meta: {
-          title: '出入库管理'
+          title: '设备类型设置'
         }
       },
       {
-        path: '/statistics',
-        component: () => import('@/views/outStore/statistics'),
-        name: 'statistics',
+        path: 'machinery',
+        component: () => import('@/views/deviceManagement/machinery'),
+        name: 'machinery',
         meta: {
-          title: '月度入库统计'
+          title: '设备台账'
         }
       },
       {
-        path: 'outStoreDetail',
-        hidden: true,
-        component: () => import('@/views/outStore/outStoreDetail'),
-        name: 'outStoreDetail',
+        path: 'dvsubject',
+        component: () => import('@/views/deviceManagement/dvsubject'),
+        name: 'dvsubject',
         meta: {
-          title: '领料详情'
+          title: '点检保养项目'
         }
       },
       {
-        path: 'storeMid',
-        hidden: true,
-        component: () => import('@/views/outStore/storeMid'),
-        name: 'storeMid',
+        path: 'checkplan',
+        component: () => import('@/views/deviceManagement/checkplan'),
+        name: 'checkplan',
         meta: {
-          title: '中间件详情'
+          title: '点检保养计划'
+        }
+      },
+      {
+        path: 'repair',
+        component: () => import('@/views/deviceManagement/repair'),
+        name: 'repair',
+        meta: {
+          title: '维修单'
         }
       }
     ]
-  }
+  },
+
 ]
 console.log(constantRoutes)
 /**
