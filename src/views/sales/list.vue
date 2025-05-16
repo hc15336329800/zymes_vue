@@ -182,7 +182,8 @@ import {
 } from '@/api/sales/sales'
 import {sales_import_order} from '@/api/sales'
 import {mapGetters} from "vuex";
-import { add} from '@/api/saleOrder'
+
+import { add,update,infoById} from '@/api/saleOrder' //补丁
 
 
 export default {
@@ -290,7 +291,9 @@ export default {
     getData() {
       salesPageList(this.queryParams).then(res => {
         this.pageList = res.data
-        this.pageTotal = Number(res.page.total_num)
+        // this.pageTotal = Number(res.page.total_num)
+        this.pageTotal = Number(res.page?.total_num || 0)  //todo: 错误提醒未解析的变量 page
+
       })
     },
     handleAdd() {
@@ -314,11 +317,11 @@ export default {
     },
 
     handleUpdate(row) {
-      detailSales({
-        params: {
+      infoById(
+         {
           id: row.id
         }
-      }).then(res => {
+      ).then(res => {
         this.form = res.data
         this.dialogShow = true
       })
@@ -372,7 +375,7 @@ export default {
             this.getData()
           })
         } else {
-          editSales({ params: { ...this.form } }).then(() => {
+          update({ ...sale, id: this.form.id }).then(() => {
             this.$message.success('修改成功')
             this.dialogShow = false
             this.getData()

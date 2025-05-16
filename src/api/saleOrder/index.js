@@ -1,6 +1,30 @@
 import request from '@/utils/request'
 
+/**
+ * 根据 ID 查询销售单详情
+ * @param {string} id
+ */
+export function infoById(data) {
+  return request({
+    url: '/api/salesOrder/infoById',
+    method: 'post',
+    data  // ✅ 直接传对象
+  })
+}
 
+
+
+/**
+ * 修改销售单（单个）
+ * @param {Object} data 格式：{id, custName, itemNo, needNum}
+ */
+export function update(data) {
+  return request({
+    url: '/api/salesOrder/update',
+    method: 'post',
+    data
+  })
+}
 
 
 /**
