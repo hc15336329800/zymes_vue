@@ -97,7 +97,9 @@
       <el-table-column label="操作" align="center" width="310" class-name="small-padding fixed-width">
         <template slot-scope="scope">
           <!-- 确认后不能编辑和删除 -->
-          <el-button link type="primary" icon="Edit" @click="handlePlace(scope.row)">下生产单</el-button>
+           <el-button link type="primary" icon="Edit" @click="handlePlace(scope.row)">下生产单</el-button>
+          <el-button link type="primary" icon="Plus" @click="openPlaceDialog(scope.row)">下生产单 NEW</el-button>
+
           <el-button link type="primary" icon="Edit" @click="handleUpdate(scope.row)">编辑</el-button>
           <el-button link type="primary" icon="Delete" @click="handleDelete(scope.row)">删除</el-button>
           <el-button link type="primary" icon="Edit" @click="handleDetail(scope.row)">审批详情</el-button>
@@ -166,6 +168,43 @@
     />
 
 
+    <!-- 下生产单弹窗 -->
+    <el-dialog
+      title="下生产单"
+      :visible.sync="placeDialogVisible"
+      width="500px"
+      top="20vh"
+      @close="resetPlaceForm"
+    >
+      <el-form :model="placeForm" :rules="placeRules" ref="placeFormRef" label-width="100px">
+        <el-form-item label="承诺交期" prop="deliverTime">
+          <el-date-picker
+            v-model="placeForm.deliverTime"
+            type="datetime"
+            placeholder="选择交期"
+            format="yyyy-MM-dd HH:mm:ss"
+            value-format="yyyy-MM-dd HH:mm:ss"
+            style="width: 100%;"
+          />
+        </el-form-item>
+
+        <el-form-item label="优先级别" prop="bizType">
+          <el-select v-model="placeForm.bizType" placeholder="请选择优先级">
+            <el-option label="紧急" value="EMERG" />
+            <el-option label="加急" value="URGENT" />
+            <el-option label="正常" value="NORMAL" />
+            <el-option label="延后" value="DELAY" />
+          </el-select>
+        </el-form-item>
+      </el-form>
+
+      <div style="text-align: right; margin-top: 20px;">
+        <el-button @click="placeDialogVisible = false">取消</el-button>
+        <el-button type="primary" @click="submitPlaceOrderHandler">提交</el-button>
+      </div>
+    </el-dialog>
+
+
 
   </div>
 </template>
@@ -183,7 +222,9 @@ import {
 import {sales_import_order} from '@/api/sales'
 import {mapGetters} from "vuex";
 
-import { add,update,infoById} from '@/api/saleOrder' //补丁
+
+//todo:  请使用submitPlaceOrder接口作为下生产订单的接口
+import { add,update,infoById,submitPlaceOrder} from '@/api/saleOrder' //补丁
 
 
 export default {
@@ -196,6 +237,25 @@ export default {
   },
   data() {
     return {
+
+
+      /////////////////////////////////下订单弹窗/////////////////////////////////////////////////
+      placeDialogVisible: false,
+      placeForm: {
+        deliverTime: '',
+        bizType: '',
+        orderNo: '',
+        saleId: '',
+        orderedNum: 1 // 默认下单数量
+      },
+      placeRules: {
+        deliverTime: [{ required: true, message: '请选择交期', trigger: 'change' }],
+        bizType: [{ required: true, message: '请选择优先级', trigger: 'change' }]
+      },
+
+
+      //////////////////////////////////////////////////////////////////////////////////
+
       bomDialogVisible: false, //bom弹窗
 
       queryParams: {
@@ -250,6 +310,51 @@ export default {
     this.getData()
   },
   methods: {
+
+
+    /////////////////////////////////下订单弹窗/////////////////////////////////////////////////
+
+    // 打开弹窗并设置初始数据
+    openPlaceDialog(row) {
+      this.placeForm = {
+        deliverTime: '',
+        bizType: '',
+        orderNo: row.orderNo,
+        saleId: row.id,
+        orderedNum: row.waitOrderedNum || row.needNum || 1
+      }
+      this.placeDialogVisible = true
+    },
+
+// 表单提交逻辑
+    submitPlaceOrderHandler() {
+      this.$refs.placeFormRef.validate(valid => {
+        if (!valid) return
+        const payload = [ { ...this.placeForm } ]
+        submitPlaceOrder(payload).then(res => {
+          this.$message.success(res.msg || '提交成功')
+          this.placeDialogVisible = false
+          this.getData()
+        }).catch(err => {
+          this.$message.error(err.msg || '提交失败')
+        })
+      })
+    },
+
+// 清空表单
+    resetPlaceForm() {
+      this.placeForm = {
+        deliverTime: '',
+        bizType: '',
+        orderNo: '',
+        saleId: '',
+        orderedNum: 1
+      }
+      this.$refs.placeFormRef && this.$refs.placeFormRef.clearValidate()
+    },
+
+
+    ///////////////////////////////// /////////////////////////////////////////////////
 
     /** bom弹窗 */
     openBomDialog() {

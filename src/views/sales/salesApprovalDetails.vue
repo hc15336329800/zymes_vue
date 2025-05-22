@@ -1,28 +1,16 @@
 <template>
   <div class="app-container">
     <el-table :data="pageList" class="commen-table mt_20">
-      <el-table-column type="index" width="55" label="序号" />
+<!--      <el-table-column type="index" width="55" label="序号" />-->
       <el-table-column label="订单号" align="center" prop="orderNo" />
       <el-table-column label="客户名称" align="center" prop="custName" />
-      <el-table-column label="物料编号" align="center" prop="itemNo" />
+<!--      <el-table-column label="物料编号" align="center" prop="itemNo" />-->
       <el-table-column label="物料名称" align="center" prop="itemName" />
       <el-table-column label="需求数量" align="center" prop="needNum" />
-      <el-table-column label="申请时间" align="center" prop="applyTime" />
+
 <!--      <el-table-column label="审批状态" align="center" prop="placeStatus" />-->
+      <el-table-column label="紧急情况" align="center" prop="bizType" />
 
-
-
-
-      <el-table-column label="申请人" align="center" prop="applyName" />
-
-      <el-table-column
-        label="审批意见"
-        prop="approvalMsg"
-        header-align="center"
-        align="center"
-        width="220"
-        :show-overflow-tooltip="true"
-      ></el-table-column>
 
       <el-table-column label="审批状态" align="center" prop="placeStatus">
         <template slot-scope="scope">
@@ -33,6 +21,20 @@
         </template>
       </el-table-column>
 
+
+      <el-table-column
+        label="审批意见"
+        prop="approvalMsg"
+        header-align="center"
+        align="center"
+        width="220"
+        :show-overflow-tooltip="true"
+      ></el-table-column>
+
+
+
+      <el-table-column label="申请人" align="center" prop="applyName" />
+      <el-table-column label="申请时间" align="center" prop="applyTime" />
 
     </el-table>
 

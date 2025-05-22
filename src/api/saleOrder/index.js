@@ -1,5 +1,25 @@
 import request from '@/utils/request'
 
+
+//////////////////////////////审批单/////////////////////////////////////////////////////////////////////
+
+/**
+ * 提交生产审批单
+ * @param {Array} data 格式：[{ orderNo, orderedNum, deliverTime, saleId, bizType }]
+ */
+export function submitPlaceOrder(data) {
+  return request({
+    url: '/api/salesOrder/submitPlaceOrder',
+    method: 'post',
+    data
+  })
+}
+
+
+
+//////////////////////////////销售单/////////////////////////////////////////////////////////////////////
+
+
 /**
  * 根据 ID 查询销售单详情
  * @param {string} id
