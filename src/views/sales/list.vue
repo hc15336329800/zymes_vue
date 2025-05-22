@@ -10,7 +10,7 @@
       <el-form-item label="客户" class="condition">
         <el-input v-model="queryParams.params.custName" placeholder="请输入名称" clearable/>
       </el-form-item>
-      <el-form-item label="BOM号" class="condition">
+      <el-form-item label="物料号" class="condition">
         <BomNoSelect :item-no.sync="queryParams.params.itemNo"/>
       </el-form-item>
       <el-form-item label="是否可下单" class="condition">
@@ -431,13 +431,14 @@ export default {
       })
     },
     handleDetail(row) {
-      this.toDetails([row.id])
+      // this.toDetails([row.id])
+      this.toDetails([row.orderNo]) // ✅ 改为传 orderNo
     },
-    toDetails(ids) {
+    toDetails(orderNos) {
       this.$router.push({
         name: 'salesApprovalDetails',
         query: {
-          id: JSON.stringify(ids)
+          id: JSON.stringify(orderNos)
         }
       })
     },

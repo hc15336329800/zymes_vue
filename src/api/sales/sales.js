@@ -9,6 +9,16 @@ export function salesPageList(data) {
   })
 }
 
+// 不分页，查询销售单 + 审批下发列表（展开组合）
+export function getAllByOrderNo(data) {
+  return request({
+    url: '/api/salesOrder/getAllByOrderNo',
+    method: 'post',
+    data
+  })
+}
+
+
 // 修改
 export function updateSales(data) {
   return request({
@@ -75,4 +85,3 @@ export function placePageList(data) {
     data
   })
 }
-

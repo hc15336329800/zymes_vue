@@ -4,11 +4,11 @@
       <el-form
         :inline="true"
         ref="form2"
-        :rule="rules"
         :model="form2"
         label-width="80px"
         label-position="left"
       >
+        <!-- 承诺交期 -->
         <el-form-item
           label="承诺交期"
           prop="deliverTime"
@@ -22,31 +22,27 @@
             class="mr_30"
             placeholder="选择日期"
             style="width: 187px;"
-          ></el-date-picker>
+          />
         </el-form-item>
+
+        <!-- 类型 -->
         <el-form-item
           label="类型"
-          :rules="[{ required: true, message: '请选择类型', trigger: 'blur' }]"
           prop="bizType"
+          :rules="[{ required: true, message: '请选择类型', trigger: 'blur' }]"
         >
           <el-select v-model="form2.bizType" placeholder="请选择">
             <el-option
-              :key="item.code"
               v-for="item in getSalesOption"
+              :key="item.code"
               :label="item.name"
               :value="item.code"
-            ></el-option>
+            />
           </el-select>
-        </el-form-item>
-        <el-form-item
-          label="类型"
-          :rules="[{ required: true, message: '请选择类型', trigger: 'blur' }]"
-          prop="bizType"
-          v-show="false"
-        >
         </el-form-item>
       </el-form>
     </el-card>
+
     <el-table
       id="isTable"
       v-loading="listLoading"
@@ -58,27 +54,23 @@
       highlight-current-row
       class="table mb_30"
     >
-      <el-table-column type="selection" width="55"></el-table-column>
+      <el-table-column type="selection" width="55" />
       <el-table-column
         v-for="item in tableList"
         :key="item.label"
         align="center"
         :label="item.label"
-        :width="item.label == '下单数量'?250:''"
+        :width="item.label === '下单数量' ? 250 : ''"
       >
         <template slot-scope="scope">
-          <template v-if="item.label == '下单数量'">
-            <el-input-number v-model="scope.row.orderedNum"></el-input-number>
-          </template>
-          <template v-else-if="item.label == '操作'">
-            <div class="flex_row flex_x_between">
-              <div class="cur_point c_02" @click="operHandle(4,scope.row)">查看详情</div>
-            </div>
+          <template v-if="item.label === '下单数量'">
+            <el-input-number v-model="scope.row.orderedNum" />
           </template>
           <template v-else>{{ scope.row[item.value] }}</template>
         </template>
       </el-table-column>
     </el-table>
+
     <div class="w_100 flex_row flex_x_center">
       <el-button type plain class="ml_20" @click="operHandle(1)">取消</el-button>
       <el-button type="primary" class="ml_20" @click="operHandle(2)">保存并提交审批</el-button>
@@ -86,169 +78,153 @@
   </div>
 </template>
 <script>
-  import {
-    place_page_list,
-    place_order,
-    get_sales_value,
-    get_sales_option
-  } from '@/api/sales'
-  import {dictInfo} from '@/api/common'
+import { place_page_list, place_order } from '@/api/sales' // 引入销售相关接口
+import { dictInfo } from '@/api/common' // 引入通用字典信息方法
 
-  export default {
-    data() {
-      return {
-        getSalesOption: [],
-        form2: {},
-        rules: {
-          name: [{required: true, message: '请输入活动名称', trigger: 'blur'}],
-          region: [
-            {required: true, message: '请选择活动区域', trigger: 'change'}
-          ]
-        },
-        selectList: [],
-        tableList: [
-          {
-            label: '订单号',
-            value: 'orderNo'
+export default {
+  data() {
+    return {
+      // 销售类型下拉框选项（通过字典获取）
+      getSalesOption: [],
+
+      // 表单对象（用于绑定承诺交期和类型）
+      form2: {},
+
+      // 用户在表格中勾选的列表数据
+      selectList: [],
+
+      // 表格列配置
+      tableList: [
+        { label: '订单号', value: 'orderNo' },
+        { label: '关联客户', value: 'custName' },
+        { label: '图纸号', value: 'bomNo' },
+        { label: '需求数量', value: 'needNum' },
+        { label: '待下单数量', value: 'waitOrderedNum' },
+        { label: '下单数量', value: 'waitOrderedNum' } // 可编辑字段
+      ],
+
+      // 表格数据列表
+      list: [],
+
+      // 加载状态（控制表格 loading 动画）
+      listLoading: false
+    }
+  },
+
+  // 组件创建时执行的钩子函数
+  async created() {
+    this.getSelectOption()       // 获取下拉字典项
+    await this.getList('clear')  // 加载表格数据，参数标记为清空状态
+  },
+
+  methods: {
+    /**
+     * 获取表格数据列表
+     * @param {String} resetFlag - 当为 'clear' 时，重置分页信息
+     */
+    async getList(resetFlag) {
+      this.listLoading = true
+      try {
+        if (resetFlag === 'clear') {
+          // 初始化分页信息（默认每页 10 条）
+          this.pages = {
+            total: 0,
+            page_num: 1,
+            page_size: 10
+          }
+        }
+
+        // 从路由参数中获取 ID 列表（JSON 格式的数组）
+        const ids = JSON.parse(this.$route.query.id)
+
+        // 调用后端接口获取数据列表
+        const res = await place_page_list({
+          page: {
+            page_num: this.pages.page_num,
+            page_size: this.pages.page_size
           },
-          {
-            label: '关联客户',
-            value: 'custName'
-          },
-          {
-            label: '图纸号',
-            value: 'bomNo'
-          },
-          {
-            label: '需求数量',
-            value: 'needNum'
-          },
-          {
-            label: '待下单数量',
-            value: 'waitOrderedNum'
-          },
-          {
-            label: '下单数量',
-            value: 'waitOrderedNum',
-          },
-          // {
-          //   label: '操作',
-          //   value: 'procedureCode'
-          // }
-        ],
-        list: [],
-        listLoading: false
+          params: { list: ids }
+        })
+
+        if (res.data) {
+          // 把每一条数据的 orderedNum 初始化为 waitOrderedNum
+          this.list = res.data.map(item => ({
+            ...item,
+            orderedNum: item.waitOrderedNum
+          }))
+        }
+      } finally {
+        this.listLoading = false // 无论成功失败，关闭 loading 状态
       }
     },
-    async created() {
-      this.getSelectOption();
-      await this.getList('clear')
+
+    /**
+     * 获取销售类型字典项（用于下拉框）
+     */
+    getSelectOption() {
+      dictInfo('ORDER_TYPE', res => (this.getSalesOption = res))
     },
-    methods: {
-      async getList(str) {
-        this.listLoading = true
-        try {
-          if (str == 'clear') {
-            this.paramForm = {}
-            this.date = null
-            this.pages = {
-              total: 0,
-              page_num: 1,
-              page_size: 10
+
+    /**
+     * 表格选中项变化时触发
+     * @param {Array} val - 当前选中的表格项
+     */
+    handleSelectionChange(val) {
+      this.selectList = val
+    },
+
+    /**
+     * 通用操作方法
+     * @param {Number} type - 操作类型（1=取消，2=保存提交，4=查看详情）
+     * @param {Object} item - 当前操作的数据项（仅详情用）
+     */
+    async operHandle(type, item) {
+      switch (type) {
+        case 1: // 取消：返回上一页
+          this.$router.push({ name: 'salesManagesment' })
+          break
+
+        case 2: // 保存并提交审批
+          // 表单校验
+          const valid = await this.$refs.form2.validate()
+          if (!valid) return
+
+          // 判断是否选中了下生产单
+          if (!this.selectList.length) {
+            this.$message.error('请选择下生产单数据')
+            return
+          }
+
+          // 组装提交列表（只保留 id 和用户修改的下单数量）
+          const payloadList = this.selectList.map(item => ({
+            id: item.id,
+            orderedNum: item.orderedNum
+          }))
+
+          // 提交到后端接口
+          await place_order({
+            page: { page_num: 1, page_size: 1 }, // 后端要求分页参数（可忽略）
+            params: {
+              deliverTime: this.form2.deliverTime, // 承诺交期
+              bizType: this.form2.bizType,         // 业务类型
+              list: payloadList                     // 提交数据列表
             }
-          }
-          if (this.date) {
-            this.paramForm.startDate = this.date[0]
-            this.paramForm.endDate = this.date[1]
-          }
-          var ids = JSON.parse(this.$route.query.id)
-          const res = await place_page_list({
-            page: {
-              page_num: this.pages.page_num,
-              page_size: this.pages.page_size
-            },
-            params: {list: ids}
           })
-          if (res.data) {
-            this.list = res.data
-            this.list.forEach(item => {
-              item.orderedNum = item.waitOrderedNum
-            })
-          }
-        } finally {
-          this.listLoading = false
-        }
-      },
-      getSelectOption() {
-        dictInfo("ORDER_TYPE", res => this.getSalesOption = res)
-      },
-      handleSelectionChange(val) {
-        this.selectList = val
-        // this.selectList = this.multipleSelection
-        console.log(this.selectList)
-      },
 
-      // handleSelectionChange(val) {
+          // 提示成功，跳转回销售管理页，并刷新列表
+          this.$message.success('操作成功')
+          this.operHandle(1) // 返回
+          this.getList('clear') // 重新加载
+          break
 
-      //     this.multipleSelection = val;
-      // },
-      async operHandle(type, item, index) {
-        switch (type) {
-          case 1: // 返回
-            this.$router.push({
-              name: 'salesManagesment'
-            })
-            break
-          case 2: // 保存并提交
-            // console.log(this.selectProductTemp)
-
-            const validate2 = await this.$refs.form2.validate()
-            if (validate2) {
-              if (this.selectList.length == 0) {
-                this.$message.error('请选择下生产单数据')
-                return
-              }
-              var list = []
-              this.selectList.forEach(item => {
-                list.push({
-                  id: item.id,
-                  orderedNum: item.orderedNum
-                })
-              })
-              await place_order({
-                page: {
-                  page_num: 1,
-                  page_size: 1
-                },
-                params: {
-                  deliverTime: this.form2.deliverTime,
-                  bizType: this.form2.bizType,
-                  list: list
-                }
-              })
-              this.dialogVisible3 = false
-              this.operHandle(1)
-            }
-
-            this.$message({
-              message: '操作成功',
-              type: 'success'
-            })
-            this.getList('clear')
-
-            break
-          case 4: // 查看详情
-            this.$router.push({
-              name: 'BOMDetail',
-              query: {
-                id: item.bomNo
-              }
-            })
-            break
-
-          default:
-        }
+        case 4: // 查看 BOM 详情
+          this.$router.push({
+            name: 'BOMDetail',
+            query: { id: item.bomNo }
+          })
+          break
       }
     }
   }
+}
 </script>
