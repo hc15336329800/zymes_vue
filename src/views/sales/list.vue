@@ -190,10 +190,10 @@
 
         <el-form-item label="优先级别" prop="bizType">
           <el-select v-model="placeForm.bizType" placeholder="请选择优先级">
-            <el-option label="紧急" value="EMERG" />
-            <el-option label="加急" value="URGENT" />
-            <el-option label="正常" value="NORMAL" />
-            <el-option label="延后" value="DELAY" />
+            <el-option label="紧急" value="02" />
+            <el-option label="加急" value="03" />
+            <el-option label="正常" value="01" />
+            <el-option label="延后" value="04" />
           </el-select>
         </el-form-item>
       </el-form>

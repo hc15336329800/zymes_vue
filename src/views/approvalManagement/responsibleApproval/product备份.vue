@@ -46,55 +46,55 @@
       </el-form-item>
       <el-form-item></el-form-item>
     </el-form>
+    <el-row class="mb8">
+      <el-button
+        type="primary"
+        class="commen-button"
+        v-if="hasPerm('B008001000001')"
+        v-show="buttonShow"
+        @click="batchPass"
+      >
+        <img
+          src="@/assets/images/yes.png"
+          alt
+          style="width: 14px; margin-right: 4px;vertical-align:middle;"
+        >批量确认
+      </el-button>
+      <el-button
+        type="primary"
+        class="commen-button"
+        v-if="hasPerm('B008001000002')"
+        v-show="buttonShow"
+        @click="batchRefuse"
+      >
+        <img
+          src="@/assets/images/no.png"
+          alt
+          style="width: 14px; margin-right: 4px;vertical-align:middle;"
+        >批量拒绝
+      </el-button>
+    </el-row>
 
+    <el-table :data="pageList" class="commen-table mt_20" @selection-change="handleSelectionChange">
+      <el-table-column type="selection" width="55"></el-table-column>
+      <el-table-column label="图纸号" align="center" prop="bomNo"/>
+      <el-table-column label="订单号" align="center" prop="orderNo"/>
+      <el-table-column label="下单数量" align="center" prop="orderedNum"/>
+      <el-table-column label="承诺交期" align="center" prop="deliverTime"/>
+      <el-table-column label="订单类型" align="center" prop="bizTypeDesc"/>
+      <el-table-column label="工序名称" align="center" prop="procedureName"/>
+      <el-table-column label="申请人" align="center" prop="applyName"/>
+      <el-table-column label="申请日期" align="center" prop="applyTime"/>
+      <el-table-column label="审批状态" align="center" prop="placeStatusDesc"/>
+      <el-table-column
+        prop="approvalMsg"
+        header-align="center"
+        align="center"
+        width="180"
+        label="拒绝原因"
+        :show-overflow-tooltip="true"
+      />
 
-<!--    <el-row class="mb8">-->
-<!--      <el-button-->
-<!--        type="primary"-->
-<!--        class="commen-button"-->
-<!--        v-if="hasPerm('B008001000001')"-->
-<!--        v-show="buttonShow"-->
-<!--        @click="batchPass"-->
-<!--      >-->
-<!--        <img-->
-<!--          src="@/assets/images/yes.png"-->
-<!--          alt-->
-<!--          style="width: 14px; margin-right: 4px;vertical-align:middle;"-->
-<!--        >批量确认-->
-<!--      </el-button>-->
-<!--      <el-button-->
-<!--        type="primary"-->
-<!--        class="commen-button"-->
-<!--        v-if="hasPerm('B008001000002')"-->
-<!--        v-show="buttonShow"-->
-<!--        @click="batchRefuse"-->
-<!--      >-->
-<!--        <img-->
-<!--          src="@/assets/images/no.png"-->
-<!--          alt-->
-<!--          style="width: 14px; margin-right: 4px;vertical-align:middle;"-->
-<!--        >批量拒绝-->
-<!--      </el-button>-->
-<!--    </el-row>-->
-
-    <el-table :data="pageList" class="commen-table mt_20">
-      <el-table-column label="订单号" align="center" prop="orderNo" />
-      <el-table-column label="客户名称" align="center" prop="custName" />
-      <el-table-column label="图纸号" align="center" prop="itemNo" />
-      <el-table-column label="物料名称" align="center" prop="itemName" />
-      <el-table-column label="需求数量" align="center" prop="needNum" />
-      <el-table-column label="紧急情况" align="center" prop="bizType" />
-      <el-table-column label="审批状态" align="center" prop="placeStatus">
-        <template slot-scope="scope">
-          <el-tag v-if="scope.row.placeStatus === '00'" type="info" effect="dark">待审批</el-tag>
-          <el-tag v-else-if="scope.row.placeStatus === '01'" type="success" effect="dark">通过</el-tag>
-          <el-tag v-else-if="scope.row.placeStatus === '02'" type="danger" effect="dark">拒绝</el-tag>
-          <el-tag v-else type="warning" effect="dark">未知</el-tag>
-        </template>
-      </el-table-column>
-      <el-table-column label="审批意见" align="center" prop="approvalMsg" width="220" show-overflow-tooltip />
-      <el-table-column label="申请人" align="center" prop="applyName" />
-      <el-table-column label="申请时间" align="center" prop="applyTime" />
       <el-table-column label="操作" align="center" width="310" class-name="small-padding fixed-width">
         <template slot-scope="scope">
           <!-- 确认后不能编辑和删除 -->
@@ -134,10 +134,6 @@
   import {dictInfo} from '@/api/common'
   import {approvalPass, approvalRefuse, placePageList} from '@/api/sales/sales'
 
-
-   import { getAllByOrderNoPageList } from '@/api/sales/sales'
-
-
   export default {
     components: {
       DateIntervals: () => import('@/components/DateIntervals'),
@@ -159,22 +155,32 @@
         approvalList: [],
         multipleSelection: [],
         selectList: [],
-
+        form: {},
         pageTotal: 0,
         pageList: {},
         title: '',
-
+        dialogShow: false,
         buttonShow: false,
-
+        rules: {
+          name: [{required: true, message: '请输入名称', trigger: 'blur'}],
+          remark: [{required: true, message: '请输入备注', trigger: 'blur'}]
+        }
       }
     },
     created() {
       const user = localStorage.getItem('user_info');
       const name = JSON.parse(user).userName;
       this.buttonShow = true;
+      // if(name ==='admin'){
+      //   this.buttonShow = true;
+      // }else{
+      //   this.currentHour = new Date().getHours();
+      //   if(this.currentHour === 8 || this.currentHour === 9){
+      //     this.buttonShow = true;
+      //   }
+      // }
       this.getSelectOptions()
-      // this.getData()
-      // this.getData(true) // ✅ 初始化查询时不带筛选参数
+      this.getData()
     },
     methods: {
       getSelectOptions() {
@@ -202,22 +208,10 @@
         this.$refs.userInfoDateIntervals.initDateData()
         this.getData()
       },
-      getData(isInit = false) {
-        const basePage = {
-          pageNum: this.queryParams.page.page_num,
-          pageSize: this.queryParams.page.page_size
-        }
-
-        const payload = isInit
-          ? basePage
-          : {
-            ...this.queryParams.params,
-            ...basePage
-          }
-
-        getAllByOrderNoPageList(payload).then(res => {
-          this.pageList = res.data || []
-          this.pageTotal = Number(res.page?.total_num || 0)
+      getData() {
+        placePageList(this.queryParams).then(res => {
+          this.pageList = res.data
+          this.pageTotal = Number(res.page.total_num)
         })
       },
       approvalRefuse(row) {
@@ -263,28 +257,9 @@
           })
       },
 
-      // approvalPass(row) {
-      //   this.approval([row.id])
-      // },
-
-      // 审批通过按钮
       approvalPass(row) {
-        this.$confirm('确认审核通过？', '提示', {
-          confirmButtonText: '确认',
-          cancelButtonText: '取消',
-          type: 'warning'
-        }).then(() => {
-          approvalPass({ id: row.id }).then(() => {
-            this.$message({
-              message: '操作成功',
-              type: 'success'
-            })
-            this.getData()
-          })
-        })
+        this.approval([row.id])
       },
-
-      //
       approval(ids) {
         if (!ids || ids.length == 0) {
           this.$message.error('请勾选数据！')

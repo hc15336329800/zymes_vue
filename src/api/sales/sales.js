@@ -19,6 +19,28 @@ export function getAllByOrderNo(data) {
 }
 
 
+// 分页原生，查询销售单 + 审批下发列表（展开组合）
+export function getAllByOrderNoPageList(data) {
+  return request({
+    url: '/api/salesOrder/getAllByOrderNoPageList',
+    method: 'post',
+    data
+  })
+}
+
+
+//审批新
+export function approvalPass(data) {
+  return request({
+    url: '/api/salesOrder/approval',
+    method: 'post',
+    data
+  })
+}
+
+
+
+
 // 修改
 export function updateSales(data) {
   return request({
@@ -62,13 +84,15 @@ export function listDetails(data) {
   })
 }
 
-export function approvalPass(data) {
-  return request({
-    url: '/api/sales/sale_order_place/approval',
-    method: 'post',
-    data
-  })
-}
+
+//原始审批
+// export function approvalPass(data) {
+//   return request({
+//     url: '/api/sales/sale_order_place/approval',
+//     method: 'post',
+//     data
+//   })
+// }
 
 export function approvalRefuse(data) {
   return request({
