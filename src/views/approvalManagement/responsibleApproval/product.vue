@@ -2,9 +2,9 @@
 <template>
   <div class="app-container">
     <el-form :model="queryParams" ref="queryRef" class="query-form commen-search" :inline="true">
-      <el-form-item label="图纸号" class="condition">
-        <BomNoSelect :item-no.sync="queryParams.params.itemNo"/>
-      </el-form-item>
+<!--      <el-form-item label="图纸号" class="condition">-->
+<!--        <BomNoSelect :item-no.sync="queryParams.params.itemNo"/>-->
+<!--      </el-form-item>-->
       <el-form-item label="订单号" class="condition">
         <el-input v-model="queryParams.params.orderNo"/>
       </el-form-item>
@@ -18,16 +18,16 @@
           />
         </el-select>
       </el-form-item>
-      <el-form-item label="审批状态" class="condition">
-        <el-select v-model="queryParams.params.placeStatus" placeholder="请选择类型" clearable>
-          <el-option
-            v-for="dict in approvalList"
-            :key="dict.code"
-            :label="dict.name"
-            :value="dict.code"
-          />
-        </el-select>
-      </el-form-item>
+<!--      <el-form-item label="审批状态" class="condition">-->
+<!--        <el-select v-model="queryParams.params.placeStatus" placeholder="请选择类型" clearable>-->
+<!--          <el-option-->
+<!--            v-for="dict in approvalList"-->
+<!--            :key="dict.code"-->
+<!--            :label="dict.name"-->
+<!--            :value="dict.code"-->
+<!--          />-->
+<!--        </el-select>-->
+<!--      </el-form-item>-->
 
       <el-form-item label="申请时间" class="condition">
         <DateIntervals
@@ -80,7 +80,7 @@
     <el-table :data="pageList" class="commen-table mt_20">
       <el-table-column label="订单号" align="center" prop="orderNo" />
       <el-table-column label="客户名称" align="center" prop="custName" />
-      <el-table-column label="图纸号" align="center" prop="itemNo" />
+      <el-table-column label="BOM号" align="center" prop="itemNo" />
       <el-table-column label="物料名称" align="center" prop="itemName" />
       <el-table-column label="需求数量" align="center" prop="needNum" />
       <el-table-column label="紧急情况" align="center" prop="bizType" />
@@ -92,7 +92,7 @@
           <el-tag v-else type="warning" effect="dark">未知</el-tag>
         </template>
       </el-table-column>
-      <el-table-column label="审批意见" align="center" prop="approvalMsg" width="220" show-overflow-tooltip />
+<!--      <el-table-column label="审批意见" align="center" prop="approvalMsg" width="220" show-overflow-tooltip />-->
       <el-table-column label="申请人" align="center" prop="applyName" />
       <el-table-column label="申请时间" align="center" prop="applyTime" />
       <el-table-column label="操作" align="center" width="310" class-name="small-padding fixed-width">

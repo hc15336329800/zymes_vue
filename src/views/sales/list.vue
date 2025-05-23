@@ -4,25 +4,25 @@
 
     <!--订单列表-->
     <el-form :model="queryParams" ref="queryRef" class="query-form commen-search" :inline="true">
-      <el-form-item label="订单号" class="condition">
-        <el-input v-model="queryParams.params.orderNo" placeholder="请输入订单号" clearable/>
+      <el-form-item label="订单号" class="condition" >
+        <el-input v-model="queryParams.params.orderNo" placeholder="请输入订单号" clearable   style="    width: 180px;"/>
       </el-form-item>
-      <el-form-item label="客户" class="condition">
-        <el-input v-model="queryParams.params.custName" placeholder="请输入名称" clearable/>
+      <el-form-item label="客户" class="condition"  >
+        <el-input v-model="queryParams.params.custName" placeholder="请输入名称" clearable  style="    width: 180px;"/>
       </el-form-item>
       <el-form-item label="物料号" class="condition">
-        <BomNoSelect :item-no.sync="queryParams.params.itemNo"/>
+        <BomNoSelect :item-no.sync="queryParams.params.itemNo" style="    width: 180px;"/>
       </el-form-item>
-      <el-form-item label="是否可下单" class="condition">
-        <el-select v-model="queryParams.params.canPlace" placeholder="请选择下单状态" clearable>
-          <el-option
-            v-for="dict in canPlaceList"
-            :key="dict.code"
-            :label="dict.name"
-            :value="dict.code"
-          />
-        </el-select>
-      </el-form-item>
+<!--      <el-form-item label="是否可下单" class="condition">-->
+<!--        <el-select v-model="queryParams.params.canPlace" placeholder="请选择下单状态" clearable>-->
+<!--          <el-option-->
+<!--            v-for="dict in canPlaceList"-->
+<!--            :key="dict.code"-->
+<!--            :label="dict.name"-->
+<!--            :value="dict.code"-->
+<!--          />-->
+<!--        </el-select>-->
+<!--      </el-form-item>-->
       <el-form-item label="创建时间" class="condition">
         <DateIntervals
           ref="userInfoDateIntervals"
