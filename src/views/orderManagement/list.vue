@@ -4,19 +4,19 @@
       <el-form-item label="订单号" class="condition">
         <el-input v-model="queryParams.params.salesOrderNo" placeholder="请输入订单号" clearable/>
       </el-form-item>
-      <el-form-item label="图纸号" class="condition">
-        <BomNoSelect :item-no.sync="queryParams.params.itemNo"/>
+      <el-form-item label="产品名" class="condition">
+        <BomNoSelect :item-no.sync="queryParams.params.itemName"/>
       </el-form-item>
-      <el-form-item label="订单类型" class="condition">
-        <el-select v-model="queryParams.params.bizType" placeholder="请选择类型" clearable>
-          <el-option
-            v-for="dict in orderTypeList"
-            :key="dict.code"
-            :label="dict.name"
-            :value="dict.code"
-          />
-        </el-select>
-      </el-form-item>
+<!--      <el-form-item label="订单类型" class="condition">-->
+<!--        <el-select v-model="queryParams.params.bizType" placeholder="请选择类型" clearable>-->
+<!--          <el-option-->
+<!--            v-for="dict in orderTypeList"-->
+<!--            :key="dict.code"-->
+<!--            :label="dict.name"-->
+<!--            :value="dict.code"-->
+<!--          />-->
+<!--        </el-select>-->
+<!--      </el-form-item>-->
       <el-form-item label="状态" class="condition">
         <el-select v-model="queryParams.params.status" placeholder="请选择类型" clearable>
           <el-option
@@ -45,15 +45,23 @@
       >批量排产
       </el-button>
     </el-row>
+
     <el-table :data="pageList" class="commen-table mt_20" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55"></el-table-column>
       <el-table-column label="订单号" align="center" prop="salesOrderNo"/>
-      <el-table-column label="图纸号" align="center" prop="bomNo"/>
+      <el-table-column label="产品名称" align="center" prop="itemName"/>
       <el-table-column label="产品编码" align="center" prop="itemNo"/>
-      <el-table-column label="订单类型" align="center" prop="bizTypeDesc"/>
+
+      <el-table-column label="订单类型" align="center" prop="orderType"
+                       :formatter="row => orderTypeMap[row.orderType] || row.orderType" />
+
+      <el-table-column label="优先级" align="center" prop="bizType"
+                       :formatter="row => bizTypeMap[row.bizType] || row.bizType" />
+
+
       <el-table-column label="交付时间" align="center" prop="deliverTime"/>
       <el-table-column label="计划数量" align="center" prop="itemCount"/>
-      <el-table-column label="工序名称" align="center" prop="procedureName"/>
+<!--      <el-table-column label="工序名称" align="center" prop="procedureName"/>-->
       <el-table-column label="状态" align="center" prop="statusDesc"/>
     </el-table>
 
@@ -105,6 +113,21 @@
     },
     data() {
       return {
+
+        ///////////////////////////////简单映射////////////////////////////////////
+        bizTypeMap: {
+          '01': '正常',
+          '02': '紧急',
+          '03': '加急',
+          '04': '延后'
+        },
+        orderTypeMap: {
+          '01': '销售单',
+          '02': '加急单',
+          '03': '追加计划',
+          '04': '月度单'
+        },
+        ///////////////////////////////////////////////////////////////////
         queryParams: {
           params: {},
           page: {
