@@ -187,21 +187,32 @@
           this.pageTotal = Number(res.page.total_num)
         })
       },
+
+      // 排产按钮
       batchSchedule() {
-        if (this.selectList.length == 0) {
+        if (this.multipleSelection.length === 0) {
           this.$message.error('请勾选数据！')
           return
         }
+
         this.$confirm('确定排产？', '提示', {
           confirmButtonText: '确认',
           cancelButtonText: '取消',
           type: 'warning'
-        }).then(res => {
-          startScheduled({
+        }).then(() => {
+          // 默认使用第一个选中项
+          const first = this.multipleSelection[0]
+
+          const requestData = {
             params: {
-              ids: this.selectList
+              bomNo: first.bomNo,
+              salesOrderNo: first.salesOrderNo,
+              rootItemNo: first.itemNo,
+              rootCount: first.itemCount
             }
-          }).then(res => {
+          }
+
+          startScheduled(requestData).then(res => {
             this.$message({
               message: '操作成功',
               type: 'success'
