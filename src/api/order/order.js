@@ -33,4 +33,11 @@ export function getWarnning(data) {
 }
 
 
-
+// ✅ 新增：分页查询 BOM 树结构
+export function getBomTreePage(data) {
+  return request({
+    url: '/api/production/production_order/getBomTreePage',
+    method: 'post',
+    data
+  })
+}

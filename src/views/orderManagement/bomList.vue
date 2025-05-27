@@ -38,50 +38,25 @@
       </el-button>
       <el-button type="primary" class="mb_20" @click="operHandle()">批量关闭</el-button>
     </el-row>
-    <el-table :data="pageList" class="commen-table mt_20" @selection-change="handleSelectionChange">
-      <el-table-column type="selection" width="55"></el-table-column>
 
 
-      <el-table-column label="生产单号" align="center" prop="orderNo"/>
-      <el-table-column label="部件名称" align="center" prop="itemName"/>
+    <el-table
+      :data="pageList"
+      row-key="id"
+      :tree-props="{ children: 'children' }"
+      default-expand-all
+      border
+      style="width: 100%;"
+    >
+      <el-table-column label="部件名称" prop="itemName" />
+      <el-table-column label="物料号" prop="itemNo" />
+      <el-table-column label="BOM号" prop="bomNo" />
 
-      <el-table-column label="物料号" align="center" prop="itemNo"/>
-      <el-table-column label="bom号" align="center" prop="bomNo"/>
-
-      <el-table-column label="计划数量" align="center" prop="itemCount"/>
-      <el-table-column label="已生产数量" align="center" prop="productionCount"/>
-      <el-table-column label="任务状态" align="center" prop="orderDtlStatusDesc"/>
-      <el-table-column label="创建时间" align="center" prop="createdTime"/>
-      <el-table-column label="操作" align="center" width="310" class-name="small-padding fixed-width">
-        <template slot-scope="scope">
-          <!-- 确认后不能编辑和删除 -->
-          <el-button
-            link
-            type="primary"
-            icon="Edit"
-            v-if="scope.row.orderDtlStatus != '06' && hasPerm('B006002000005')"
-            @click="updateOrderStatus(scope.row,'06')"
-          >关闭
-          </el-button>
-          <el-button
-            link
-            type="primary"
-            icon="Delete"
-            v-if="(scope.row.orderDtlStatus == '03'||scope.row .orderDtlStatus== '04')  && hasPerm('B006002000006')"
-            @click="updateOrderStatus(scope.row,'07')"
-          >暂停
-          </el-button>
-          <el-button
-            link
-            type="primary"
-            icon="Delete"
-            v-if="(scope.row.orderDtlStatus == '07'|| scope.row .orderDtlStatus== '06') &&   hasPerm('B006002000007')"
-            @click="updateOrderStatus(scope.row,'04')"
-          >恢复
-          </el-button>
-        </template>
-      </el-table-column>
+      <el-table-column label="子件号" prop="useItemNo" />
+      <el-table-column label="用量" prop="useItemCount" />
+      <el-table-column label="父级编码" prop="parentCode" />
     </el-table>
+
 
     <pagination
       style="text-align: right"
@@ -94,16 +69,9 @@
   </div>
 </template>
 <script>
-  import {
-    addDeviceType,
-    deleteDeviceType,
-    detailDeviceType,
-    pageList,
-    updateDeviceType
-  } from '@/api/device/deviceType'
+
   import {dictInfo} from '@/api/common'
-  import {orderPageList, updateOrderStatus,updateAllocation} from '@/api/order/order'
-  import {mapGetters} from "vuex";
+  import {orderPageList, updateOrderStatus,updateAllocation,getBomTreePage} from '@/api/order/order'
 
   export default {
     components: {
@@ -117,18 +85,25 @@
         statusList: [],
         selectList: [],
         multipleSelection: [],
+        // queryParams: {
+        //   orderNo: '',
+        //   parentItemNo: '',
+        //   // childItemNos: [],
+        //   orderDtlStatus: '04',
+        //   pageNum: 1,
+        //   pageSize: 100
+        // }
+
         queryParams: {
-          orderNo: '',
-          parentItemNo: '',
-          // childItemNos: [],
-          orderDtlStatus: '04',
+          bomNo: '',         // 查询用 BOM 编号
           pageNum: 1,
-          pageSize: 100
+          pageSize: 10
         },
 
         form: {},
         pageTotal: 0,
-        pageList: {},
+        pageList: [],  // ✅ 正确：树形数据必须是数组
+
         title: '',
         dialogShow: false,
         buttonShow: false,
@@ -139,24 +114,18 @@
       }
     },
     created() {
-      const user = localStorage.getItem('user_info');
-      const name = JSON.parse(user).userName;
-      this.buttonShow = true;
-      // if(name ==='admin'){
-      //   this.buttonShow = true;
-      // }else{
-      //   this.currentHour = new Date().getHours();
-      //   if(this.currentHour === 8 || this.currentHour === 9){
-      //     this.buttonShow = true;
-      //   }
-      // }
+      this.buttonShow = true
       this.getOptionData()
+
+      // 🌟 默认加载指定 bomNo 的数据
+      this.queryParams.bomNo = 'BOM20240501'  // ⚠️ 可根据需要调整默认值
       this.getData()
     },
+
     methods: {
       /** 搜索按钮操作 */
       handleQuery() {
-        this.queryParams.page.page_num = 1
+        this.queryParams.pageNum = 1
         this.getData()
       },
       beforeClose() {
@@ -181,11 +150,20 @@
 
       //初始化和查询
       getData() {
-        orderPageList(this.queryParams).then(res => {
-          this.pageList = res.data|| []
-          console.log("data:" + this.pageList[0].bomNo);
-          this.pageTotal = Number(res.page.total_num)
+
+        getBomTreePage(this.queryParams).then(res => {
+          this.pageList = res.data || []
+          this.pageTotal = Number(res.page?.total_num || 0)
+
+          // 🌟调试检查
+          if (this.pageList.length === 0) {
+            this.$message.warning('暂无数据，请检查 bomNo 是否正确')
+          } else {
+            console.log('BOM 树数据加载成功：', this.pageList)
+          }
         })
+
+
       },
       procAlloc() {
         if (this.selectList.length == 0) {

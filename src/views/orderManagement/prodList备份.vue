@@ -1,14 +1,14 @@
 <template>
   <div class="app-container">
     <el-form :model="queryParams" ref="queryRef" class="query-form commen-search" :inline="true">
-<!--      <el-form-item label="母件图纸号" class="condition">-->
-<!--        <BomNoSelect ref="BomNoSelect" :item-no.sync="queryParams.params.parentItemNo"/>-->
-<!--      </el-form-item>-->
-<!--      <el-form-item label="子件图纸号" class="condition">-->
-<!--        <multipleBomNo ref="multipleBomNo" :item-nos.sync="queryParams.params.childItemNos"/>-->
-<!--      </el-form-item>-->
+      <el-form-item label="母件图纸号" class="condition">
+        <BomNoSelect ref="BomNoSelect" :item-no.sync="queryParams.params.parentItemNo"/>
+      </el-form-item>
+      <el-form-item label="子件图纸号" class="condition">
+        <multipleBomNo ref="multipleBomNo" :item-nos.sync="queryParams.params.childItemNos"/>
+      </el-form-item>
       <el-form-item label="状态" class="condition">
-        <el-select v-model="queryParams.orderStatus" placeholder="请选择状态" clearable>
+        <el-select v-model="queryParams.params.orderStatus" placeholder="请选择状态" clearable>
           <el-option
             v-for="dict in statusList"
             :key="dict.code"
@@ -40,14 +40,8 @@
     </el-row>
     <el-table :data="pageList" class="commen-table mt_20" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55"></el-table-column>
-
-
       <el-table-column label="生产单号" align="center" prop="orderNo"/>
-      <el-table-column label="部件名称" align="center" prop="itemName"/>
-
-      <el-table-column label="物料号" align="center" prop="itemNo"/>
-      <el-table-column label="bom号" align="center" prop="bomNo"/>
-
+      <el-table-column label="图纸号" align="center" prop="bomNo"/>
       <el-table-column label="计划数量" align="center" prop="itemCount"/>
       <el-table-column label="已生产数量" align="center" prop="productionCount"/>
       <el-table-column label="任务状态" align="center" prop="orderDtlStatusDesc"/>
@@ -87,8 +81,8 @@
       style="text-align: right"
       v-show="pageTotal>0"
       :total="pageTotal"
-      :page.sync="queryParams.pageNum"
-      :limit.sync="queryParams.pageSize"
+      :page.sync="queryParams.page.page_num"
+      :limit.sync="queryParams.page.page_size"
       @pagination="getData"
     />
   </div>
@@ -118,14 +112,14 @@
         selectList: [],
         multipleSelection: [],
         queryParams: {
-          orderNo: '',
-          parentItemNo: '',
-          // childItemNos: [],
-          orderDtlStatus: '04',
-          pageNum: 1,
-          pageSize: 100
+          params: {
+            orderStatus: '04'
+          },
+          page: {
+            page_num: 1,
+            page_size: 50
+          }
         },
-
         form: {},
         pageTotal: 0,
         pageList: {},
@@ -165,24 +159,24 @@
       },
       /** 重置操作表单 */
       handleReset() {
+        // this.$refs.BomNoSelect.resetData()
+        // this.$refs.multipleBomNo.resetData()
         this.queryParams = {
-          orderNo: '',
-          parentItemNo: '',
-          // childItemNos: [],
-          orderDtlStatus: '',
-          pageNum: 1,
-          pageSize: 100
+          page: {
+            page_num: 1,
+            page_size: 50
+          },
+          params: {}
         }
+
         this.getData()
       },
       getOptionData() {
         dictInfo('ORDER_STATUS', r => (this.statusList = r))
       },
-
-      //初始化和查询
       getData() {
         orderPageList(this.queryParams).then(res => {
-          this.pageList = res.data|| []
+          this.pageList = res.data
           console.log("data:" + this.pageList[0].bomNo);
           this.pageTotal = Number(res.page.total_num)
         })

@@ -574,6 +574,15 @@ export const constantRoutes = [
       },
 
       {
+        path: 'bomList',
+        component: () => import('@/views/orderManagement/bomList'),
+        name: 'bomList',
+        meta: {
+          title: 'BOM组织'
+        }
+      },
+
+      {
         path: 'deliverGoodsDetail',
         hidden: true,
         component: () => import('@/views/orderManagement/deliverGoodsDetail'),
