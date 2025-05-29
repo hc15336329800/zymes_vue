@@ -1,3 +1,4 @@
+<!--生产任务页面-->
 <template>
   <div class="app-container">
     <el-form :model="queryParams" ref="queryRef" class="query-form commen-search" :inline="true">
@@ -17,16 +18,16 @@
 <!--          />-->
 <!--        </el-select>-->
 <!--      </el-form-item>-->
-      <el-form-item label="状态" class="condition">
-        <el-select v-model="queryParams.params.status" placeholder="请选择类型" clearable>
-          <el-option
-            v-for="dict in statusList"
-            :key="dict.code"
-            :label="dict.name"
-            :value="dict.code"
-          />
-        </el-select>
-      </el-form-item>
+<!--      <el-form-item label="状态" class="condition">-->
+<!--        <el-select v-model="queryParams.params.status" placeholder="请选择类型" clearable>-->
+<!--          <el-option-->
+<!--            v-for="dict in statusList"-->
+<!--            :key="dict.code"-->
+<!--            :label="dict.name"-->
+<!--            :value="dict.code"-->
+<!--          />-->
+<!--        </el-select>-->
+<!--      </el-form-item>-->
       <el-form-item class="commen-button">
         <el-button type="primary" icon="el-icon-search" @click="handleQuery">搜索</el-button>
       </el-form-item>
@@ -62,7 +63,7 @@
       <el-table-column label="交付时间" align="center" prop="deliverTime"/>
       <el-table-column label="计划数量" align="center" prop="itemCount"/>
 <!--      <el-table-column label="工序名称" align="center" prop="procedureName"/>-->
-      <el-table-column label="状态" align="center" prop="statusDesc"/>
+<!--      <el-table-column label="状态" align="center" prop="statusDesc"/>-->
     </el-table>
 
     <pagination

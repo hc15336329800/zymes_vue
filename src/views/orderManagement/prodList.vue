@@ -34,7 +34,7 @@
         v-show="buttonShow"
         icon="el-icon-plus"
         @click="procAlloc"
-      >工序分配
+      >工序下发
       </el-button>
       <el-button type="primary" class="mb_20" @click="operHandle()">批量关闭</el-button>
     </el-row>
@@ -121,7 +121,7 @@
           orderNo: '',
           parentItemNo: '',
           // childItemNos: [],
-          orderDtlStatus: '04',
+          orderDtlStatus: '03',  //待生产
           pageNum: 1,
           pageSize: 100
         },

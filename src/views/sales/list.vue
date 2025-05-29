@@ -97,8 +97,8 @@
       <el-table-column label="操作" align="center" width="310" class-name="small-padding fixed-width">
         <template slot-scope="scope">
           <!-- 确认后不能编辑和删除 -->
-           <el-button link type="primary" icon="Edit" @click="handlePlace(scope.row)">下生产单</el-button>
-          <el-button link type="primary" icon="Plus" @click="openPlaceDialog(scope.row)">下生产单 NEW</el-button>
+<!--           <el-button link type="primary" icon="Edit" @click="handlePlace(scope.row)">下生产单</el-button>-->
+          <el-button link type="primary" icon="Plus" @click="openPlaceDialog(scope.row)">下生产单 </el-button>
 
           <el-button link type="primary" icon="Edit" @click="handleUpdate(scope.row)">编辑</el-button>
           <el-button link type="primary" icon="Delete" @click="handleDelete(scope.row)">删除</el-button>
@@ -517,12 +517,19 @@ export default {
       this.form = {}
       this.$refs['form'].clearValidate()
     },
-    handlePlace(row) {
-      this.toPlaces([row.id])
-    },
+
     handlePlaces() {
+      if (this.selectList.length === 0) {
+        this.$message.error('请勾选一个订单')
+        return
+      }
+      if (this.selectList.length > 1) {
+        this.$message.warning('请选择一个订单进行操作')
+        return
+      }
       this.toPlaces(this.selectList)
-    },
+    }
+,
     toPlaces(ids) {
       if (ids.length == 0) {
         this.$message.error('请勾选订单数据')

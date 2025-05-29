@@ -536,7 +536,7 @@ export const constantRoutes = [
         component: () => import('@/views/orderManagement/list'),
         name: 'orderList',
         meta: {
-          title: '生产任务管理'
+          title: '生产任务'
         }
       },
 

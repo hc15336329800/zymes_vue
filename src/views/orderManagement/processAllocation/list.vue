@@ -40,7 +40,7 @@
       <el-form-item></el-form-item>
     </el-form>
     <el-row class="mb8">
-      <el-button type="primary" class="commen-button" icon="el-icon-plus" @click="handleAdd">工序分配</el-button>
+      <el-button type="primary" class="commen-button" icon="el-icon-plus" @click="handleAdd">工序下发</el-button>
       <el-button type="primary" class="commen-button" icon="el-icon-plus" @click="updateStatus('01')">启用</el-button>
       <el-button type="primary" class="commen-button" icon="el-icon-plus" @click="updateStatus('00')">停用</el-button>
       <el-button type="primary" class="commen-button" icon="el-icon-plus" @click="handleOuter">外协分配</el-button>
