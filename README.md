@@ -12,6 +12,10 @@ cnpm install
 #打包命令
 npm run build:prod
 
+#打包命令
+ npm run prod  (实验通过)
+
+
 #打包后路径
 dist/
 

@@ -1,3 +1,4 @@
+<!--任务分配-->
 <template>
   <div class="app-container">
     <el-form :model="queryParams" ref="queryRef" class="query-form commen-search" :inline="true">
@@ -38,20 +39,21 @@
       </el-button>
       <el-button type="primary" class="mb_20" @click="operHandle()">批量关闭</el-button>
     </el-row>
-    <el-table :data="pageList" class="commen-table mt_20" @selection-change="handleSelectionChange">
+
+    <el-table :data="pageList" class="commen-table mt_20" @selection-change="handleSelectionChange"    @sort-change="handleSortChange"     >
       <el-table-column type="selection" width="55"></el-table-column>
 
 
-      <el-table-column label="生产单号" align="center" prop="orderNo"/>
-      <el-table-column label="部件名称" align="center" prop="itemName"/>
+      <el-table-column label="生产单号" align="center" prop="orderNo"  sortable="custom"/>
+      <el-table-column label="部件名称" align="center" prop="itemName" sortable="custom"/>
 
-      <el-table-column label="物料号" align="center" prop="itemNo"/>
-      <el-table-column label="bom号" align="center" prop="bomNo"/>
+      <el-table-column label="物料号" align="center" prop="itemNo" sortable="custom"/>
+      <el-table-column label="bom号" align="center" prop="bomNo" sortable="custom"/>
 
-      <el-table-column label="计划数量" align="center" prop="itemCount"/>
-      <el-table-column label="已生产数量" align="center" prop="productionCount"/>
-      <el-table-column label="任务状态" align="center" prop="orderDtlStatusDesc"/>
-      <el-table-column label="创建时间" align="center" prop="createdTime"/>
+      <el-table-column label="计划数量" align="center" prop="itemCount" sortable="custom"/>
+      <el-table-column label="已生产数量" align="center" prop="productionCount" sortable="custom"/>
+      <el-table-column label="任务状态" align="center" prop="orderDtlStatusDesc" sortable="custom"/>
+      <el-table-column label="创建时间" align="center" prop="createdTime"  sortable="custom"/>
       <el-table-column label="操作" align="center" width="310" class-name="small-padding fixed-width">
         <template slot-scope="scope">
           <!-- 确认后不能编辑和删除 -->
@@ -114,6 +116,13 @@
     },
     data() {
       return {
+
+
+
+        pageList: [],       // 表格实际渲染的数组数据
+        originList: [],     // 存储原始顺序，用于取消排序时还原
+
+
         statusList: [],
         selectList: [],
         multipleSelection: [],
@@ -128,7 +137,7 @@
 
         form: {},
         pageTotal: 0,
-        pageList: {},
+        // pageList: {},
         title: '',
         dialogShow: false,
         buttonShow: false,
@@ -179,12 +188,57 @@
         dictInfo('ORDER_STATUS', r => (this.statusList = r))
       },
 
+      /**
+       * el-table 表头点击排序事件，前端本地排序
+       * @param {{ prop: string, order: 'ascending'|'descending'|null }} sort
+       */
+      handleSortChange({ prop, order }) {
+        // 没有排序，恢复原始顺序
+        if (!order) {
+          this.pageList = [...this.originList]
+          return
+        }
+
+        // 升降序转换
+        const sortFlag = order === 'ascending' ? 1 : -1
+
+        // 按数据类型自动排序，空值排最后
+        this.pageList = [...this.pageList].sort((a, b) => {
+          const valA = a[prop]
+          const valB = b[prop]
+
+          if (valA == null && valB != null) return 1
+          if (valB == null && valA != null) return -1
+          if (valA == null && valB == null) return 0
+
+          // 数字比较
+          if (!isNaN(valA) && !isNaN(valB)) {
+            return (Number(valA) - Number(valB)) * sortFlag
+          }
+          // 日期字段名包含 time 或 date，按时间排
+          if (/time|date/i.test(prop)) {
+            return (new Date(valA) - new Date(valB)) * sortFlag
+          }
+          // 字符串比较
+          return valA.toString().localeCompare(valB.toString(), 'zh-Hans-CN') * sortFlag
+        })
+      },
+
+
       //初始化和查询
       getData() {
+        // orderPageList(this.queryParams).then(res => {
+        //   this.pageList = res.data|| []
+        //   console.log("data:" + this.pageList[0].bomNo);
+        //   this.pageTotal = Number(res.page.total_num)
+        // })
+
         orderPageList(this.queryParams).then(res => {
-          this.pageList = res.data|| []
-          console.log("data:" + this.pageList[0].bomNo);
-          this.pageTotal = Number(res.page.total_num)
+          // 适配后端返回结构，确保是数组
+          const arr = Array.isArray(res.data) ? res.data : (res.data?.list || [])
+          this.pageList   = arr
+          this.originList = [...arr]  // 拷贝原始顺序
+          this.pageTotal  = Number(res.page?.total_num || 0)
         })
       },
       procAlloc() {

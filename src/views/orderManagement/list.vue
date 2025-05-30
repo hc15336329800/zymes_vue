@@ -63,7 +63,7 @@
       <el-table-column label="交付时间" align="center" prop="deliverTime"/>
       <el-table-column label="计划数量" align="center" prop="itemCount"/>
 <!--      <el-table-column label="工序名称" align="center" prop="procedureName"/>-->
-<!--      <el-table-column label="状态" align="center" prop="statusDesc"/>-->
+      <el-table-column label="状态" align="center" prop="statusDesc"/>
     </el-table>
 
     <pagination
