@@ -81,6 +81,7 @@
       <el-table-column label="正品数量" align="center" prop="realCount"/>
       <el-table-column label="待确认次品数量" align="center" prop="toReviewDeffCount"/>
       <el-table-column label="次品数量" align="center" prop="deffCount"/>
+      <el-table-column label="工单状态" align="center" prop="state"/>
       <el-table-column label="更新时间" align="center" prop="updatedTime" width="100"/>
       <el-table-column label="操作" align="center" width="180">
         <template slot-scope="scope">
@@ -381,6 +382,13 @@
         })
       },
       handleAssign(row) {
+
+        // 前置校验：只有“就绪”状态才允许下达
+        if (row.state !== '就绪') {
+          this.$message.warning('禁止重复下达');
+          return;
+        }
+
         this.$set(this.form, 'workOrderId', row.id)
         this.$set(this.form, 'procedureName', row.procedureName)
         this.$set(this.form, 'assignCount', row.waitAssignCount)
