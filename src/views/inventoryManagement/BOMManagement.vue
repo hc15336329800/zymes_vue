@@ -2,9 +2,15 @@
 <template>
   <div class="app-container">
     <el-form :model="queryParams" ref="queryRef" class="query-form commen-search" :inline="true">
-      <el-form-item label="图纸号" class="condition">
-        <BomNoSelect :item-no.sync="queryParams.params.itemNo"/>
+      <el-form-item label="BOM号" class="condition">
+        <BomNoSelect :item-no.sync="queryParams.params.bomNo"/>
       </el-form-item>
+
+
+      <el-form-item label="物料号" class="condition">
+        <ItemNoSelect :item-no.sync="queryParams.params.itemNo"/>
+      </el-form-item>
+
       <el-form-item label="产品名称" class="condition">
         <el-input v-model="queryParams.params.itemName" placeholder="请输入名称" clearable/>
       </el-form-item>
@@ -58,8 +64,9 @@
     </el-row>
     <el-table :data="pageList" class="commen-table mt_20">
       <el-table-column type="index" width="55" label="序号"></el-table-column>
-      <el-table-column label="图纸号" align="center" prop="bomNo"/>
-      <el-table-column label="产品编码" align="center" prop="itemNo"/>
+      <el-table-column label="Bom号" align="center" prop="bomNo"/>
+      <el-table-column label="物料号" align="center" prop="itemNo"/>
+<!--      <el-table-column label="产品编码" align="center" prop="itemNo"/>-->
       <el-table-column label="产品名称" align="center" prop="itemName"/>
       <el-table-column label="型号" align="center" prop="itemModel"/>
       <el-table-column label="来源" align="center" prop="itemOrigin"/>
@@ -206,7 +213,8 @@ export default {
     UploadExcelComponent,
     DateIntervals: () => import('@/components/DateIntervals'),
     Pagination: () => import('@/components/Pagination'),
-    BomNoSelect: () => import('@/components/Item/BomNo')
+    BomNoSelect: () => import('@/components/Item/BomNo'),
+    ItemNoSelect: () => import('@/components/Item/ItemNo')
   },
   data() {
     return {

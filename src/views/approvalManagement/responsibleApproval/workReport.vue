@@ -88,33 +88,37 @@
           style="width: 14px; margin-right: 4px;vertical-align:middle;"
         >审核拒绝
       </el-button>
+
       <el-button
         type="primary"
         class="commen-button"
-        v-if="hasPerm('B008002000003')"
-        v-show="buttonShow"
+        v-if="showVerifyBtn"
         @click="handleVerfilyStatus('03')"
       >
-        <img
-          src="@/assets/images/yes.png"
-          alt
-          style="width: 14px; margin-right: 4px;vertical-align:middle;"
-        >验收通过
+        <img src="@/assets/images/yes.png" alt style="width: 14px; margin-right: 4px;vertical-align:middle;">
+        验收通过
       </el-button>
+
       <el-button
         type="primary"
         class="commen-button"
-        v-if="hasPerm('B008002000004')"
-        v-show="buttonShow"
+        v-if="showRejectVerifyBtn"
         @click="handleRejectVerfilyStatus('04')"
       >
-        <img src="@/assets/images/no.png" alt style="width: 14px; margin-right: 4px;">验收拒绝
+        <img src="@/assets/images/no.png" alt style="width: 14px; margin-right: 4px;">
+        验收拒绝
       </el-button>
+
+
     </el-row>
 
     <el-table :data="pageList" class="commen-table mt_20" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55"></el-table-column>
-      <el-table-column label="图纸号" align="center" prop="bomNo"/>
+      <el-table-column label="bom号" align="center" prop="bomNo"/>
+      <el-table-column label="物料号" align="center" prop="itemNo"/>
+      <el-table-column label="物料名" align="center" prop="itemName"/>
+
+
       <el-table-column label="工单号" align="center" prop="workOrderNo"/>
       <el-table-column label="工序" align="center" prop="procedureName"/>
       <el-table-column label="分配数量" align="center" prop="planTotalCount"/>
@@ -193,7 +197,37 @@ export default {
       }
     }
   },
+
+  computed: {
+    showVerifyBtn() {
+      let permissions = localStorage.getItem('perms')
+      if (!permissions) return false
+      try {
+        permissions = JSON.parse(permissions)
+      } catch (e) {
+        return false
+      }
+      return Array.isArray(permissions) && permissions.includes('B008002000003')
+    },
+    showRejectVerifyBtn() {
+      let permissions = localStorage.getItem('perms')
+      if (!permissions) return false
+      try {
+        permissions = JSON.parse(permissions)
+      } catch (e) {
+        return false
+      }
+      return Array.isArray(permissions) && permissions.includes('B008002000004')
+    }
+  },
+
+
   created() {
+
+    const userInfo = JSON.parse(localStorage.getItem('user_info') || '{}')
+    // console.log('userInfo----:', userInfo)
+
+
     const user = localStorage.getItem('user_info');
     const name = JSON.parse(user).userName;
     this.buttonShow = true;
@@ -261,7 +295,7 @@ export default {
         inputType: 'textarea'
       })
         .then(({ value }) => {
-          console.log(value)
+          // console.log("测试1"+value)
           if (!value || value.length == 0) {
             this.$message.error('请填写审核不通过的原因！')
             return
@@ -297,7 +331,8 @@ export default {
         inputType: 'textarea'
       })
         .then(({ value }) => {
-          console.log(value)
+
+          // console.log( '测试2'+value)
           if (!value || value.length == 0) {
             this.$message.error('请填写验收不通过的原因！')
             return
@@ -370,7 +405,7 @@ export default {
           }
         })
       }
-      console.log(this.multipleSelection, 'this.selectList')
+      // console.log('测试6'+this.multipleSelection, 'this.selectList')
     }
   }
 }
