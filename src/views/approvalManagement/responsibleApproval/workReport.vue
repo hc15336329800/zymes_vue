@@ -1,3 +1,4 @@
+<!--报工审批-->
 <template>
   <div class="app-container">
     <el-form :model="queryParams" ref="queryRef" class="query-form commen-search" :inline="true">
@@ -114,6 +115,9 @@
 
     <el-table :data="pageList" class="commen-table mt_20" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55"></el-table-column>
+
+      <el-table-column label="订单号" align="center" prop="orderNo"/>
+
       <el-table-column label="bom号" align="center" prop="bomNo"/>
       <el-table-column label="物料号" align="center" prop="itemNo"/>
       <el-table-column label="物料名" align="center" prop="itemName"/>

@@ -50,14 +50,14 @@
         @click="handleAdd"
       >新增
       </el-button>
-      <el-button
-        type="primary"
-        icon="el-icon-s-order"
-        v-if="hasPerm('B004001000004')"
-        v-show="buttonShow"
-        @click="handlePlaces()"
-      >批量下生产单
-      </el-button>
+<!--      <el-button-->
+<!--        type="primary"-->
+<!--        icon="el-icon-s-order"-->
+<!--        v-if="hasPerm('B004001000004')"-->
+<!--        v-show="buttonShow"-->
+<!--        @click="handlePlaces()"-->
+<!--      >批量下生产单-->
+<!--      </el-button>-->
       <upload-excel-component
         text="导入销售单"
         :on-success="handleSuccess"
