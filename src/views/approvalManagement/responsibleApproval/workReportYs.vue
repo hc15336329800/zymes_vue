@@ -1,4 +1,4 @@
-<!--报工审批-->
+<!--报工验收-->
 <template>
   <div class="app-container">
     <el-form :model="queryParams" ref="queryRef" class="query-form commen-search" :inline="true">
@@ -63,52 +63,26 @@
       <el-form-item></el-form-item>
     </el-form>
     <el-row class="mb8">
+
       <el-button
         type="primary"
         class="commen-button"
-        v-if="hasPerm('B008002000001')"
-        v-show="buttonShow"
-        @click="handlePassStatus('01')"
+        v-if="showVerifyBtn"
+        @click="handleVerfilyStatus('03')"
       >
-        <img
-          src="@/assets/images/yes.png"
-          alt
-          style="width: 14px; margin-right: 4px;vertical-align:middle;"
-        >审核通过
+        <img src="../../../assets/images/yes.png" alt style="width: 14px; margin-right: 4px;vertical-align:middle;">
+        验收通过
       </el-button>
+
       <el-button
         type="primary"
         class="commen-button"
-        v-if="hasPerm('B008002000002')"
-        v-show="buttonShow"
-        @click="handleRejectStatus('02')"
+        v-if="showRejectVerifyBtn"
+        @click="handleRejectVerfilyStatus('04')"
       >
-        <img
-          src="@/assets/images/no.png"
-          alt
-          style="width: 14px; margin-right: 4px;vertical-align:middle;"
-        >审核拒绝
+        <img src="../../../assets/images/no.png" alt style="width: 14px; margin-right: 4px;">
+        验收拒绝
       </el-button>
-
-<!--      <el-button-->
-<!--        type="primary"-->
-<!--        class="commen-button"-->
-<!--        v-if="showVerifyBtn"-->
-<!--        @click="handleVerfilyStatus('03')"-->
-<!--      >-->
-<!--        <img src="@/assets/images/yes.png" alt style="width: 14px; margin-right: 4px;vertical-align:middle;">-->
-<!--        验收通过-->
-<!--      </el-button>-->
-
-<!--      <el-button-->
-<!--        type="primary"-->
-<!--        class="commen-button"-->
-<!--        v-if="showRejectVerifyBtn"-->
-<!--        @click="handleRejectVerfilyStatus('04')"-->
-<!--      >-->
-<!--        <img src="@/assets/images/no.png" alt style="width: 14px; margin-right: 4px;">-->
-<!--        验收拒绝-->
-<!--      </el-button>-->
 
 
     </el-row>
@@ -166,12 +140,12 @@ import {mapGetters} from "vuex";
 
 export default {
   components: {
-    DateIntervals: () => import('@/components/DateIntervals'),
-    Pagination: () => import('@/components/Pagination'),
-    BomNoSelect: () => import('@/components/Item/BomNo'),
-    WorkShop: () => import('@/components/Dept/workShop'),
-    deviceSelected: () => import('@/components/Device/deviceSelected'),
-    multipleProcedure: () => import('@/components/Item/multipleProcedure')
+    DateIntervals: () => import('@/components/DateIntervals/index.vue'),
+    Pagination: () => import('@/components/Pagination/index.vue'),
+    BomNoSelect: () => import('@/components/Item/BomNo.vue'),
+    WorkShop: () => import('@/components/Dept/workShop.vue'),
+    deviceSelected: () => import('@/components/Device/deviceSelected.vue'),
+    multipleProcedure: () => import('@/components/Item/multipleProcedure.vue')
   },
   data() {
     return {
@@ -180,7 +154,7 @@ export default {
       verifyList: [],
       queryParams: {
         params: {
-          status: '00'
+          status: '01'
         },
         page: {
           page_num: 1,

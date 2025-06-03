@@ -129,6 +129,15 @@ export const constantRoutes = [
         }
       },
       {
+        path: 'workReportYs',
+        component: () =>
+          import('@/views/approvalManagement/responsibleApproval/workReportYs'),
+        name: 'responsibleApprovalWorkReport',
+        meta: {
+          title: '报工验收'
+        }
+      },
+      {
         path: 'outsourcing',
         component: () =>
           import('@/views/approvalManagement/responsibleApproval/outsourcing'),
