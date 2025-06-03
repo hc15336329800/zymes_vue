@@ -29,15 +29,20 @@
       <el-form-item class="commen-button reset">
         <el-button icon="el-icon-refresh" @click="handleReset">重置</el-button>
       </el-form-item>
+
+      <el-form-item class="commen-button">
+        <el-button type="primary" icon="el-icon-download" @click="handleExport">导出工资表</el-button>
+      </el-form-item>
+
       <el-form-item></el-form-item>
     </el-form>
 
     <el-table :data="pageList" class="commen-table mt_20">
       <el-table-column type="index" width="55" label="序号"></el-table-column>
       <el-table-column label="订单号" align="center" prop="orderNo"/>
-
-      <el-table-column label="工人" align="center" prop="userName"/>
       <el-table-column label="图纸号" align="center" prop="bomNo"/>
+      <el-table-column label="工人" align="center" prop="userName"/>
+
       <el-table-column label="工单号" align="center" prop="workOrderNo"/>
       <el-table-column label="工序" align="center" prop="procedureName"/>
       <el-table-column label="加工件数" align="center" prop="userCount"/>
@@ -59,7 +64,7 @@
 <script>
   import {dictInfo} from '@/api/common'
   import {workReportPage} from '@/api/workOrder/workReport'
-  import {wages_detail_page_list, wages_page_list} from '@/api/wages'
+  import { wages_detail_page_list, wages_export_detail, wages_page_list } from '@/api/wages'
   import pinyinSelect from '@/components/pinyinSelect.vue'
 
   export default {
@@ -100,6 +105,32 @@
       this.getData()
     },
     methods: {
+
+
+      //导出
+      // 导出工资明细
+      handleExport() {
+        // 前端必填校验（可选）
+        const { userId, beginTime, endTime } = this.queryParams.params
+        if (!userId || !beginTime || !endTime) {
+          this.$message.error('工人和报工时间为必填！')
+          return
+        }
+        this.$message.loading && this.$message.loading('导出中...')
+        wages_export_detail(this.queryParams.params).then(res => {
+          const blob = new Blob([res.data], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' })
+          const link = document.createElement('a')
+          link.href = window.URL.createObjectURL(blob)
+          link.download = '工人工资明细.xlsx'
+          document.body.appendChild(link)
+          link.click()
+          document.body.removeChild(link)
+          window.URL.revokeObjectURL(link.href)
+          this.$message.success('导出成功')
+        }).catch(() => this.$message.error('导出失败'))
+      },
+
+
       getSelectOptions() {
         dictInfo("USER_INFO", r => (this.userList = r))
 
