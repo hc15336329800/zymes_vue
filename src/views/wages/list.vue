@@ -39,6 +39,8 @@
 
     <el-table :data="pageList" class="commen-table mt_20">
       <el-table-column type="index" width="55" label="序号"></el-table-column>
+      <el-table-column label="订单号" align="center" prop="orderNo"/>
+
       <el-table-column label="工人" align="center" prop="userName"/>
       <el-table-column label="图纸号" align="center" prop="bomNo"/>
       <el-table-column label="工序" align="center" prop="procedureName"/>

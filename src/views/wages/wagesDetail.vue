@@ -1,6 +1,7 @@
 <template>
   <div class="app-container">
     <el-form :model="queryParams" ref="queryRef" class="query-form commen-search" :inline="true">
+
       <el-form-item label="图纸号" class="condition">
         <BomNoSelect :item-no.sync="queryParams.params.itemNo"/>
       </el-form-item>
@@ -33,6 +34,8 @@
 
     <el-table :data="pageList" class="commen-table mt_20">
       <el-table-column type="index" width="55" label="序号"></el-table-column>
+      <el-table-column label="订单号" align="center" prop="orderNo"/>
+
       <el-table-column label="工人" align="center" prop="userName"/>
       <el-table-column label="图纸号" align="center" prop="bomNo"/>
       <el-table-column label="工单号" align="center" prop="workOrderNo"/>
