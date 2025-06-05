@@ -1,6 +1,6 @@
 <template>
   <el-select
-    v-model="itemNo1"
+    v-model="itemNo"
     filterable
     remote
     clearable
@@ -21,7 +21,6 @@ import debounce from 'lodash/debounce'
 export default {
   data() {
     return {
-      itemNo1: '',
       itemList: [],
       loading: false
     }
@@ -37,52 +36,58 @@ export default {
   },
   created() {
     // 初始化赋值
-    this.itemNo1 = this.itemNo
-    if (this.itemNo) {
+     if (this.itemNo) {
       this.getData(this.itemNo)
     }
     // 防抖包装，只在created里赋值一次，保证方法引用稳定
-    this.remoteMethod = debounce(this._remoteMethod, 1000)
+    // this.remoteMethod = debounce(this._remoteMethod, 1000)
   },
-  beforeDestroy() {
-    // 清除定时器，防止内存泄漏
-    if (this.remoteMethod && this.remoteMethod.cancel) {
-      this.remoteMethod.cancel()
-    }
-  },
+  // beforeDestroy() {
+  //   // 清除定时器，防止内存泄漏
+  //   if (this.remoteMethod && this.remoteMethod.cancel) {
+  //     this.remoteMethod.cancel()
+  //   }
+  // },
   watch: {
-    // 双向同步
-    itemNo1(newVal) {
-      this.$emit('update:itemNo', newVal)
-    },
+
     // 父组件props变化时，重置本地状态和下拉
     itemNo(newVal) {
-      if (!newVal) {
-        this.resetData()
-      }
+      // 如果外部置空，清空列表
+      if (!newVal) this.itemList = []
     }
   },
   methods: {
-    // 远程搜索逻辑，供防抖包装
-    async _remoteMethod(query) {
-      if (query !== '') {
-        this.loading = true
-        try {
-          const res = await bomSelected({
-            params: { bomNo: query }
-          })
-          this.itemList = res.data
-        } catch (err) {
-          // 捕获错误，避免loading假死
-          this.itemList = []
-        } finally {
-          this.loading = false
-        }
-      } else {
+
+    // 核心远程搜索方法，已防抖
+    //  bug卡死问题：数据源 itemList 里存在重复 bomNo
+    remoteMethod: debounce(async function(query) {
+      if (!query) {
         this.itemList = []
         this.loading = false
+        return
       }
-    },
+      this.loading = true
+      try {
+        const res = await bomSelected({ params: { bomNo: query } })
+        // 前端去重
+        const arr = res.data || []
+        const map = {}
+        this.itemList = arr.filter(item => {
+          if (item && item.bomNo && !map[item.bomNo]) {
+            map[item.bomNo] = true
+            return true
+          }
+          return false
+        })
+      } catch {
+        this.itemList = []
+      } finally {
+        this.loading = false
+      }
+    }, 1000),
+
+
+
     // 物料号外部变更时，直接查物料
     getData(params) {
       if (params) {
@@ -100,7 +105,6 @@ export default {
     },
     // 清空本地下拉数据和选中项
     resetData() {
-      this.itemNo1 = null
       this.clearData()
     },
     clearData() {
