@@ -115,6 +115,9 @@
     data() {
       return {
 
+        ///////////////////////////////批量多选////////////////////////////////////
+
+
         ///////////////////////////////简单映射////////////////////////////////////
         bizTypeMap: {
           '01': '正常',
@@ -189,39 +192,108 @@
         })
       },
 
-      // 排产按钮
+      // 排产按钮   单选
+      // batchSchedule() {
+      //   if (this.multipleSelection.length === 0) {
+      //     this.$message.error('请勾选数据！')
+      //     return
+      //   }
+      //
+      //   this.$confirm('确定排产？', '提示', {
+      //     confirmButtonText: '确认',
+      //     cancelButtonText: '取消',
+      //     type: 'warning'
+      //   }).then(() => {
+      //     // 默认使用第一个选中项
+      //     // const first = this.multipleSelection[0]
+      //     //
+      //     // const requestData = {
+      //     //   params: {
+      //     //     bomNo: first.bomNo,
+      //     //     salesOrderNo: first.salesOrderNo,
+      //     //     rootItemNo: first.itemNo,
+      //     //     rootCount: first.itemCount
+      //     //   }
+      //     // }
+      //
+      //     //【修改：批量处理，每一项都映射为接口参数结构】
+      //     const paramsArr = this.multipleSelection.map(item => ({
+      //       bomNo: item.bomNo,
+      //       salesOrderNo: item.salesOrderNo,
+      //       rootItemNo: item.itemNo,
+      //       rootCount: item.itemCount
+      //     }))
+      //     const requestData = { params: paramsArr }
+      //     startScheduled(requestData).then(res => {
+      //       this.$message({ message: '操作成功', type: 'success' })
+      //       this.getData()
+      //     })
+      //
+      //     startScheduled(requestData).then(res => {
+      //       this.$message({
+      //         message: '操作成功',
+      //         type: 'success'
+      //       })
+      //       this.getData()
+      //     })
+      //   })
+      // },
+
+
+
       batchSchedule() {
         if (this.multipleSelection.length === 0) {
           this.$message.error('请勾选数据！')
           return
         }
 
-        this.$confirm('确定排产？', '提示', {
+        this.$confirm('确定批量排产？', '提示', {
           confirmButtonText: '确认',
           cancelButtonText: '取消',
           type: 'warning'
         }).then(() => {
-          // 默认使用第一个选中项
-          const first = this.multipleSelection[0]
+          const paramsArr = this.multipleSelection.map(item => ({
+            bomNo: item.bomNo,
+            salesOrderNo: item.salesOrderNo,
+            rootItemNo: item.itemNo,
+            rootCount: item.itemCount
+          }))
+          const requestData = { params: paramsArr }
 
-          const requestData = {
-            params: {
-              bomNo: first.bomNo,
-              salesOrderNo: first.salesOrderNo,
-              rootItemNo: first.itemNo,
-              rootCount: first.itemCount
-            }
-          }
-
+          //格式化输出错误信息
           startScheduled(requestData).then(res => {
+            let msg = res.data || ''
+            // 判断并格式化“失败原因示例”后的内容
+            const failIdx = msg.indexOf('失败原因示例：')
+            if (failIdx > -1) {
+              const prefix = msg.substring(0, failIdx + 7)
+              // 多个分号结尾要过滤空项
+              const details = msg.substring(failIdx + 7)
+                .split('；')
+                .filter(s => !!s.trim())
+                .map(str => str.trim())
+                .join('<br>')
+              msg = `${prefix}<br>${details}`
+            }
             this.$message({
-              message: '操作成功',
-              type: 'success'
+              message: msg,
+              type: msg.includes('失败0条') ? 'success' : 'info',
+              duration: 10000,
+              showClose: true,
+              dangerouslyUseHTMLString: true
             })
             this.getData()
           })
+
+
+
+
         })
+
       },
+
+
+
       handleSelectionChange(val) {
         if (val.length == this.pageList.length) {
           //当前页数据全选
