@@ -61,7 +61,7 @@ export default {
     // 核心远程搜索方法，已防抖
     //  bug卡死问题：数据源 itemList 里存在重复 bomNo
     remoteMethod: debounce(async function(query) {
-      if (!query) {
+      if (!query || query.length < 4) { // 输入小于5位直接清空
         this.itemList = []
         this.loading = false
         return
@@ -71,13 +71,12 @@ export default {
         const res = await bomSelected({ params: { bomNo: query } })
         // 前端去重
         const arr = res.data || []
-        const map = {}
+        const seen = new Set()
         this.itemList = arr.filter(item => {
-          if (item && item.bomNo && !map[item.bomNo]) {
-            map[item.bomNo] = true
-            return true
-          }
-          return false
+          if (!item || !item.bomNo) return false
+          if (seen.has(item.bomNo)) return false
+          seen.add(item.bomNo)
+          return true
         })
       } catch {
         this.itemList = []
@@ -85,6 +84,7 @@ export default {
         this.loading = false
       }
     }, 1000),
+
 
 
 

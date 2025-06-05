@@ -58,24 +58,36 @@ export default {
       this.name2 = null
       this.itemList = []
     },
+
+
     // “只输入内容时才查找”的远程方法（被 debounce 包裹后赋给 remoteMethod）
     async _remoteMethod(query) {
-      if (query && query.trim() !== '') {
+      // 必须输入3位及以上才发请求
+      if (query && query.trim().length >3) {
         this.loading = true
         try {
           const res = await itemSelected({ params: { itemNo: query } })
-          this.itemList = res.data || []
+          // 去重处理（itemNo唯一）
+          const arr = res.data || []
+          const map = {}
+          this.itemList = arr.filter(item => {
+            if (!item || !item.itemNo) return false
+            if (map[item.itemNo]) return false
+            map[item.itemNo] = true
+            return true
+          })
         } catch (err) {
           this.itemList = []
         } finally {
           this.loading = false
         }
       } else {
-        // 输入内容为空时清空下拉，不发请求
+        // 输入不足3位，直接清空下拉，不发请求
         this.itemList = []
         this.loading = false
       }
     },
+
     // 回显用：只查一次，且只查指定物料，不是全量
     async fetchForEcho(itemNo) {
       if (itemNo) {
