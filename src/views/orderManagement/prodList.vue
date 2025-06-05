@@ -9,7 +9,7 @@
 <!--        <multipleBomNo ref="multipleBomNo" :item-nos.sync="queryParams.params.childItemNos"/>-->
 <!--      </el-form-item>-->
       <el-form-item label="状态" class="condition">
-        <el-select v-model="queryParams.orderStatus" placeholder="请选择状态" clearable>
+        <el-select v-model="queryParams.orderDtlStatus" placeholder="请选择状态" clearable>
           <el-option
             v-for="dict in statusList"
             :key="dict.code"
@@ -18,6 +18,19 @@
           />
         </el-select>
       </el-form-item>
+
+      <el-form-item label="订单号" class="condition">
+        <el-input
+          v-model="queryParams.orderNo"
+          maxlength="32"
+          show-word-limit
+          placeholder="请输入订单号"
+          clearable
+          @input="handleOrderNoInput"
+          style="width:180px"
+        />
+      </el-form-item>
+
 
       <el-form-item class="commen-button">
         <el-button type="primary" icon="el-icon-search" @click="handleQuery">搜索</el-button>
@@ -131,6 +144,7 @@
           parentItemNo: '',
           // childItemNos: [],
           orderDtlStatus: '03',  //待生产
+
           pageNum: 1,
           pageSize: 100
         },
@@ -163,9 +177,21 @@
       this.getData()
     },
     methods: {
+
+
+      // 输入框校验
+      handleOrderNoInput(val) {
+        // 这里可以做更严格校验，如只允许字母数字（可选）
+        if (val && val.length > 32) {
+          this.queryParams.orderNo = val.slice(0, 32);
+        }
+      },
+
       /** 搜索按钮操作 */
       handleQuery() {
-        this.queryParams.page.page_num = 1
+        // this.queryParams.page.page_num = 1
+        this.queryParams.pageNum = 1 // 标准分页写法，重置到第1页
+
         this.getData()
       },
       beforeClose() {

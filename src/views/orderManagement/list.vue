@@ -49,21 +49,21 @@
 
     <el-table :data="pageList" class="commen-table mt_20" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55"></el-table-column>
-      <el-table-column label="订单号" align="center" prop="salesOrderNo"/>
-      <el-table-column label="产品名称" align="center" prop="itemName"/>
-      <el-table-column label="产品编码" align="center" prop="itemNo"/>
+      <el-table-column label="订单号" align="center" prop="salesOrderNo" sortable="custom"/>
+      <el-table-column label="产品名称" align="center" prop="itemName" sortable="custom"/>
+      <el-table-column label="产品编码" align="center" prop="itemNo" sortable="custom"/>
 
       <el-table-column label="订单类型" align="center" prop="orderType"
-                       :formatter="row => orderTypeMap[row.orderType] || row.orderType" />
+                       :formatter="row => orderTypeMap[row.orderType] || row.orderType"  sortable="custom"/>
 
       <el-table-column label="优先级" align="center" prop="bizType"
-                       :formatter="row => bizTypeMap[row.bizType] || row.bizType" />
+                       :formatter="row => bizTypeMap[row.bizType] || row.bizType"   sortable="custom"/>
 
 
-      <el-table-column label="交付时间" align="center" prop="deliverTime"/>
-      <el-table-column label="计划数量" align="center" prop="itemCount"/>
+      <el-table-column label="交付时间" align="center" prop="deliverTime" sortable="custom"/>
+      <el-table-column label="计划数量" align="center" prop="itemCount" sortable="custom"/>
 <!--      <el-table-column label="工序名称" align="center" prop="procedureName"/>-->
-      <el-table-column label="状态" align="center" prop="statusDesc"/>
+      <el-table-column label="状态" align="center" prop="statusDesc" sortable="custom"/>
     </el-table>
 
     <pagination
