@@ -120,7 +120,7 @@ export default {
       this.fetchForEcho(this.itemNo)
     }
     // 用 debounce 包裹远程搜索方法，只赋值一次
-    this.remoteMethod = debounce(this._remoteMethod, 800)
+    this.remoteMethod = debounce(this._remoteMethod, 1000)
   },
   beforeDestroy() {
     if (this.remoteMethod && this.remoteMethod.cancel) {

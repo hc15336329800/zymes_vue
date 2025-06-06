@@ -1,6 +1,6 @@
 <template>
   <el-select
-    v-model="itemNo"
+    v-model="localValue"
     filterable
     remote
     clearable
@@ -9,6 +9,7 @@
     :remote-method="remoteMethod"
     :loading="loading"
     :disabled="disabled"
+    @change="handleChange"
   >
     <el-option v-for="item in itemList" :key="item.bomNo" :label="item.itemName" :value="item.bomNo"></el-option>
   </el-select>
@@ -19,49 +20,29 @@ import { bomSelected, itemSelected } from '@/api/item/itemStock'
 import debounce from 'lodash/debounce'
 
 export default {
+  props: {
+    itemNo: String,
+    disabled: { type: Boolean, default: false }
+  },
   data() {
     return {
       itemList: [],
-      loading: false
+      loading: false,
+      localValue: this.itemNo // 本地缓存，用于和父组件双向同步
     }
   },
-  props: {
-    itemNo: {
-      type: String
-    },
-    disabled: {
-      type: Boolean,
-      default: false
-    }
-  },
-  created() {
-    // 初始化赋值
-     if (this.itemNo) {
-      this.getData(this.itemNo)
-    }
-    // 防抖包装，只在created里赋值一次，保证方法引用稳定
-    // this.remoteMethod = debounce(this._remoteMethod, 1000)
-  },
-  // beforeDestroy() {
-  //   // 清除定时器，防止内存泄漏
-  //   if (this.remoteMethod && this.remoteMethod.cancel) {
-  //     this.remoteMethod.cancel()
-  //   }
-  // },
   watch: {
-
-    // 父组件props变化时，重置本地状态和下拉
     itemNo(newVal) {
-      // 如果外部置空，清空列表
-      if (!newVal) this.itemList = []
+      this.localValue = newVal
+      // 自动回显（初始化或者父组件切换）
+      if (newVal) this.getData(newVal)
+      else this.itemList = []
     }
   },
   methods: {
-
-    // 核心远程搜索方法，已防抖
-    //  bug卡死问题：数据源 itemList 里存在重复 bomNo
     remoteMethod: debounce(async function(query) {
-      if (!query || query.length < 4) { // 输入小于5位直接清空
+      // 3位起搜（可调节）
+      if (!query || query.length < 3) {
         this.itemList = []
         this.loading = false
         return
@@ -69,7 +50,6 @@ export default {
       this.loading = true
       try {
         const res = await bomSelected({ params: { bomNo: query } })
-        // 前端去重
         const arr = res.data || []
         const seen = new Set()
         this.itemList = arr.filter(item => {
@@ -83,32 +63,27 @@ export default {
       } finally {
         this.loading = false
       }
-    }, 1000),
-
-
-
-
-    // 物料号外部变更时，直接查物料
-    getData(params) {
-      if (params) {
-        this.loading = true
-        itemSelected({
-          params: { itemNo: params }
-        }).then(res => {
-          this.itemList = res.data
-        }).catch(() => {
-          this.itemList = []
-        }).finally(() => {
-          this.loading = false
-        })
-      }
+    }, 800),
+    // 本地 change 事件同步父组件
+    handleChange(val) {
+      this.$emit('update:itemNo', val)
     },
-    // 清空本地下拉数据和选中项
-    resetData() {
-      this.clearData()
-    },
-    clearData() {
-      this.itemList = []
+    getData(bomNo) {
+      if (!bomNo) return
+      this.loading = true
+      itemSelected({ params: { itemNo: bomNo } }).then(res => {
+        // 只回显选中项，不追加多余选项
+        this.itemList = res.data ? [res.data[0]] : []
+      }).catch(() => {
+        this.itemList = []
+      }).finally(() => {
+        this.loading = false
+      })
+    }
+  },
+  created() {
+    if (this.itemNo) {
+      this.getData(this.itemNo)
     }
   }
 }
