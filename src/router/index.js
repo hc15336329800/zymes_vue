@@ -464,7 +464,15 @@ export const constantRoutes = [
         component: () => import('@/views/workshopManagement/workOrder.vue'),
         name: 'wordList',
         meta: {
-          title: '工单管理'
+          title: '工单下达'
+        }
+      },
+      {
+        path: 'workOrderBg',
+        component: () => import('@/views/workshopManagement/workOrderBg.vue'),
+        name: 'workOrderBg',
+        meta: {
+          title: '工单报工'
         }
       },
       {

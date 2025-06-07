@@ -1,6 +1,8 @@
 <!--报工审批-->
 <template>
   <div class="app-container">
+
+<!--    搜索栏-->
     <el-form :model="queryParams" ref="queryRef" class="query-form commen-search" :inline="true">
       <el-form-item label="图纸号" class="condition">
         <BomNoSelect :item-no.sync="queryParams.params.itemNo"/>
@@ -62,6 +64,8 @@
       </el-form-item>
       <el-form-item></el-form-item>
     </el-form>
+
+    <!--    工具栏-->
     <el-row class="mb8">
       <el-button
         type="primary"
@@ -113,36 +117,40 @@
 
     </el-row>
 
+    <!--   表格-->
     <el-table :data="pageList" class="commen-table mt_20" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55"></el-table-column>
 
       <el-table-column label="订单号" align="center" prop="orderNo"/>
 
-      <el-table-column label="bom号" align="center" prop="bomNo"/>
+      <el-table-column label="图纸号" align="center" prop="bomNo"/>
       <el-table-column label="物料号" align="center" prop="itemNo"/>
       <el-table-column label="物料名" align="center" prop="itemName"/>
 
-
       <el-table-column label="工单号" align="center" prop="workOrderNo"/>
+      <el-table-column label="车间" align="center" prop="deptName"/>
+      <el-table-column label="设备" align="center" prop="deviceName"/>
+      <el-table-column label="组名" align="center" prop="groupName"/>
+      <el-table-column label="报工类型" align="center" prop="reportTypeDesc"/>
       <el-table-column label="工序" align="center" prop="procedureName"/>
       <el-table-column label="分配数量" align="center" prop="planTotalCount"/>
       <el-table-column label="正品数量" align="center" prop="realCount"/>
       <el-table-column label="次品数量" align="center" prop="deffCount"/>
-      <el-table-column label="组名" align="center" prop="groupName"/>
-      <el-table-column label="报工类型" align="center" prop="reportTypeDesc"/>
-      <el-table-column label="组报工人" align="center" prop="groupUserName"/>
-      <el-table-column label="报工时间" align="center" prop="createdTime"/>
+
+
+<!--      <el-table-column label="组报工人" align="center" prop="groupUserName"/>-->
       <el-table-column label="审核状态" align="center" prop="statusDesc"/>
-      <el-table-column label="设备" align="center" prop="deviceName"/>
-      <el-table-column label="车间" align="center" prop="deptName"/>
-      <el-table-column
-        prop="remark"
-        header-align="center"
-        align="center"
-        width="180"
-        label="拒绝原因"
-        :show-overflow-tooltip="true"
-      />
+      <el-table-column label="报工时间" align="center" prop="createdTime"/>
+
+
+      <!--      <el-table-column-->
+<!--        prop="remark"-->
+<!--        header-align="center"-->
+<!--        align="center"-->
+<!--        width="180"-->
+<!--        label="拒绝原因"-->
+<!--        :show-overflow-tooltip="true"-->
+<!--      />-->
     </el-table>
 
     <pagination
