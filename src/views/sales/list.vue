@@ -11,6 +11,12 @@
       <el-form-item label="客户" class="condition"  >
         <el-input v-model="queryParams.params.custName" placeholder="请输入名称" clearable  style="    width: 180px;"/>
       </el-form-item>
+
+      <el-form-item label="图纸号" class="condition">
+        <BomNoSelect :item-no.sync="queryParams.params.bomNo" style="    width: 180px;"/>
+      </el-form-item>
+
+
       <el-form-item label="物料号" class="condition">
         <BomNoSelect :item-no.sync="queryParams.params.itemNo" style="    width: 180px;"/>
       </el-form-item>
@@ -87,7 +93,8 @@
     <el-table :data="pageList" class="commen-table mt_20" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55"></el-table-column>
       <el-table-column label="订单号" align="center" prop="orderNo"/>
-      <el-table-column label="BOM号" align="center" prop="itemNo"/>
+      <el-table-column label="图纸号" align="center" prop="bomNo"/>
+      <el-table-column label="物料号" align="center" prop="itemNo"/>
       <el-table-column label="客户" align="center" prop="custName"/>
       <el-table-column label="产品名称" align="center" prop="itemName"/>
       <el-table-column label="需求数量" align="center" prop="needNum"/>

@@ -9,7 +9,7 @@
     <!-- 搜索输入框 -->
     <el-input
       placeholder="请输入BOM号"
-      v-model="queryParams.params.itemNo"
+      v-model="queryParams.params.bomNo"
       class="mb_10"
       clearable
       @keyup.enter.native="getData"
@@ -22,7 +22,8 @@
       height="400"
       @row-dblclick="selectBom"
     >
-      <el-table-column prop="itemNo" label="BOM号" min-width="120" />
+      <el-table-column prop="bomNo" label="图纸号" min-width="120" />
+      <el-table-column prop="itemNo" label="物料号" min-width="120" />
       <el-table-column prop="itemName" label="产品名称" min-width="120" />
     </el-table>
 
@@ -62,7 +63,7 @@ export default {
       queryParams: {
         params: {
           itemType: '01',    //  01为成品
-          itemNo: ''         // 搜索关键字
+          bomNo: ''         // 搜索关键字
         },
         page: {
           page_num: 1,
