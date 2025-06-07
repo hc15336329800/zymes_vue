@@ -1,3 +1,4 @@
+<!--工序下发页面  选择班次-->
 <template>
   <div class="app-container">
     <el-form :model="queryParams" ref="queryRef" class="query-form commen-search" :inline="true">
@@ -91,6 +92,15 @@
             ></el-option>
           </el-select>
         </div>
+
+          <!-- [MOD] 班组选择 -->
+          <div>
+            <span class="procedure-enterprise public02">班组：</span>
+            <el-select v-model="groupId" clearable placeholder="请选择班组"      style="width:140px;" filterable>
+              <el-option :key="g.id" v-for="g in groupList" :label="g.groupName" :value="g.id" />
+            </el-select>
+          </div>
+
       </div>
       <div style="margin-top: 20px;font-size: 16px;display: flex;flex-wrap:wrap;">
         <div
@@ -108,14 +118,16 @@
       </div>
       <div slot="footer" class="dialog-footer">
         <el-button @click="cancel()">取 消</el-button>
-        <el-button type="primary" @click="operHandle(5)">确 定</el-button>
+<!--        <el-button type="primary" @click="operHandle(5)">确 定</el-button>-->
+        <!-- [MOD] 当班次或班组未选时禁用 -->
+        <el-button type="primary" :disabled="!shiftType || !groupId" @click="operHandle(5)">确 定</el-button>
       </div>
     </el-dialog>
 
   </div>
 </template>
 <script>
-  import {allocationPageList, listAllocationById, updateAllocation} from '@/api/procAllocation/procAllocation'
+  import {allocationPageList, listAllocationById, updateAllocation,groupInfoPageList } from '@/api/procAllocation/procAllocation'
   import {dictInfo} from '@/api/common'
 
   export default {
@@ -131,6 +143,13 @@
     },
     data() {
       return {
+
+        // [MOD] 班组下拉框绑定值 & 数据源
+        shiftType: '',// 班次
+        groupId: '', // [NEW] 班组id
+        groupList: [],// [NEW] 班组下拉数据
+
+        // 搜索参数框
         queryParams: {
           params: {
             allocStatus: '00',
@@ -141,7 +160,7 @@
             page_size: 10
           }
         },
-        shiftType: '',
+
         chooseData: [],
         workShopList: [],
         chooseDataVisible: false,
@@ -182,6 +201,12 @@
         dictInfo("SHIFT_TYPE", r => this.shiftList = r);
         dictInfo("PROC_STATUS", r => this.procStatusList = r);
         dictInfo("WORK_SHOP", r => this.workShopList = r);
+
+          // [MOD] 一次拉取 300 条班组数据（无需分页组件）
+            groupInfoPageList({
+                params: {},
+            page: { page_num: 1, page_size: 300 }
+          }).then(res => { this.groupList = res.data; });
 
       },
       /** 重置操作表单 */
@@ -233,24 +258,29 @@
 
       },
       operHandle() {
-        if (!this.shiftType) {
-          this.$message.error('请选择班次')
-          return
+
+          // [FIX] 重新生成 id 数组
+            const newArr = this.chooseData.map(item => item.id);
+        if (newArr.length === 0) {
+          this.$message.error('请选择要操作的数据');
+          return;
         }
-        var newArr = []
-        this.chooseData.forEach(item => {
-          newArr.push(item.id)
-        })
-        if (newArr.length <= 0) {
-          this.$message.error('请选择要操作的数据')
-          return
+
+
+        if (!this.shiftType || !this.groupId) {        // 两项必选
+          this.$message.error('请选择班次和班组');
+          return;
         }
+
+        // 参数拼进 URL，跳转到 procedureList 页面。
         this.$router.push({
           name: 'procedureList',
           query: {
             id: JSON.stringify(newArr),
             allocModel: this.allocModel,
             shiftType: this.shiftType,
+            groupId:    this.groupId      // 把班组也带过去
+
           }
         })
       },

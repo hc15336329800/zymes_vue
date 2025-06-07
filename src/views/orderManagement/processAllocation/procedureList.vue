@@ -1,3 +1,4 @@
+<!--工序分配页面-->
 <template>
   <div
     class="w_100 pt_30 plr_30 ptb_30 process-allocation"
@@ -164,6 +165,7 @@
         this.$router.back()
       },
 
+      // 保存按钮
       async save(item, k) {
         this.saveList = []
         console.log("....", this.list)
@@ -175,9 +177,11 @@
             allocCount: item.workItemCount
           })
         })
-        var result = await submit_alloc_proc({
+
+        await submit_alloc_proc({
           params: {
             shiftType: this.$route.query.shiftType,
+            groupId:   this.$route.query.groupId,  // ← 新增
             list: this.saveList
           }
         })
@@ -205,7 +209,8 @@
           const res = await proc_procedure_list({
             params: {
               ids: paramsId,
-              shiftType: this.$route.query.shiftType
+              shiftType: this.$route.query.shiftType,
+              groupId:   this.$route.query.groupId      // [MOD] 新增
             }
           })
           this.listLoading = false
