@@ -1,5 +1,35 @@
 import request from '@/utils/request'
 
+
+
+// ==================== 新接口（分段流程） ====================
+
+/**
+ * ①  上传 Excel → 只写 mes_item_use
+ * formData: new FormData(); formData.append('file', file)
+ */
+export function uploadUsedNew(formData) {
+  return request({
+    url: '/api/item/mes_item_use/uploadNew',   // ← 新控制器
+    method: 'post',
+    data: formData
+  })
+}
+
+// /**
+//  * ②  生成 BOM 树 → 写 t_bom_used
+//  * roots: ['600494', '600495']  // 根物料编码数组
+//  */
+// export function refreshBomTree(roots) {
+//   return request({
+//     url: '/api/item/mes_item_use/refreshBomTree',
+//     method: 'post',
+//     data: roots
+//   })
+// }
+
+// ==================== 旧接口 ====================
+
 //分页数据
 export function usedPageList(data) {
   return request({
@@ -17,6 +47,7 @@ export function uploadUsed(data) {
   })
 }
 
+// 一阶用料树
 export function itemUsedTree(data) {
   return request({
     url: '/api/item/mes_item_use/item_use_tree',

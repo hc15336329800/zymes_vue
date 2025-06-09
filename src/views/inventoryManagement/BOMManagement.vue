@@ -39,6 +39,7 @@
         v-if="hasPerm('B002004000001')"
         @click="handleAdd()"
       >新增</el-button>
+
       <upload-excel-component
         text="工序导入"
         v-if="hasPerm('B002004000004')"
@@ -47,14 +48,45 @@
         :loading="loading"
         ref="uploadGong"
       />
-      <upload-excel-component
-        text="用料导入"
-        v-if="hasPerm('B002004000006')"
-        :on-success="uploadUsedSuccess"
-        :loading="loading"
-        ref="uploadYong"
-        class="ml_20"
-      />
+
+<!--      <upload-excel-component-->
+<!--        text="用料导入"-->
+<!--        v-if="hasPerm('B002004000006')"-->
+<!--        :on-success="uploadUsedSuccess"-->
+<!--        :loading="loading"-->
+<!--        ref="uploadYong"-->
+<!--        class="ml_20"-->
+<!--      />-->
+
+
+<!--      // ==================== 上传相关 ====================-->
+
+
+      <!-- 上传控件 -->
+      <el-upload
+        action="#"
+        :show-file-list="false"
+        :http-request="doUpload">
+        <el-button size="mini" type="primary">选文件并上传</el-button>
+      </el-upload>
+
+<!--      &lt;!&ndash; 输入根物料编码 &ndash;&gt;-->
+<!--      <el-input-->
+<!--        v-model="rootItemNo"-->
+<!--        placeholder="根物料编码"-->
+<!--        size="mini"-->
+<!--        style="width: 180px; margin:0 8px" />-->
+
+<!--      &lt;!&ndash; 生成树 &ndash;&gt;-->
+<!--      <el-button-->
+<!--        size="mini"-->
+<!--        type="success"-->
+<!--        :disabled="!canGen"-->
+<!--        @click="doGenTree">-->
+<!--        生成 BOM 树-->
+<!--      </el-button>-->
+
+
       <div
         @click="dialogVisible1=true"
         style="color:#3145ec;font-size:14px;float:right;z-index:999;position:absolute;right:0px;top:16px;"
@@ -208,6 +240,9 @@ import { get_new_export } from '@/api/common'
 import { uploadProcedure } from '@/api/item/mesProcedure'
 import { uploadUsed } from '@/api/item/mesItemUsed'
 
+import { uploadUsedNew, refreshBomTree } from '@/api/item/mesItemUsed'  // 路径按实际调整
+
+
 export default {
   components: {
     UploadExcelComponent,
@@ -218,6 +253,15 @@ export default {
   },
   data() {
     return {
+
+      // ==================== 上传相关 ====================
+
+      rootItemNo: '',     // 这里可手输或上传成功后再填写
+      canGen: false,
+
+      // ==================== 旧 ====================
+
+
       queryParams: {
         params: {},
         page: {
@@ -264,6 +308,37 @@ export default {
     this.getData()
   },
   methods: {
+
+    // ==================== 上传相关 ====================
+    // 上传
+    doUpload( param ) {
+
+      const fd = new FormData()
+      fd.append('file', param.file)   // 仍然取 param.file
+
+
+      uploadUsedNew(fd).then(res => {
+        this.$message.success(res.msg || '用料导入成功')
+        this.canGen = true                    // 启用“生成树”按钮
+      }).catch(() => {                 // 便于调试
+        this.$message.error('上传失败')
+      })
+    },
+
+    // 生成 BOM 树
+    doGenTree() {
+      if (!this.rootItemNo) {
+        this.$message.error('请先填写根物料编码')
+        return
+      }
+      refreshBomTree([this.rootItemNo]).then(() => {
+        this.$message.success('BOM 树已生成')
+        this.canGen = false
+      })
+    },
+
+    // ====================  ====================
+
     uploadProcedure,
     /** 搜索按钮操作 */
     handleQuery() {
