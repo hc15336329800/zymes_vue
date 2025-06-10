@@ -67,7 +67,7 @@
         action="#"
         :show-file-list="false"
         :http-request="doUpload">
-        <el-button size="mini" type="primary">选文件并上传</el-button>
+        <el-button size="mini" type="primary"  style="margin-left: 20px">选文件并上传</el-button>
       </el-upload>
 
 <!--      &lt;!&ndash; 输入根物料编码 &ndash;&gt;-->
@@ -309,8 +309,8 @@ export default {
   },
   methods: {
 
-    // ==================== 上传相关 ====================
-    // 上传
+    // ==================== 上传相关  ====================
+    // 上传  - 只支持 .xlsx
     doUpload( param ) {
 
       const fd = new FormData()
