@@ -47,13 +47,17 @@
         ref="uploadGong"
       />
 
+
+      <!-- 完全隐藏但仍可点击的NEW按钮 -->
       <upload-excel-component
         text="物料导入NEW"
+        v-if="showNewImport"
         :on-success="handleSuccessNew"
-        class="ml_20"
+        class="invisible-white-btn"
         :loading="loading"
         ref="uploadGong"
       />
+
 
       <div
         @click="downLoadTemplate()"
@@ -177,6 +181,8 @@ import {
     },
     data() {
       return {
+        // 新增状态控制
+        showNewImport: false,
         queryParams: {
           params: {},
           page: {
@@ -215,8 +221,18 @@ import {
     created() {
       this.getSelectOption()
       this.getData()
+
     },
     methods: {
+
+      // 新增方法：控制NEW按钮显示3秒
+      toggleNewImportButton() {
+        this.showNewImport = true
+        setTimeout(() => {
+          this.showNewImport = false
+        }, 2000) // 3秒后自动隐藏
+      },
+
       /** 搜索按钮操作 */
       handleQuery() {
         this.queryParams.page.page_num = 1
@@ -233,6 +249,11 @@ import {
       },
       /** 重置操作表单 */
       handleReset() {
+
+        // 显示NEW按钮3秒
+        // this.toggleNewImportButton()
+        this.showNewImport = true
+
         this.queryParams = {
           page: {
             page_num: 1,
@@ -242,6 +263,8 @@ import {
         }
         this.$refs.userInfoDateIntervals.initDateData()
         this.getData()
+
+
       },
       getData() {
         this.queryParams.params.itemType = '00'
@@ -389,4 +412,27 @@ import {
   .btn {
     width: 200px;
   }
+
+
+  //完全隐藏但仍可点击
+  .invisible-btn {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  .invisible-white-btn {
+    background: #ffffff;
+    border: none !important;
+    color: #ffffff;
+    margin-left: 20px;
+    padding: 12px 10px;
+  }
+
 </style>

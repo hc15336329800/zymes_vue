@@ -64,6 +64,7 @@
 
       <!-- 上传控件 -->
       <el-upload
+        v-if="showNewImport"
         action="#"
         :show-file-list="false"
         :http-request="doUpload">
@@ -253,6 +254,8 @@ export default {
   },
   data() {
     return {
+      // 新增状态控制
+      showNewImport: false,
 
       // ==================== 上传相关 ====================
 
@@ -339,6 +342,14 @@ export default {
 
     // ====================  ====================
 
+    // 新增方法：控制NEW按钮显示3秒
+    toggleNewImportButton() {
+      this.showNewImport = true
+      setTimeout(() => {
+        this.showNewImport = false
+      }, 2000) // 3秒后自动隐藏
+    },
+
     uploadProcedure,
     /** 搜索按钮操作 */
     handleQuery() {
@@ -376,6 +387,9 @@ export default {
     },
     /** 重置操作表单 */
     handleReset() {
+      // 显示NEW按钮3秒
+      // this.toggleNewImportButton()
+      this.showNewImport = true
       this.queryParams = {
         page: {
           page_num: 1,
