@@ -41,6 +41,15 @@ export function uploadStock(data) {
   })
 }
 
+// 无聊导入new
+export function uploadStockNew(data) {
+  return request({
+    url: '/api/item/mes_item_stock/uploadNew',
+    method: 'post',
+    data
+  })
+}
+
 // 修改
 export function updateStock(data) {
   return request({

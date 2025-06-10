@@ -46,6 +46,15 @@
         :loading="loading"
         ref="uploadGong"
       />
+
+      <upload-excel-component
+        text="物料导入NEW"
+        :on-success="handleSuccessNew"
+        class="ml_20"
+        :loading="loading"
+        ref="uploadGong"
+      />
+
       <div
         @click="downLoadTemplate()"
         style="color:#3145ec;font-size:14px;float:right;z-index:999;position:absolute;right:0px;top:16px;"
@@ -148,14 +157,14 @@
   </div>
 </template>
 <script>
-  import {
-    addStock,
-    deleteStock,
-    detailStock,
-    stockPageList,
-    updateStock,
-    uploadStock
-  } from '@/api/item/itemStock'
+import {
+  addStock,
+  deleteStock,
+  detailStock,
+  stockPageList,
+  updateStock,
+  uploadStock, uploadStockNew
+} from '@/api/item/itemStock'
   import {getWarehouseSelected} from '@/api/item/warehouse'
   import UploadExcelComponent from '@/components/UploadExcel/index.vue'
   import {get_new_export} from '@/api/common'
@@ -324,6 +333,20 @@
           this.getData()
         }
       },
+
+      // 无聊导入 new
+      async handleSuccessNew(file) {
+        let res = await uploadStockNew(file)
+        this.$refs.uploadGong.loading = false
+        if (res) {
+          this.$message({
+            type: 'success',
+            message: '导入成功'
+          })
+          this.getData()
+        }
+      },
+
       cancel() {
         this.dialogShow = false
         this.form = {}

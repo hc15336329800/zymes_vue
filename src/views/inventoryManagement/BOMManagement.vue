@@ -49,14 +49,14 @@
         ref="uploadGong"
       />
 
-<!--      <upload-excel-component-->
-<!--        text="用料导入"-->
-<!--        v-if="hasPerm('B002004000006')"-->
-<!--        :on-success="uploadUsedSuccess"-->
-<!--        :loading="loading"-->
-<!--        ref="uploadYong"-->
-<!--        class="ml_20"-->
-<!--      />-->
+      <upload-excel-component
+        text="用料导入"
+        v-if="hasPerm('B002004000006')"
+        :on-success="uploadUsedSuccess"
+        :loading="loading"
+        ref="uploadYong"
+        class="ml_20"
+      />
 
 
 <!--      // ==================== 上传相关 ====================-->
