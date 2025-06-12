@@ -241,6 +241,7 @@ import {
     },
     created() {
       this.getSelectOption()
+      this.queryParams.params.itemType = '00'
       this.getData()
 
     },
@@ -271,7 +272,7 @@ import {
       /** 重置操作表单 */
       handleReset() {
 
-        // 显示NEW按钮3秒
+
         // this.toggleNewImportButton()
         this.showNewImport = true
 
@@ -284,7 +285,6 @@ import {
         }
         this.$refs.userInfoDateIntervals.initDateData()
         this.getData()
-
 
       },
       getData() {
