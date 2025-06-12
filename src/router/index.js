@@ -310,6 +310,14 @@ export const constantRoutes = [
           title: '库位设置'
         }
       },
+      {
+        path: 'bomItem',
+        component: () => import('@/views/inventoryManagement/bomItem'),
+        name: 'bomItem',
+        meta: {
+          title: 'Bom库存'
+        }
+      },
 
 
 

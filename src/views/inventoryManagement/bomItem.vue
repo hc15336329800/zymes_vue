@@ -1,7 +1,5 @@
 <template>
   <div class="app-container">
-
-<!--    搜索框-->
     <el-form :model="queryParams" ref="queryRef" class="query-form commen-search" :inline="true">
       <el-form-item label="物料编码" class="condition">
         <el-input v-model="queryParams.params.itemNo" placeholder="请输入编码" clearable/>
@@ -19,25 +17,13 @@
           />
         </el-select>
       </el-form-item>
-<!--      <el-form-item label="库位" class="condition">-->
-<!--        <el-select v-model="queryParams.params.location" placeholder="请选择物料库位" clearable>-->
-<!--          <el-option-->
-<!--            v-for="dict in locationList"-->
-<!--            :key="dict.code"-->
-<!--            :label="dict.name"-->
-<!--            :value="dict.code"-->
-<!--          />-->
-<!--        </el-select>-->
-<!--      </el-form-item>-->
-      <el-form-item label="类型" class="condition">
-        <el-select v-model="queryParams.params.itemType" placeholder="请选择物料类型" clearable>
+      <el-form-item label="库位" class="condition">
+        <el-select v-model="queryParams.params.location" placeholder="请选择物料库位" clearable>
           <el-option
-            label="物料"
-            :value="'00'"
-          />
-          <el-option
-            label="BOM"
-            :value="'01'"
+            v-for="dict in locationList"
+            :key="dict.code"
+            :label="dict.name"
+            :value="dict.code"
           />
         </el-select>
       </el-form-item>
@@ -51,11 +37,7 @@
       </el-form-item>
       <el-form-item></el-form-item>
     </el-form>
-
-
-<!--    工具栏-->
     <el-row class="flex_row pb_10 c_b fw_bold fs_24">
-
       <el-button type="primary" class="commen-button" icon="el-icon-plus" @click="handleAdd">新增</el-button>
       <upload-excel-component
         text="物料导入"
@@ -64,6 +46,8 @@
         :loading="loading"
         ref="uploadGong"
       />
+
+
       <!-- 完全隐藏但仍可点击的NEW按钮 -->
       <upload-excel-component
         text="物料导入NEW"
@@ -73,6 +57,8 @@
         :loading="loading"
         ref="uploadGong"
       />
+
+
       <div
         @click="downLoadTemplate()"
         style="color:#3145ec;font-size:14px;float:right;z-index:999;position:absolute;right:0px;top:16px;"
@@ -80,9 +66,6 @@
         <span style="cursor:pointer;">下载模版</span>
       </div>
     </el-row>
-
-
-<!--    列表-->
     <el-table :data="pageList" class="commen-table mt_20">
       <el-table-column type="index" width="55" label="序号"></el-table-column>
       <el-table-column label="物料编码" align="center" prop="itemNo"/>
@@ -109,8 +92,6 @@
       :limit.sync="queryParams.page.page_size"
       @pagination="getData"
     />
-
-
     <!-- 添加或修改对话框 -->
     <el-dialog :title="title" :visible.sync="dialogShow" width="960px" @close="beforeClose">
       <el-form :model="form" class="commen-form" :rules="rules" ref="form" label-width="100px">
@@ -203,9 +184,7 @@ import {
         // 新增状态控制
         showNewImport: false,
         queryParams: {
-          params: {
-            itemType: '00' // 默认物料类型
-          },
+          params: {},
           page: {
             page_num: 1,
             page_size: 10
@@ -288,7 +267,7 @@ import {
 
       },
       getData() {
-        // this.queryParams.params.itemType = '00'
+        this.queryParams.params.itemType = '00'
         stockPageList(this.queryParams).then(res => {
           this.pageList = res.data
           this.pageTotal = Number(res.page.total_num)
