@@ -50,6 +50,8 @@
     <el-table :data="pageList" class="commen-table mt_20" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55"></el-table-column>
       <el-table-column label="订单号" align="center" prop="salesOrderNo" sortable="custom"/>
+      <el-table-column label="图纸号" align="center" prop="bomNo" sortable="custom"/>
+
       <el-table-column label="产品名称" align="center" prop="itemName" sortable="custom"/>
       <el-table-column label="产品编码" align="center" prop="itemNo" sortable="custom"/>
 

@@ -31,6 +31,19 @@
         />
       </el-form-item>
 
+      <!-- 新增：物料名称模糊查询 -->
+      <el-form-item label="物料名称" class="condition">
+        <el-input
+          v-model="queryParams.itemName"
+          maxlength="10"
+          show-word-limit
+          placeholder="请输入物料名称"
+          clearable
+          @input="handleItemNameInput"
+          style="width:180px"
+        />
+      </el-form-item>
+
 
       <el-form-item class="commen-button">
         <el-button type="primary" icon="el-icon-search" @click="handleQuery">搜索</el-button>
@@ -58,6 +71,7 @@
 
 
       <el-table-column label="生产单号" align="center" prop="orderNo"  sortable="custom"/>
+      <el-table-column label="图纸号" align="center" prop="topBomNo"  sortable="custom"/>
       <el-table-column label="部件名称" align="center" prop="itemName" sortable="custom"/>
 
       <el-table-column label="物料号" align="center" prop="itemNo" sortable="custom"/>
@@ -129,13 +143,8 @@
     },
     data() {
       return {
-
-
-
         pageList: [],       // 表格实际渲染的数组数据
         originList: [],     // 存储原始顺序，用于取消排序时还原
-
-
         statusList: [],
         selectList: [],
         multipleSelection: [],
@@ -144,7 +153,8 @@
           parentItemNo: '',
           // childItemNos: [],
           orderDtlStatus: '03',  //待生产
-
+          // ========== 新增 ==========
+          itemName: '',
           pageNum: 1,
           pageSize: 100
         },
@@ -186,6 +196,12 @@
           this.queryParams.orderNo = val.slice(0, 32);
         }
       },
+       // ========== 新增：物料名称长度校验 ==========
+      handleItemNameInput(val) {
+        if (val && val.length > 10) {
+          this.queryParams.itemName = val.slice(0, 10);
+        }
+      },
 
       /** 搜索按钮操作 */
       handleQuery() {
@@ -204,6 +220,8 @@
           orderNo: '',
           parentItemNo: '',
           // childItemNos: [],
+          // ========== 新增 ==========
+          itemName: '',
           orderDtlStatus: '',
           pageNum: 1,
           pageSize: 100
