@@ -26,18 +26,18 @@
       </el-form-item>
       <el-form-item></el-form-item>
     </el-form>
-    <el-row class="mb8">
-      <el-button
-        type="primary"
-        class="commen-button"
-        v-if="hasPerm('B006002000004')"
-        v-show="buttonShow"
-        icon="el-icon-plus"
-        @click="procAlloc"
-      >工序分配
-      </el-button>
-      <el-button type="primary" class="mb_20" @click="operHandle()">批量关闭</el-button>
-    </el-row>
+<!--    <el-row class="mb8">-->
+<!--      <el-button-->
+<!--        type="primary"-->
+<!--        class="commen-button"-->
+<!--        v-if="hasPerm('B006002000004')"-->
+<!--        v-show="buttonShow"-->
+<!--        icon="el-icon-plus"-->
+<!--        @click="procAlloc"-->
+<!--      >工序分配-->
+<!--      </el-button>-->
+<!--      <el-button type="primary" class="mb_20" @click="operHandle()">批量关闭</el-button>-->
+<!--    </el-row>-->
 
 
     <el-table

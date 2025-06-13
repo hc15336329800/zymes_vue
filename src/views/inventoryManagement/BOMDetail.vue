@@ -44,6 +44,7 @@
       <el-col :span="20" :xs="24">
         <el-row class="mb8">
           <el-button type="primary" class="commen-button" @click="handleAdd">新增</el-button>
+          <el-button type="primary" class="commen-button" @click="getItemTreeNew">更新</el-button>
         </el-row>
         <el-table :data="pageList" class="commen-table mt_20">
           <el-table-column label="序号" align="center" prop="seqNo"/>
@@ -78,6 +79,8 @@
         />
       </el-col>
     </el-row>
+
+
     <el-dialog :title="title" :visible.sync="dialogShow" width="960px" @close="beforeClose">
       <el-form :model="form" class="commen-form" :rules="rules" ref="form" label-width="100px">
         <el-row>
@@ -139,10 +142,12 @@
         </div>
       </el-form>
     </el-dialog>
+
+
   </div>
 </template>
 <script>
-import { itemUsedTree } from '@/api/item/mesItemUsed'
+import { itemUsedTree ,itemUsedTreeV1} from '@/api/item/mesItemUsed'
 import {
   addProcedure,
   deleteProcedure,
@@ -326,6 +331,14 @@ export default {
         this.itemTreeData = [res.data]
       })
     },
+
+    //树接口 新！
+    getItemTreeNew() {
+      itemUsedTreeV1(this.queryParams).then(res => {
+        this.itemTreeData = [res.data]
+      })
+    },
+
     filterNode(value, data) {
       if (!value) return true
       return data.itemName.indexOf(value) !== -1

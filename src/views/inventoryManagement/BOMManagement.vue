@@ -371,6 +371,7 @@ export default {
         query: {
           id: row.id,
           itemNo: row.itemNo,
+          bomNo: row.bomNo,
           itemName: row.itemName
         }
       })
@@ -388,8 +389,8 @@ export default {
     /** 重置操作表单 */
     handleReset() {
       // 显示NEW按钮3秒
-      // this.toggleNewImportButton()
-      this.showNewImport = true
+      this.toggleNewImportButton()
+
       this.queryParams = {
         page: {
           page_num: 1,
