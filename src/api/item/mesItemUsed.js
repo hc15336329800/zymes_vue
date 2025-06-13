@@ -32,7 +32,7 @@ export function uploadUsedNew(formData) {
 // 一阶用料树
 export function itemUsedTreeV1(data) {
   return request({
-    url: '/api/item/mes_item_use/item_use_tree_v1',
+    url: '/api/item/mes_item_use/item_use_tree_new',
     method: 'post',
     data
   })
