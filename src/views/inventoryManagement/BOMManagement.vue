@@ -3,16 +3,16 @@
   <div class="app-container">
     <el-form :model="queryParams" ref="queryRef" class="query-form commen-search" :inline="true">
       <el-form-item label="BOM号" class="condition">
-        <BomNoSelect :item-no.sync="queryParams.params.bomNo"/>
+        <BomNoSelect :item-no.sync="queryParams.params.bomNo" />
       </el-form-item>
 
 
       <el-form-item label="物料号" class="condition">
-        <ItemNoSelect :item-no.sync="queryParams.params.itemNo"/>
+        <ItemNoSelect :item-no.sync="queryParams.params.itemNo" />
       </el-form-item>
 
       <el-form-item label="产品名称" class="condition">
-        <el-input v-model="queryParams.params.itemName" placeholder="请输入名称" clearable/>
+        <el-input v-model="queryParams.params.itemName" placeholder="请输入名称" clearable />
       </el-form-item>
       <el-form-item label="库位" class="condition">
         <el-select v-model="queryParams.location" placeholder="请选择产品库位" clearable>
@@ -38,7 +38,8 @@
         icon="el-icon-plus"
         v-if="hasPerm('B002004000001')"
         @click="handleAdd()"
-      >新增</el-button>
+      >新增
+      </el-button>
 
       <upload-excel-component
         text="工序导入"
@@ -59,7 +60,7 @@
       />
 
 
-<!--      // ==================== 上传相关 ====================-->
+      <!--      // ==================== 上传相关 ====================-->
 
 
       <!-- 上传控件 -->
@@ -68,24 +69,24 @@
         action="#"
         :show-file-list="false"
         :http-request="doUpload">
-        <el-button size="mini" type="primary"  style="margin-left: 20px">选文件并上传</el-button>
+        <el-button size="mini" type="primary" style="margin-left: 20px">选文件并上传</el-button>
       </el-upload>
 
-<!--      &lt;!&ndash; 输入根物料编码 &ndash;&gt;-->
-<!--      <el-input-->
-<!--        v-model="rootItemNo"-->
-<!--        placeholder="根物料编码"-->
-<!--        size="mini"-->
-<!--        style="width: 180px; margin:0 8px" />-->
+      <!--      &lt;!&ndash; 输入根物料编码 &ndash;&gt;-->
+      <!--      <el-input-->
+      <!--        v-model="rootItemNo"-->
+      <!--        placeholder="根物料编码"-->
+      <!--        size="mini"-->
+      <!--        style="width: 180px; margin:0 8px" />-->
 
-<!--      &lt;!&ndash; 生成树 &ndash;&gt;-->
-<!--      <el-button-->
-<!--        size="mini"-->
-<!--        type="success"-->
-<!--        :disabled="!canGen"-->
-<!--        @click="doGenTree">-->
-<!--        生成 BOM 树-->
-<!--      </el-button>-->
+      <!--      &lt;!&ndash; 生成树 &ndash;&gt;-->
+      <!--      <el-button-->
+      <!--        size="mini"-->
+      <!--        type="success"-->
+      <!--        :disabled="!canGen"-->
+      <!--        @click="doGenTree">-->
+      <!--        生成 BOM 树-->
+      <!--      </el-button>-->
 
 
       <div
@@ -97,17 +98,17 @@
     </el-row>
     <el-table :data="pageList" class="commen-table mt_20">
       <el-table-column type="index" width="55" label="序号"></el-table-column>
-      <el-table-column label="Bom号" align="center" prop="bomNo"/>
-      <el-table-column label="物料号" align="center" prop="itemNo"/>
-<!--      <el-table-column label="产品编码" align="center" prop="itemNo"/>-->
-      <el-table-column label="产品名称" align="center" prop="itemName"/>
-      <el-table-column label="型号" align="center" prop="itemModel"/>
-      <el-table-column label="来源" align="center" prop="itemOrigin"/>
-      <el-table-column label="库存量" align="center" prop="itemCount"/>
-      <el-table-column label="净重" align="center" prop="netWeight"/>
-      <el-table-column label="单位" align="center" prop="itemMeasure"/>
-      <el-table-column label="库位" align="center" prop="locationDesc"/>
-      <el-table-column label="创建时间" align="center" prop="createdTime"/>
+      <el-table-column label="Bom号" align="center" prop="bomNo" />
+      <el-table-column label="物料号" align="center" prop="itemNo" />
+      <!--      <el-table-column label="产品编码" align="center" prop="itemNo"/>-->
+      <el-table-column label="产品名称" align="center" prop="itemName" />
+      <el-table-column label="型号" align="center" prop="itemModel" />
+      <el-table-column label="来源" align="center" prop="itemOrigin" />
+      <el-table-column label="库存量" align="center" prop="itemCount" />
+      <el-table-column label="净重" align="center" prop="netWeight" />
+      <el-table-column label="单位" align="center" prop="itemMeasure" />
+      <el-table-column label="库位" align="center" prop="locationDesc" />
+      <el-table-column label="创建时间" align="center" prop="createdTime" />
       <el-table-column label="操作" align="center" width="320" class-name="small-padding fixed-width">
         <template slot-scope="scope">
           <!-- 确认后不能编辑和删除 -->
@@ -132,17 +133,17 @@
         <el-row>
           <el-col :span="8">
             <el-form-item prop="bomNo" label="图纸号">
-              <el-input v-model="form.bomNo"/>
+              <el-input v-model="form.bomNo" />
             </el-form-item>
           </el-col>
           <el-col :span="8">
             <el-form-item prop="itemNo" label="产品编码">
-              <el-input v-model="form.itemNo" :disabled="form.id"/>
+              <el-input v-model="form.itemNo" :disabled="form.id" />
             </el-form-item>
           </el-col>
           <el-col :span="8">
             <el-form-item prop="itemName" label="产品名称">
-              <el-input v-model="form.itemName"/>
+              <el-input v-model="form.itemName" />
             </el-form-item>
           </el-col>
         </el-row>
@@ -150,7 +151,7 @@
         <el-row>
           <el-col :span="8">
             <el-form-item prop="itemModel" label="规格型号">
-              <el-input v-model="form.itemModel"/>
+              <el-input v-model="form.itemModel" />
             </el-form-item>
           </el-col>
           <el-col :span="8">
@@ -191,7 +192,7 @@
           </el-col>
           <el-col :span="8">
             <el-form-item prop="itemMeasure" label="单位">
-              <el-input v-model="form.itemMeasure"/>
+              <el-input v-model="form.itemMeasure" />
             </el-form-item>
           </el-col>
         </el-row>
@@ -228,20 +229,12 @@
   </div>
 </template>
 <script>
-import {
-  addStock,
-  bomPageList,
-  deleteStock,
-  detailStock,
-  updateStock
-} from '@/api/item/itemStock'
+import { addStock, bomPageList, deleteStock, detailStock, updateStock } from '@/api/item/itemStock'
 import { getWarehouseSelected } from '@/api/item/warehouse'
 import UploadExcelComponent from '@/components/UploadExcel/index.vue'
 import { get_new_export } from '@/api/common'
 import { uploadProcedure } from '@/api/item/mesProcedure'
-import { uploadUsed } from '@/api/item/mesItemUsed'
-
-import { uploadUsedNew, refreshBomTree } from '@/api/item/mesItemUsed'  // 路径按实际调整
+import { refreshBomTree, uploadUsed, uploadUsedNew } from '@/api/item/mesItemUsed' // 路径按实际调整
 
 
 export default {
@@ -281,7 +274,8 @@ export default {
       dialogVisible1: false,
       form: {},
       pageTotal: 0,
-      pageList: {},
+      // pageList: {},
+      pageList: [],
       title: '',
       dialogShow: false,
       rules: {
@@ -314,7 +308,7 @@ export default {
 
     // ==================== 上传相关  ====================
     // 上传  - 只支持 .xlsx
-    doUpload( param ) {
+    doUpload(param) {
 
       const fd = new FormData()
       fd.append('file', param.file)   // 仍然取 param.file
@@ -388,23 +382,24 @@ export default {
     },
     /** 重置操作表单 */
     handleReset() {
-      // 显示NEW按钮3秒
-      this.toggleNewImportButton()
+      this.showNewImport = true,  //隐藏
 
-      this.queryParams = {
-        page: {
-          page_num: 1,
-          page_size: 10
-        },
-        params: {}
-      }
-      this.$refs.userInfoDateIntervals.initDateData()
+        this.queryParams = {
+          page: {
+            page_num: 1,
+            page_size: 10
+          },
+          params: {}
+        }
+      // this.$refs.userInfoDateIntervals.initDateData()  //日期区间筛选
       this.getData()
     },
     getData() {
       this.queryParams.params.itemType = '01'
       bomPageList(this.queryParams).then(res => {
-        this.pageList = res.data
+        // this.pageList = res.data
+        // 确保拿到的 data 是 Array，再赋值给 pageList
+        this.pageList = Array.isArray(res.data) ? res.data : (res.data.list || [])
         this.pageTotal = Number(res.page.total_num)
       })
     },
@@ -449,7 +444,8 @@ export default {
             })
           })
         })
-        .then(() => {})
+        .then(() => {
+        })
     },
     submitForm() {
       this.$refs['form'].validate(valid => {
@@ -518,6 +514,7 @@ export default {
 ::v-deep .el-form--inline .el-form-item {
   margin-right: 20px;
 }
+
 .template-list > div {
   border: 1px solid #eee;
   display: flex;
@@ -528,11 +525,13 @@ export default {
   border-radius: 3px;
   margin-bottom: 10px;
   cursor: pointer;
+
   &:hover {
     background-color: #eee;
     color: #000;
   }
 }
+
 ::v-deep .my_label {
   width: 120px;
 }
