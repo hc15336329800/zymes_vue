@@ -102,7 +102,7 @@
       <el-table-column label="已生产数量" align="center" prop="productionCount" sortable="custom" />
       <el-table-column label="任务状态" align="center" prop="orderDtlStatusDesc" sortable="custom" />
       <el-table-column label="创建时间" align="center" prop="createdTime" sortable="custom" />
-      <el-table-column label="操作" align="center" width="310" class-name="small-padding fixed-width">
+      <el-table-column label="操作" align="center"   class-name="small-padding fixed-width">
         <template slot-scope="scope" >
           <!-- 只有“叶子节点”才显示按钮，根节点（有 children）不显示 -->
           <template v-if="!scope.row.children || scope.row.children.length === 0">

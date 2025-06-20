@@ -183,7 +183,7 @@ export const constantRoutes = [
         component: () => import('@/views/inventoryManagement/BOMManagement'),
         name: 'BOMManagement',
         meta: {
-          title: 'BOM明细'
+          title: 'BOM库存'
         }
       },
 
@@ -315,7 +315,7 @@ export const constantRoutes = [
         component: () => import('@/views/inventoryManagement/bomItem'),
         name: 'bomItem',
         meta: {
-          title: 'Bom库存'
+          title: 'Bom库存1'
         }
       },
 
