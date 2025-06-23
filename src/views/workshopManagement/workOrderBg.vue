@@ -136,6 +136,7 @@
             placeholder="请选择分组"
             style="width:100%;"
             filterable
+            disabled
           >
             <el-option
               :key="dept.code"
@@ -234,6 +235,7 @@
             placeholder="请选择分组"
             style="width:200px;"
             filterable
+
           >
             <el-option
               :key="dept.code"
@@ -396,7 +398,7 @@
             procedureName: row.procedureName,
             realCount: real,
             deffCount: 0,
-            reportType: this.reportTypeList[0]?.code || '',
+            reportType: this.reportTypeList[2]?.code || '',
             groupId: row.groupId || '',
             maxRemain                    // <-- 保存到表单，后面校验用
           };
@@ -504,6 +506,7 @@
       getSelectOptions() {
         dictInfo('WORK_SHOP', r => (this.workShopList = r))
         dictInfo('REPORT_TYPE', r => (this.reportTypeList = r))
+
 
         groupSelected({}).then(res => {
           this.groupList = res.data
