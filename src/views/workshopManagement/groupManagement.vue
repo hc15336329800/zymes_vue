@@ -1,12 +1,13 @@
 <template>
   <div class="app-container">
+
+
+<!--    搜索框-->
     <el-form :model="queryParams" ref="queryRef" class="query-form commen-search" :inline="true">
       <el-form-item label="分组名称" class="condition">
         <el-input v-model="queryParams.params.groupName" placeholder="请输入名称" clearable/>
       </el-form-item>
       <workShop :bindId.sync="queryParams.params.deptId" :required-dept="false"/>
-
-
       <el-form-item class="commen-button">
         <el-button type="primary" icon="el-icon-search" @click="handleQuery">搜索</el-button>
       </el-form-item>
@@ -15,6 +16,9 @@
       </el-form-item>
       <el-form-item></el-form-item>
     </el-form>
+
+
+
     <el-row class="mb8" v-if="hasPerm('B009001000001')">
       <el-button type="primary" class="commen-button" icon="el-icon-plus" @click="handleAdd">新增</el-button>
     </el-row>

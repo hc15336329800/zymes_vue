@@ -1,17 +1,28 @@
 <template>
   <div class="app-container">
-    <el-row class="mb8">
-      <el-button type="primary" class="commen-button" icon="el-icon-plus" @click="handleAdd">新增</el-button>
+    <!-- 工具栏 -->
+    <el-row class="mb8" :gutter="10">
+      <el-col :span="4">
+        <el-button type="primary" class="commen-button" icon="el-icon-plus" @click="handleAdd">新增</el-button>
+      </el-col>
+      <el-col :span="18" class="statistic-col"  style="padding-top: 15px;">
+        <div class="statistic-info">
+<!--          <span class="statistic-label">信息统计：</span>-->
+          <span class="statistic-value">合工总数 ： {{ totalPercentage.toFixed(1) }}</span>
+        </div>
+      </el-col>
+
     </el-row>
+
+    <!-- 列表 -->
     <el-table :data="pageList" class="commen-table mt_20">
       <el-table-column type="index" width="55" label="序号"></el-table-column>
-      <el-table-column label="工人" align="center" prop="userName"/>
-      <el-table-column label="合工/占比" align="center" prop="percentage"/>
-      <el-table-column label="类型" align="center" prop="leaderTypeDesc"/>
-      <el-table-column label="创建时间" align="center" prop="createdTime"/>
+      <el-table-column label="工人" align="center" prop="userName" />
+      <el-table-column label="合工/占比" align="center" prop="percentage" />
+      <el-table-column label="类型" align="center" prop="leaderTypeDesc" />
+      <el-table-column label="创建时间" align="center" prop="createdTime" />
       <el-table-column label="操作" align="center" width="310" class-name="small-padding fixed-width">
         <template slot-scope="scope">
-          <!-- 确认后不能编辑和删除 -->
           <el-button link type="primary" icon="Edit" @click="handleUpdate(scope.row)">编辑</el-button>
           <el-button link type="primary" icon="Delete" v-if="scope.row.leaderType=='00'"
                      @click="handleDelete(scope.row)">删除
@@ -20,6 +31,7 @@
       </el-table-column>
     </el-table>
 
+    <!-- 分页 -->
     <pagination
       style="text-align: right"
       v-show="pageTotal>0"
@@ -28,190 +40,304 @@
       :limit.sync="queryParams.page.page_size"
       @pagination="getData"
     />
+
     <!-- 添加或修改对话框 -->
-    <el-dialog :title="title" :visible.sync="dialogShow" width="480px" @close="beforeClose">
-      <el-form :model="form" class="commen-form" :rules="rules" ref="form" label-width="80px">
-        <userSelect :title="userTitle" :user-id.sync="form.userId" :required-user="true"/>
-        <el-form-item prop="percentage" label="合共/占比">
-          <el-input-number v-model="form.percentage" :precision="3" :controls="false" :min="0"/>
+    <el-dialog :title="title" :visible.sync="dialogShow" width="470px" @close="beforeClose"   >
+      <el-form :model="form" class="commen-form" :rules="rules" ref="form" label-width="60px">
+<!--        <userSelect :title="userTitle" :user-id.sync="form.userId" :required-user="true" />-->
+
+        <!-- 修改userSelect组件，增加required属性和验证 -->
+        <el-form-item prop="userId" label="工人" required>
+          <userSelect
+            :user-id.sync="form.userId"
+            :required="true"
+            @change="handleUserChange"
+            style="width: 100%"
+          />
+        </el-form-item>
+
+        <!--      工资占比-->
+        <el-form-item prop="percentage" label="占比" status-icon  style="margin-top: 25px ;margin-bottom: 25px">
+          <el-input
+            v-model="form.percentage"
+            placeholder="请输入0.1-1.0之间的数值"
+            @input="onPercentageInput"
+          />
         </el-form-item>
         <div class="dialog-footer" style="text-align: center;width:100%;">
-          <el-button @click="cancel">取 消</el-button>
+          <el-button @click="cancel"  style="margin-right: 35px">取 消</el-button>
           <el-button type="primary" @click="submitForm">确 定</el-button>
         </div>
       </el-form>
     </el-dialog>
   </div>
 </template>
+
 <script>
+import { addGroupDtl, deleteGroupDtl, detailGroupDtl, groupDtlPageList, updateGroupDtl } from '@/api/group/groupDetail'
 
-  import {addGroupDtl, deleteGroupDtl, detailGroupDtl, groupDtlPageList, updateGroupDtl} from '@/api/group/groupDetail'
+export default {
+  components: {
+    DateIntervals: () => import('@/components/DateIntervals'),
+    Pagination: () => import('@/components/Pagination'),
+    UserSelect: () => import('@/components/user/userSelect')
+  },
+  data() {
+    return {
 
-  export default {
-    components: {
-      DateIntervals: () => import('@/components/DateIntervals'),
-      Pagination: () => import('@/components/Pagination'),
-      UserSelect: () => import('@/components/user/userSelect'),
-
-    },
-    data() {
-      return {
-        userTitle: '工人',
-        queryParams: {
-          params: {},
-          page: {
-            page_num: 1,
-            page_size: 50
-          }
-        },
-        form: {},
-        pageTotal: 0,
-        pageList: {},
-        title: '',
-        dialogShow: false,
-        rules: {
-          percentage: [{required: true, message: '请输入百分比', trigger: 'blur'}],
+      totalPercentage: 0,   // 新增统计总数
+      userTitle: '工人',
+      queryParams: {
+        params: {},
+        page: {
+          page_num: 1,
+          page_size: 50
         }
+      },
+      form: {
+         userId: '',            // 默认空
+        percentage: '0.1'      // 默认字符串 0.1
+      },
+      pageTotal: 0,
+      pageList: [],
+      title: '',
+      dialogShow: false,
+      rules: {
+        userId: [
+          { required: true, message: '请选择工人', trigger: 'change' }
+        ],
+        percentage: [
+          { required: true, message: '请输入占比值', trigger: ['blur', 'change'] }, // ✅ 修改 trigger
+          { validator: validatePercentage, trigger: ['blur', 'change'] }            // ✅ 修改 trigger
+        ]
+      }
+
+    }
+
+    //检验输入
+    const validatePercentage = (rule, value, callback) => {
+      const num = Number(value)
+      const pattern = /^([0]{0,1}[.][1-9]|0\.[1-9][0-9]?|1(\.0?)?)$/
+
+      if (!value) {
+        callback(new Error('请输入占比值'))
+      } else if (!pattern.test(value)) {
+        callback(new Error('请输入0.1到1.0之间的数值'))
+      } else {
+        callback()
+      }
+    }
+
+
+  },
+  created() {
+    this.getData()
+  },
+
+  methods: {
+
+    // 禁止中文输入（额外提示，而不直接屏蔽）
+    onPercentageInput(val) {
+      if (/[\u4e00-\u9fa5]/.test(val)) {
+        // this.$message.warning('请输入数字，不能包含汉字');
       }
     },
-    created() {
+
+    // 新增工人选择变化处理
+    handleUserChange(val) {
+      this.form.userId = val;
+      this.$refs.form.validateField('userId');
+    },
+
+    handleQuery() {
+      this.queryParams.page.page_num = 1
       this.getData()
     },
-    methods: {
-      /** 搜索按钮操作 */
-      handleQuery() {
-        this.queryParams.page.page_num = 1
-        this.getData()
-      },
-      beforeClose() {
-        this.form = {}
-        this.$refs['form'].clearValidate()
-      },
-      /** 重置操作表单 */
-      handleReset() {
-        this.queryParams = {
-          page: {
-            page_num: 1,
-            page_size: 50
-          },
-          params: {}
+    beforeClose() {
+      this.$refs['form'].resetFields();  // ✅ 推荐用 resetFields 一次性处理
+      this.form = {
+        userId: '',
+        percentage: '0.1'                // ✅ 注意是字符串
+      }
+    },
+    handleReset() {
+      this.queryParams = {
+        page: {
+          page_num: 1,
+          page_size: 50
+        },
+        params: {}
+      }
+      this.$refs.userInfoDateIntervals?.initDateData()
+      this.getData()
+    },
+    getData() {
+      this.queryParams.params.groupId = this.$route.query.id
+      groupDtlPageList(this.queryParams).then(res => {
+        this.pageList = res.data
+        this.pageTotal = Number(res.page.total_num)
+        // 计算合工总数
+        this.calculateTotalPercentage()
+      })
+
+    },
+
+
+    // 新增计算总数方法
+    calculateTotalPercentage() {
+      this.totalPercentage = this.pageList.reduce((sum, item) => {
+        return sum + (parseFloat(item.percentage) || 0)
+      }, 0)
+    },
+
+    handleAdd() {
+      this.title = '新增'
+      this.dialogShow = true
+    },
+    handleUpdate(row) {
+      detailGroupDtl({
+        params: {
+          id: row.id
         }
-        this.$refs.userInfoDateIntervals.initDateData()
-        this.getData()
-      },
-      getData() {
-        this.queryParams.params.groupId = this.$route.query.id
-        groupDtlPageList(this.queryParams).then(res => {
-          this.pageList = res.data
-          this.pageTotal = Number(res.page.total_num)
-        })
-      },
-      handleAdd() {
-        this.title = '新增'
+      }).then(res => {
+        this.form = res.data
+        // 确保编辑时的值也在0.1-1.0范围内
+        if (this.form.percentage < 0.1) {
+          this.form.percentage = 0.1
+        } else if (this.form.percentage > 1.0) {
+          this.form.percentage = 1.0
+        }
         this.dialogShow = true
-      },
-      handleUpdate(row) {
-        detailGroupDtl({
+      })
+      this.title = '编辑'
+    },
+    handleDelete(row) {
+      this.$confirm('确认要删除数据吗?', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        deleteGroupDtl({
           params: {
             id: row.id
           }
         }).then(res => {
-          this.form = res.data
-          this.dialogShow = true
-        })
-
-        this.title = '编辑'
-      },
-
-      handleDelete(row) {
-        this.$confirm('确认要删除数据吗?', {
-          confirmButtonText: '确定',
-          cancelButtonText: '取消',
-          type: 'warning'
-        })
-          .then(() => {
-            deleteGroupDtl({
-              params: {
-                id: row.id
-              }
-            }).then(res => {
-              this.getData()
-              this.$message({
-                type: 'success',
-                message: '删除成功'
-              })
-            })
+          this.getData()
+          this.$message({
+            type: 'success',
+            message: '删除成功'
           })
-          .then(() => {
-          })
-      },
-      submitForm() {
-        this.form.groupId = this.$route.query.id
-        this.$refs['form'].validate(valid => {
-          if (valid) {
-            if (this.form.id) {
-              updateGroupDtl({
-                params: this.form
-              }).then(res => {
-                this.$message({
-                  message: '修改成功',
-                  type: 'success'
-                })
-                this.getData()
-              })
-            } else {
-              addGroupDtl({params: this.form}).then(res => {
-                this.$message({
-                  message: '新增成功',
-                  type: 'success'
-                })
-                this.getData()
-              })
-            }
-            this.dialogShow = false
-          }
         })
-      },
-      cancel() {
-        this.dialogShow = false
-        this.form = {}
-        this.$refs['form'].clearValidate()
+      })
+    },
+    submitForm() {
+      this.$refs.form.validate(valid => {
+        if (!valid) {
+          return false;
+        }
+
+        // 验证占比值
+        const percentage = parseFloat(this.form.percentage);
+        if (isNaN(percentage)) {
+          this.$message.error('请输入有效的数字');
+          return false;
+        }
+
+        // 验证小数位数
+        const decimalPart = this.form.percentage.toString().split('.')[1];
+        if (decimalPart && decimalPart.length > 1) {
+          this.$message.error('只能输入一位小数');
+          return false;
+        }
+
+        // 验证范围
+        if (percentage < 0.1 || percentage > 1.0) {
+          this.$message.error('占比值必须在0.1到1.0之间');
+          return false;
+        }
+
+        this.form.groupId = this.$route.query.id;
+        const operation = this.form.id ?
+          updateGroupDtl({ params: this.form }) :
+          addGroupDtl({ params: this.form });
+
+        operation.then(res => {
+          this.$message({
+            message: this.form.id ? '修改成功' : '新增成功',
+            type: 'success'
+          });
+          this.dialogShow = false;
+          this.getData(); // 这会自动触发calculateTotalPercentage
+        }).catch(error => {
+          this.$message.error('操作失败，请重试');
+        });
+      });
+    },
+    cancel() {
+      this.dialogShow = false
+      this.form = {
+        percentage: 0.1
       }
+      this.$refs['form'].clearValidate()
     }
   }
+}
 </script>
 
 <style lang="scss" scoped>
-  .input {
-    width: 380px;
+.input {
+  width: 380px;
+}
+
+::v-deep .el-form--inline .el-form-item {
+  margin-right: 20px;
+}
+
+::v-deep .my_label {
+  width: 120px;
+}
+
+.add_img {
+  width: 148px;
+  height: 148px;
+
+  img {
+    width: 100%;
+    height: 100%;
   }
 
-  ::v-deep .el-form--inline .el-form-item {
-    margin-right: 20px;
+  .delete_img {
+    width: 20px;
+    height: 20px;
+    right: -10px;
+    top: -15px;
   }
+}
 
-  ::v-deep .my_label {
-    width: 120px;
-  }
+.btn {
+  width: 200px;
+}
 
-  .add_img {
-    width: 148px;
-    height: 148px;
+/* ✅ 用 scoped 时需要深度穿透 */
+::v-deep .el-select.el-select--medium {
+  width: 100% !important;
+}
 
-    img {
-      width: 100%;
-      height: 100%;
-    }
 
-    .delete_img {
-      width: 20px;
-      height: 20px;
-      right: -10px;
-      top: -15px;
-    }
-  }
+/* 报工信息统计 */
+.statistic-col {
+  display: flex;
+  justify-content: flex-end; /* ✅ 靠右 */
+  align-items: center;       /* ✅ 上下居中 */
+  height: 100%;              /* 可根据 el-row 实际高度微调 */
+}
+/* 报工信息统计 */
+.statistic-info {
+  font-size: 16px;
+  //color: #333;
+  font-weight: bold;           /* ✅ 加粗 */
+  color: #FFA500;              /* ✅ 橘黄色 */
+}
 
-  .btn {
-    width: 200px;
-  }
+
 </style>
