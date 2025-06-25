@@ -1,6 +1,17 @@
 <!--分组详情-->
 <template>
   <div class="app-container">
+
+    <!--    横条提醒-->
+    <el-alert
+      v-if="totalPercentage.toFixed(3) !== '1.000'"
+      title="当前合工总数不为 1.000，请及时修正以防工资计算出错！"
+      type="error"
+      show-icon
+      closable={false}
+      style="margin-bottom: 30px; margin-top: 30px"
+    />
+
     <!-- 工具栏 -->
     <el-row class="mb8" :gutter="10">
       <el-col :span="4">
@@ -9,11 +20,16 @@
       <el-col :span="18" class="statistic-col"  style="padding-top: 15px;">
         <div class="statistic-info">
 <!--          <span class="statistic-label">信息统计：</span>-->
-          <span class="statistic-value">合工总数 ： {{ totalPercentage.toFixed(1) }}</span>
+<!--          <span class="statistic-value">合工总数 ： {{ totalPercentage.toFixed(1) }}</span>-->
+          <span class="statistic-value">合工总数 ： {{ formatTotalPercentage(totalPercentage) }}</span>
+
         </div>
       </el-col>
 
     </el-row>
+
+
+
 
     <!-- 列表 -->
     <el-table :data="pageList" class="commen-table mt_20">
@@ -135,7 +151,57 @@ export default {
     this.getData()
   },
 
+  // 处理离开网页弹窗  注册监听：
+  mounted() {
+    this.getData(); // 确保初始调用
+    window.addEventListener('beforeunload', this.handleBeforeUnload);
+  },
+  // 处理离开网页弹窗  卸载监听：
+  beforeDestroy() {
+    window.removeEventListener('beforeunload', this.handleBeforeUnload);
+  },
+
+  // 【	拦截路由切换】 ：组件级导航守卫：在用户离开当前组件页面时触发（无论是跳转到其他页面，还是浏览器后退）
+  beforeRouteLeave(to, from, next) {
+    const total = parseFloat(this.totalPercentage.toFixed(3));
+    if (total !== 1.000) {
+      this.$message.warning('当前合工总数不为 1.000，请及时修正以防工资计算出错！');
+      next(false); // 直接阻止跳转
+    } else {
+      next(); // 放行
+    }
+  },
+
+
+
   methods: {
+
+    // 浏览器关闭、刷新（用 beforeunload，但必须返回字符串！）
+    handleBeforeUnload(e) {
+      const total = parseFloat(this.totalPercentage.toFixed(3));
+      if (total !== 1.000) {
+        const msg = '合工总数不为 1.000，确认要离开吗？';
+        e.preventDefault();
+        e.returnValue = msg;
+        return msg;
+      }
+},
+
+
+    // 综合统计  确保 只截断，不四舍五入，保留至少三位小数：
+    formatTotalPercentage(val) {
+      if (typeof val !== 'number') return '0.000';
+      const str = val.toString();
+      const index = str.indexOf('.');
+      if (index === -1) return str + '.000';
+      const decimal = str.substring(index + 1);
+      if (decimal.length >= 3) {
+        return str.substring(0, index + 4); // 截断三位小数
+      } else {
+        return str + '0'.repeat(3 - decimal.length); // 不足补0
+      }
+    },
+
 
     // 禁止中文输入（额外提示，而不直接屏蔽）
     onPercentageInput(val) {
