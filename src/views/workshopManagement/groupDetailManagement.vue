@@ -320,7 +320,7 @@ export default {
 
         // 验证范围
         if (percentage < 0.001 || percentage > 1.0) {
-          this.$message.error('占比值必须在0.1到1.0之间');
+          this.$message.error('占比值必须在0.001到1.000之间');
           return false;
         }
 
