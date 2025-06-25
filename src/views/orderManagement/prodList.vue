@@ -182,7 +182,7 @@ export default {
         // ========== 新增 ==========
         itemName: '',
         pageNum: 1,
-        pageSize: 100
+        pageSize: 20
       },
 
       form: {},
@@ -288,7 +288,7 @@ export default {
         itemName: '',
         orderDtlStatus: '',
         pageNum: 1,
-        pageSize: 100
+        pageSize: 20
       }
       this.getData()
     },
