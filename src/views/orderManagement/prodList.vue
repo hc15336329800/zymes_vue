@@ -1,6 +1,8 @@
 <!--任务分配-->
 <template>
   <div class="app-container">
+
+<!--    搜索框-->
     <el-form :model="queryParams" ref="queryRef" class="query-form commen-search" :inline="true">
       <!--      <el-form-item label="母件图纸号" class="condition">-->
       <!--        <BomNoSelect ref="BomNoSelect" :item-no.sync="queryParams.params.parentItemNo"/>-->
@@ -53,6 +55,7 @@
       </el-form-item>
       <el-form-item></el-form-item>
     </el-form>
+<!--    工具栏-->
     <el-row class="mb8">
       <el-button
         type="primary"
@@ -66,13 +69,16 @@
       <el-button type="primary" class="mb_20" @click="operHandle()">批量关闭</el-button>
     </el-row>
 
+<!--    表格列表-->
     <!--    <el-table :data="pageList" class="commen-table mt_20" @selection-change="handleSelectionChange"    @sort-change="handleSortChange"     >-->
     <el-table
       ref="treeTable"
       :data="pageList"
       :row-key="row => row.id"
-      :tree-props="{ children: 'children' }"
-       class="commen-table mt_20"
+      lazy
+      :load="loadChildren"
+      :tree-props="{ children: 'children', hasChildren: 'hasChildren' }"
+      class="commen-table mt_20"
     >
 
       <!-- 自定义选择列 -->
@@ -207,6 +213,14 @@ export default {
     this.getData()
   },
   methods: {
+
+    //树：模拟懒加载）
+    loadChildren(row, resolve) {
+      // 模拟懒加载 —— 实际数据已包含所有 children
+      setTimeout(() => {
+        resolve(row.children || []);
+      }, 0); // 不延迟也可以，立即 resolve
+    },
 
 
     // -// -// -// -// -// -// -// -// -// -// -// -// -// -// -// -// -// -// -// -// -// -// -新增树形组测试// -// -// -// -// -// -// -// -// -// -// -// -// -// -// -// -// -// -// -// -// -// -// -// -// ---
