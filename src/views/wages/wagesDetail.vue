@@ -1,3 +1,4 @@
+<!--工资明细-->
 <template>
   <div class="app-container">
     <el-form :model="queryParams" ref="queryRef" class="query-form commen-search" :inline="true">
@@ -101,6 +102,19 @@
       }
     },
     created() {
+
+      //获取用户信息  当前登录用户  当前用户
+      const userInfo = JSON.parse(localStorage.getItem('user_info') || '{}')
+      console.log('当前登录用户id----:', userInfo.id)
+
+
+      // const user = localStorage.getItem('user_info');
+      // const name = JSON.parse(user).userName;
+      // console.log('当前登录用户名称----:', name)
+
+      // ✅ 初始化时设置 userId 为当前用户
+      this.queryParams.params.userId = userInfo.id
+
       this.getSelectOptions()
       this.getData()
     },

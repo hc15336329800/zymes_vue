@@ -101,6 +101,14 @@
       }
     },
     created() {
+
+      //获取用户信息  当前登录用户  当前用户
+      const userInfo = JSON.parse(localStorage.getItem('user_info') || '{}')
+      console.log('当前登录用户id----:', userInfo.id)
+
+      // ✅ 初始化时设置 userId 为当前用户
+      this.queryParams.params.userId = userInfo.id
+
       this.getSelectOptions()
       this.getData()
     },

@@ -206,12 +206,15 @@ export default {
 
   created() {
 
+    //获取用户信息  当前登录用户  当前用户
     const userInfo = JSON.parse(localStorage.getItem('user_info') || '{}')
-    // console.log('userInfo----:', userInfo)
+    console.log('获取用户信息----:', userInfo)
 
 
     const user = localStorage.getItem('user_info');
     const name = JSON.parse(user).userName;
+    console.log('当前登录用户名称----:', name)
+
     this.buttonShow = true;
     // if(name ==='admin'){
     //   this.buttonShow = true;

@@ -1,3 +1,4 @@
+<!--分组详情-->
 <template>
   <div class="app-container">
     <!-- 工具栏 -->
@@ -230,6 +231,7 @@ export default {
         })
       })
     },
+    //提交
     submitForm() {
       this.$refs.form.validate(valid => {
         if (!valid) {
@@ -244,11 +246,11 @@ export default {
         }
 
         // 验证小数位数
-        const decimalPart = this.form.percentage.toString().split('.')[1];
-        if (decimalPart && decimalPart.length > 1) {
-          this.$message.error('只能输入一位小数');
-          return false;
-        }
+        // const decimalPart = this.form.percentage.toString().split('.')[1];
+        // if (decimalPart && decimalPart.length > 1) {
+        //   this.$message.error('只能输入一位小数');
+        //   return false;
+        // }
 
         // 验证范围
         if (percentage < 0.1 || percentage > 1.0) {
