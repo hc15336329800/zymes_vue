@@ -69,8 +69,31 @@
         action="#"
         :show-file-list="false"
         :http-request="doUpload">
-        <el-button size="mini" type="primary" style="margin-left: 20px">选文件并上传</el-button>
+        <el-button size="mini" type="primary" style="margin-left: 20px; margin-right: 20px">用料导入NEW</el-button>
       </el-upload>
+
+
+      <!-- 外部同步bom -->
+      <el-button
+        v-if="showNewImport"
+        type="primary"
+        icon="el-icon-plus"
+         @click="syncErpToMes"
+      >外部同步bom
+      </el-button>
+
+
+
+
+      <!-- 内部同步bom -->
+      <el-button
+        v-if="showNewImport"
+        type="primary"
+        icon="el-icon-plus"
+        @click="innerSyncBom"
+      >内部同步bom
+      </el-button>
+
 
       <!--      &lt;!&ndash; 输入根物料编码 &ndash;&gt;-->
       <!--      <el-input-->
@@ -234,7 +257,7 @@ import { getWarehouseSelected } from '@/api/item/warehouse'
 import UploadExcelComponent from '@/components/UploadExcel/index.vue'
 import { get_new_export } from '@/api/common'
 import { uploadProcedure } from '@/api/item/mesProcedure'
-import { refreshBomTree, uploadUsed, uploadUsedNew } from '@/api/item/mesItemUsed' // 路径按实际调整
+import { refreshBomTree, uploadUsed, uploadUsedNew ,innerSyncBom,syncErpToMes} from '@/api/item/mesItemUsed' // 路径按实际调整
 
 
 export default {
@@ -305,6 +328,49 @@ export default {
     this.getData()
   },
   methods: {
+// ==================== 同步相关  ====================
+
+    //内部bom同步
+    async innerSyncBom() {
+      this.loading = true
+      let intervalFlag = null
+      try {
+        // 每隔 10 秒提醒一次
+        intervalFlag = setInterval(() => {
+          this.$message.info('操作正在进行中，请耐心等待...')
+        }, 5000)
+
+        await innerSyncBom()
+        this.$message.success('内部同步 BOM 完成')
+        this.getData()
+      } catch (e) {
+        this.$message.error('内部同步 BOM 失败')
+      } finally {
+        clearInterval(intervalFlag)
+        this.loading = false
+      }
+    },
+    //wai 部bom同步
+    async syncErpToMes() {
+      this.loading = true
+      let intervalFlag = null
+      try {
+        intervalFlag = setInterval(() => {
+          this.$message.info('操作正在进行中，请耐心等待...')
+        }, 5000)
+
+        await syncErpToMes()
+        this.$message.success('外部同步 BOM 完成')
+        this.getData()
+      } catch (e) {
+        this.$message.error('外部同步 BOM 失败')
+      } finally {
+        clearInterval(intervalFlag)
+        this.loading = false
+      }
+    },
+
+
 
     // ==================== 上传相关  ====================
     // 上传  - 只支持 .xlsx

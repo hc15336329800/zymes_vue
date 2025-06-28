@@ -1,5 +1,28 @@
 import request from '@/utils/request'
 
+// ==================== 同步更新测试 ====================
+
+
+
+/**
+ * 内部同步 BOM 树（触发后端内部同步接口）
+ */
+export function innerSyncBom() {
+  return request({
+    url: '/api/item/mes_item_use/inner_sync_bom',
+    method: 'post'
+  })
+}
+
+/**
+ * 外部同步 ERP 数据到 MES（触发后端外部同步接口）
+ */
+export function syncErpToMes() {
+  return request({
+    url: '/api/item/mes_item_use/sync_erp_to_mes',
+    method: 'post'
+  })
+}
 
 
 // ==================== 新接口（分段流程） ====================
