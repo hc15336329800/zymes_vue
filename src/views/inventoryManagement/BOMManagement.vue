@@ -50,22 +50,21 @@
         ref="uploadGong"
       />
 
-      <upload-excel-component
-        text="用料导入"
-        v-if="hasPerm('B002004000006')"
-        :on-success="uploadUsedSuccess"
-        :loading="loading"
-        ref="uploadYong"
-        class="ml_20"
-      />
+<!--      <upload-excel-component-->
+<!--        text="用料导入"-->
+<!--        v-if="hasPerm('B002004000006')"-->
+<!--        :on-success="uploadUsedSuccess"-->
+<!--        :loading="loading"-->
+<!--        ref="uploadYong"-->
+<!--        class="ml_20"-->
+<!--      />-->
 
 
       <!--      // ==================== 上传相关 ====================-->
 
 
-      <!-- 上传控件 -->
+      <!-- 上传控件    v-if="showNewImport"-->
       <el-upload
-        v-if="showNewImport"
         action="#"
         :show-file-list="false"
         :http-request="doUpload">
@@ -78,8 +77,8 @@
         v-if="showNewImport"
         type="primary"
         icon="el-icon-plus"
-         @click="syncErpToMes"
-      >外部同步bom
+         @click="confirmSyncErpToMes"
+      >外部同步ERP
       </el-button>
 
 
@@ -90,7 +89,7 @@
         v-if="showNewImport"
         type="primary"
         icon="el-icon-plus"
-        @click="innerSyncBom"
+        @click="confirmInnerSyncBom"
       >内部同步bom
       </el-button>
 
@@ -329,6 +328,51 @@ export default {
   },
   methods: {
 // ==================== 同步相关  ====================
+
+    // 新增：外部同步时弹窗输入密码，验证通过后调用原方法
+    confirmSyncErpToMes() {
+      this.$prompt('请输入同步密码', '外部同步 ERP 验证', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        inputType: 'password',
+        inputValidator: (value) => {
+          if (value === '135896') {
+            return true;
+          } else {
+            return '密码错误';
+          }
+        }
+      }).then(({ value }) => {
+        // 密码正确，调用原同步方法
+        this.syncErpToMes();
+      }).catch(() => {
+        this.$message.info('已取消同步操作');
+      });
+    },
+
+
+    // 新增：内部同步时弹窗输入密码，验证通过后调用原方法
+    confirmInnerSyncBom() {
+      this.$prompt('请输入同步密码', '内部同步 BOM 验证', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        inputType: 'password',
+        inputValidator: (value) => {
+          if (value === '135896') {
+            return true;
+          } else {
+            return '密码错误';
+          }
+        }
+      }).then(({ value }) => {
+        // 密码正确，调用原同步方法
+        this.innerSyncBom();
+      }).catch(() => {
+        this.$message.info('已取消同步操作');
+      });
+    },
+
+
 
     //内部bom同步
     async innerSyncBom() {
