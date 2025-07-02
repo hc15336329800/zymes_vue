@@ -17,3 +17,11 @@ export function startScheduled(data) {
   })
 }
 
+// 删除接口
+export function deleteProductionOrder(data) {
+  return request({
+    url: '/api/production/production_order/delete',
+    method: 'post',
+    data
+  })
+}

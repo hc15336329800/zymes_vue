@@ -217,7 +217,8 @@ export default {
     this.$set(this.form, 'itemNo', this.$route.query.itemNo)
     this.$set(this.form, 'itemName', this.$route.query.itemName)
 
-    this.getItemTree()
+    this.getItemTreeNew()
+    // this.getItemTree()
     this.getData()
   },
   methods: {

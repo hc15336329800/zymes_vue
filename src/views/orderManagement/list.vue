@@ -66,6 +66,15 @@
       <el-table-column label="计划数量" align="center" prop="itemCount" sortable="custom"/>
 <!--      <el-table-column label="工序名称" align="center" prop="procedureName"/>-->
       <el-table-column label="状态" align="center" prop="statusDesc" sortable="custom"/>
+
+      <el-table-column label="操作"    >
+        <template slot-scope="scope">
+          <!-- 其他按钮... -->
+          <el-button size="mini" type="danger" @click="handleDelete(scope.row)">删除</el-button>
+        </template>
+      </el-table-column>
+
+
     </el-table>
 
     <pagination
@@ -103,6 +112,7 @@
   } from '@/api/device/deviceType'
   import {dictInfo} from '@/api/common'
   import {
+    deleteProductionOrder,
     productionPageList,
     startScheduled
   } from '@/api/production/productionOrder'
@@ -147,7 +157,7 @@
         multipleSelection: [],
         form: {},
         pageTotal: 0,
-        pageList: {},
+        pageList: [],
         title: '',
         dialogShow: false,
         rules: {
@@ -161,6 +171,31 @@
       this.getData()
     },
     methods: {
+
+      submitForm() {
+        // TODO: 实现提交逻辑
+        console.log('提交表单');
+      },
+
+
+      // 删除
+      handleDelete(row) {
+        this.$confirm('确认删除该生产工单吗？', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(() => {
+          deleteProductionOrder({
+            params: {
+              ids: [row.id]
+            }
+          }).then(() => {
+            this.$message.success('删除成功');
+            this.getData(); // 刷新列表
+          });
+        }).catch(() => {});
+      } ,
+
       getSelectOptions() {
         dictInfo('ORDER_TYPE', r => (this.orderTypeList = r))
         dictInfo('PRODUCTION_STATUS', r => (this.statusList = r))
@@ -184,7 +219,7 @@
           },
           params: {}
         }
-        this.$refs.userInfoDateIntervals.initDateData()
+        // this.$refs.userInfoDateIntervals.initDateData()
         this.getData()
       },
       getData() {
@@ -286,9 +321,6 @@
             })
             this.getData()
           })
-
-
-
 
         })
 
