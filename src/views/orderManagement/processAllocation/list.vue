@@ -1,4 +1,4 @@
-<!--工序下发页面  选择班次-->
+<!--工序下发-->
 <template>
   <div class="app-container">
     <el-form :model="queryParams" ref="queryRef" class="query-form commen-search" :inline="true">
@@ -242,6 +242,21 @@
           }
         }).then(res => {
           this.chooseData = res.data
+
+          // 设置班次默认值
+          if (this.shiftList.length > 0) {
+            this.shiftType = this.shiftList[0].code
+          } else {
+            this.shiftType = ''
+          }
+
+          // 设置班组默认值
+          if (this.groupList.length > 0) {
+            this.groupId = this.groupList[0].id
+          } else {
+            this.groupId = ''
+          }
+
         })
       },
       handleOuter() {
