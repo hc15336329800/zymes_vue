@@ -81,9 +81,6 @@
       >外部同步ERP
       </el-button>
 
-
-
-
       <!-- 内部同步bom -->
       <el-button
         v-if="showNewImport"
@@ -92,6 +89,18 @@
         @click="confirmInnerSyncBom"
       >内部同步bom
       </el-button>
+
+
+      <!-- 新增：外部同步时间选择 -->
+      <el-date-picker
+        v-if="showNewImport"
+        v-model="syncTime"
+        type="datetime"
+        value-format="yyyy-MM-dd HH:mm:ss"
+        placeholder="选择同步时间"
+        size="mini"
+        style="margin-left: 10px;width:200px;"
+      ></el-date-picker>
 
 
       <!--      &lt;!&ndash; 输入根物料编码 &ndash;&gt;-->
@@ -269,6 +278,11 @@ export default {
   },
   data() {
     return {
+
+      // syncTime: '', // 新增：同步时间参数
+      syncTime: this.formatNowTime(), // 新增：默认当前时间
+
+
       // 新增状态控制
       showNewImport: false,
 
@@ -327,6 +341,19 @@ export default {
     this.getData()
   },
   methods: {
+
+    // 构建当前时间
+    formatNowTime() {
+      const date = new Date()
+      const Y = date.getFullYear()
+      const M = (date.getMonth() + 1).toString().padStart(2, '0')
+      const D = date.getDate().toString().padStart(2, '0')
+      const h = date.getHours().toString().padStart(2, '0')
+      const m = date.getMinutes().toString().padStart(2, '0')
+      const s = date.getSeconds().toString().padStart(2, '0')
+      return `${Y}-${M}-${D} ${h}:${m}:${s}`
+    },
+
 // ==================== 同步相关  ====================
 
     // 新增：外部同步时弹窗输入密码，验证通过后调用原方法
@@ -403,7 +430,13 @@ export default {
           this.$message.info('操作正在进行中，请耐心等待...')
         }, 5000)
 
-        await syncErpToMes()
+
+        // 最小改动：增加时间参数传递
+        await syncErpToMes({
+          syncTime: this.syncTime // 新增：传入选中的时间参数
+        })
+
+        // await syncErpToMes()
         this.$message.success('外部同步 BOM 完成')
         this.getData()
       } catch (e) {

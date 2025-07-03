@@ -17,10 +17,11 @@ export function innerSyncBom() {
 /**
  * 外部同步 ERP 数据到 MES（触发后端外部同步接口）
  */
-export function syncErpToMes() {
+export function syncErpToMes(data = {}) {
   return request({
     url: '/api/item/mes_item_use/sync_erp_to_mes',
-    method: 'post'
+    method: 'post',
+    data // 新增：传递参数
   })
 }
 
