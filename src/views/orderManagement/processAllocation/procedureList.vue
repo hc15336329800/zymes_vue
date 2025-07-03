@@ -51,8 +51,8 @@
             class="input1"
             type="text"
             :ref="'input' + scope.$index"
-            :value="parseInt(scope.row.workItemCount)"
-             @keyup.enter.native="handleEnter(scope.$index)"
+            @input="scope.row.workItemCount = formatToInt(scope.row.workItemCount)"
+            @keyup.enter.native="handleEnter(scope.$index)"
           />
 
         </template>
@@ -127,12 +127,17 @@
     },
     methods: {
 
-      // 输入框格式化
+      //去除后三位小数点
       formatToInt(val) {
-        // 只保留正整数，空值返回 ''
-        const intVal = parseInt(val);
-        return isNaN(intVal) || intVal < 1 ? '' : intVal.toString();
+        // 只保留正整数，去掉小数部分
+        if (val == null || val === '') return '';
+        // 去掉非数字和小数点字符
+        val = val.toString().replace(/[^\d.]/g, '');
+        // 取整数部分
+        const intVal = parseInt(val, 10);
+        return isNaN(intVal) ? '' : intVal.toString();
       },
+
       getDeviceList() {
         deviceSelect({}).then(res => {
           this.deviceList = res.data
@@ -266,6 +271,11 @@
               if (!item.workDeviceId && item.deviceId) {
                 this.$set(item, 'workDeviceId', item.deviceId)
               }
+              // 🌟 新增：初始化时直接过滤掉小数
+              if (item.workItemCount !== undefined && item.workItemCount !== null) {
+                item.workItemCount = this.formatToInt(item.workItemCount)
+              }
+
             })
           }
         } finally {
