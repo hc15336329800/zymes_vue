@@ -27,7 +27,7 @@ export function addDefective(data) {
   })
 }
 
-// 删除
+// 删
 export function deleteDefective(data) {
   return request({
     url: '/api/item/defective_stock/delete',

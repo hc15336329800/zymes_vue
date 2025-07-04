@@ -7,10 +7,11 @@ import request from '@/utils/request'
 /**
  * 内部同步 BOM 树（触发后端内部同步接口）
  */
-export function innerSyncBom() {
+export function innerSyncBom(data = {}) {
   return request({
     url: '/api/item/mes_item_use/inner_sync_bom',
-    method: 'post'
+    method: 'post',
+    data // 新增：传递参数
   })
 }
 

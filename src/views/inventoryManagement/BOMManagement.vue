@@ -78,7 +78,7 @@
         type="primary"
         icon="el-icon-plus"
          @click="confirmSyncErpToMes"
-      >外部同步ERP
+      >完整同步ERP
       </el-button>
 
       <!-- 内部同步bom -->
@@ -87,7 +87,7 @@
         type="primary"
         icon="el-icon-plus"
         @click="confirmInnerSyncBom"
-      >内部同步bom
+      >内部同步bom和工序（bom依赖于时间）
       </el-button>
 
 
@@ -378,9 +378,8 @@ export default {
     },
 
 
-    // 新增：内部同步时弹窗输入密码，验证通过后调用原方法
     confirmInnerSyncBom() {
-      this.$prompt('请输入同步密码', '内部同步 BOM 验证', {
+      this.$prompt('请输入同步密码', '内部同步 ERP 验证', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         inputType: 'password',
@@ -399,6 +398,27 @@ export default {
       });
     },
 
+    // // 新增：内部同步时弹窗输入密码，验证通过后调用原方法
+    // confirmInnerSyncBom() {
+    //   this.$prompt('请输入同步密码', '内部同步 BOM 验证', {
+    //     confirmButtonText: '确定',
+    //     cancelButtonText: '取消',
+    //     inputType: 'password',
+    //     inputValidator: (value) => {
+    //       if (value === '135896') {
+    //         return true;
+    //       } else {
+    //         return '密码错误';
+    //       }
+    //     }
+    //   }).then(({ value }) => {
+    //     // 密码正确，调用原同步方法
+    //     this.innerSyncBom();
+    //   }).catch(() => {
+    //     this.$message.info('已取消同步操作');
+    //   });
+    // },
+
 
 
     //内部bom同步
@@ -411,7 +431,9 @@ export default {
           this.$message.info('操作正在进行中，请耐心等待...')
         }, 5000)
 
-        await innerSyncBom()
+        await innerSyncBom({
+          syncTime: this.syncTime // 新增：传入选中的时间参数
+        })
         this.$message.success('内部同步 BOM 完成')
         this.getData()
       } catch (e) {
