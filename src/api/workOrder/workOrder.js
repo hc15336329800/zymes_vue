@@ -29,6 +29,9 @@ export function allAddAssign(data) {
     data
   })
 }
+
+
+// 报工
 export function addReport(data) {
   return request({
     url: '/api/work/work_order/add_report',
@@ -37,13 +40,24 @@ export function addReport(data) {
   })
 }
 
+
+// 批量报工
 export function addAllReport(data) {
   return request({
-    url: '/api/work/work_order/add_All_report',
+    url: '/api/work/work_order/add_report_all',
     method: 'post',
-    data
-  })
+    data  // 直接传数组
+  });
 }
+
+
+// export function addAllReport(data) {
+//   return request({
+//     url: '/api/work/work_order/add_All_report',
+//     method: 'post',
+//     data
+//   })
+// }
 export function saveItemand(data) {
   return request({
     url: '/api/work/work_order/saveItemand',

@@ -46,12 +46,13 @@
         <el-button icon="el-icon-refresh" @click="handleReset">重置</el-button>
       </el-form-item>
 
-      <!-- [RESTORE] 批量报工按钮（不推荐） -->
-<!--      <el-form-item class="commen-button">-->
-<!--        <el-button type="primary" @click="allHandleReport" v-show="buttonShow">-->
-<!--          批量报工-->
-<!--        </el-button>-->
-<!--      </el-form-item>-->
+
+      <el-form-item class="commen-button">
+        <el-button type="primary" @click="allHandleReport" v-show="buttonShow">
+          批量报工
+        </el-button>
+      </el-form-item>
+
 
 
     </el-form>
@@ -61,7 +62,7 @@
 
 <!--    表格-->
     <el-table :data="pageList" class="commen-table mt_20"  @selection-change="handleSelectionChange">
-<!--      <el-table-column type="selection" width="55"></el-table-column>-->
+      <el-table-column type="selection" width="55"></el-table-column>
 <!--      <el-table-column type="index" width="50" label="序号"></el-table-column>-->
       <el-table-column label="订单号" align="center" prop="orderNo"  min-width="100"/>
 
@@ -473,6 +474,63 @@
 
         });
       },
+
+
+      // 批量报工
+      allHandleReport() {
+        if (this.multipleSelection.length === 0) {
+          this.$message.error('请勾选需要报工的数据！');
+          return;
+        }
+
+        this.$confirm(
+          '确认对选中工单执行批量报工吗？',
+          '提示',
+          { confirmButtonText: '确定', cancelButtonText: '取消', type: 'warning' }
+        ).then(() => {
+          // 构建批量报工请求数据
+          const reportList = this.multipleSelection.map(row => {
+            const assign = Number(row.assignCount || 0);
+            const real = Number(row.realCount || 0);
+            const deff = Number(row.deffCount || 0);
+            const wait = Math.max(0, assign - real - deff); // 最大可报工数量
+
+            return {
+              workOrderId: row.id,
+              realCount: wait,
+              deffCount: 0,
+              groupId: row.groupId || '',     // 可选，后端可不校验
+              reportType: row.reportType || '' // 可选，后端可不校验
+            };
+          });
+
+          addAllReport(reportList).then(res => {
+            if (res.code === 0) {
+              const successCount = res.data?.successCount || 0;
+              const failedOrders = res.data?.failedWorkOrders || [];
+              const failCount = failedOrders.length;
+
+              this.$message.success(`批量报工成功：${successCount} 条`);
+
+              if (failCount > 0) {
+                this.$message.warning(`批量报工失败：${failCount} 条，工单ID：${failedOrders.join(', ')}`);
+              }
+
+              this.getData();
+            } else {
+              this.$message.error(res.msg || '批量报工失败');
+            }
+          }).catch(err => {
+            this.$message.error('批量报工请求异常');
+            console.error('批量报工异常:', err);
+          });
+
+
+        }).catch(() => {
+          // 用户点击取消，不处理
+        });
+      },
+
 
       // // [RESTORE] 批量报工（不推荐  ）
       // allHandleReport() {
