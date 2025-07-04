@@ -1,3 +1,4 @@
+<!--设备台账页面-->
 <template>
   <div class="app-container">
     <el-row :gutter="20">
@@ -83,14 +84,14 @@
                 v-if="hasPerm('B003002000002')"
               >编辑
               </el-button>
-              <el-button
-                link
-                type="primary"
-                icon="Delete"
-                @click="handleDelete(scope.row)"
-                v-if="hasPerm('B003002000003')"
-              >删除
-              </el-button>
+<!--              <el-button-->
+<!--                link-->
+<!--                type="primary"-->
+<!--                icon="Delete"-->
+<!--                @click="handleDelete(scope.row)"-->
+<!--                v-if="hasPerm('B003002000003')"-->
+<!--              >删除-->
+<!--              </el-button>-->
             </template>
           </el-table-column>
         </el-table>
