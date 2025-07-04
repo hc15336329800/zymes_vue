@@ -324,9 +324,22 @@ export default {
 
     // 打开弹窗并设置初始数据
     openPlaceDialog(row) {
+
+      //设备默认时间
+      const now = new Date();
+      now.setDate(now.getDate() + 1); // 日期加 1 天
+      const yyyy = now.getFullYear();
+      const MM = String(now.getMonth() + 1).padStart(2, '0');
+      const dd = String(now.getDate()).padStart(2, '0');
+      const HH = String(now.getHours()).padStart(2, '0');
+      const mm = String(now.getMinutes()).padStart(2, '0');
+      const ss = String(now.getSeconds()).padStart(2, '0');
+      const tomorrowStr = `${yyyy}-${MM}-${dd} ${HH}:${mm}:${ss}`;
+
+
       this.placeForm = {
-        deliverTime: '',
-        bizType: '',
+        deliverTime: tomorrowStr, // 默认值：明天当前时间
+        bizType: '01',            // 默认值：正常
         orderNo: row.orderNo,
         saleId: row.id,
         orderedNum: row.waitOrderedNum || row.needNum || 1
