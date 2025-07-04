@@ -1,6 +1,8 @@
 <!--bom列表-->
 <template>
   <div class="app-container">
+
+<!--    搜索框-->
     <el-form :model="queryParams" ref="queryRef" class="query-form commen-search" :inline="true">
       <el-form-item label="BOM号" class="condition">
         <BomNoSelect :item-no.sync="queryParams.params.bomNo" />
@@ -32,6 +34,9 @@
       </el-form-item>
       <el-form-item></el-form-item>
     </el-form>
+
+
+<!--    工具栏-->
     <el-row class="flex_row pb_10 c_b fw_bold fs_24">
       <el-button
         type="primary"
@@ -50,17 +55,9 @@
         ref="uploadGong"
       />
 
-<!--      <upload-excel-component-->
-<!--        text="用料导入"-->
-<!--        v-if="hasPerm('B002004000006')"-->
-<!--        :on-success="uploadUsedSuccess"-->
-<!--        :loading="loading"-->
-<!--        ref="uploadYong"-->
-<!--        class="ml_20"-->
-<!--      />-->
 
 
-      <!--      // ==================== 上传相关 ====================-->
+      <!--       ==================== 上传相关 ====================-->
 
 
       <!-- 上传控件    v-if="showNewImport"-->
@@ -71,6 +68,7 @@
         <el-button size="mini" type="primary" style="margin-left: 20px; margin-right: 20px">用料导入NEW</el-button>
       </el-upload>
 
+      <!--      ==================== 手动同步相关 ====================-->
 
       <!-- 外部同步bom -->
       <el-button
@@ -78,7 +76,7 @@
         type="primary"
         icon="el-icon-plus"
          @click="confirmSyncErpToMes"
-      >完整同步ERP
+      >外部同步物料和bom和工序
       </el-button>
 
       <!-- 内部同步bom -->
@@ -87,8 +85,17 @@
         type="primary"
         icon="el-icon-plus"
         @click="confirmInnerSyncBom"
-      >内部同步bom和工序（bom依赖于时间）
+      >内部同步bom和工序（根据物料号/时间同步bom）
       </el-button>
+
+<!--      物料号-->
+      <el-input
+        v-if="showNewImport"
+        v-model="syncItemNo"
+        placeholder="请输入物料号"
+        size="mini"
+        style="width: 180px; margin-left: 10px;"
+      ></el-input>
 
 
       <!-- 新增：外部同步时间选择 -->
@@ -103,23 +110,6 @@
       ></el-date-picker>
 
 
-      <!--      &lt;!&ndash; 输入根物料编码 &ndash;&gt;-->
-      <!--      <el-input-->
-      <!--        v-model="rootItemNo"-->
-      <!--        placeholder="根物料编码"-->
-      <!--        size="mini"-->
-      <!--        style="width: 180px; margin:0 8px" />-->
-
-      <!--      &lt;!&ndash; 生成树 &ndash;&gt;-->
-      <!--      <el-button-->
-      <!--        size="mini"-->
-      <!--        type="success"-->
-      <!--        :disabled="!canGen"-->
-      <!--        @click="doGenTree">-->
-      <!--        生成 BOM 树-->
-      <!--      </el-button>-->
-
-
       <div
         @click="dialogVisible1=true"
         style="color:#3145ec;font-size:14px;float:right;z-index:999;position:absolute;right:0px;top:16px;"
@@ -127,6 +117,9 @@
         <span style="cursor:pointer;">下载模版</span>
       </div>
     </el-row>
+
+
+<!--    列表-->
     <el-table :data="pageList" class="commen-table mt_20">
       <el-table-column type="index" width="55" label="序号"></el-table-column>
       <el-table-column label="Bom号" align="center" prop="bomNo" />
@@ -158,6 +151,8 @@
       :limit.sync="queryParams.page.page_size"
       @pagination="getData"
     />
+
+
     <!-- 添加或修改对话框 -->
     <el-dialog :title="title" :visible.sync="dialogShow" width="960px" @close="beforeClose">
       <el-form :model="form" class="commen-form" :rules="rules" ref="form" label-width="100px">
@@ -257,6 +252,8 @@
         </div>
       </div>
     </el-dialog>
+
+
   </div>
 </template>
 <script>
@@ -286,10 +283,14 @@ export default {
       // 新增状态控制
       showNewImport: false,
 
+      syncItemNo: '', // 新增：同步物料号
+
+
       // ==================== 上传相关 ====================
 
       rootItemNo: '',     // 这里可手输或上传成功后再填写
       canGen: false,
+
 
       // ==================== 旧 ====================
 
@@ -421,7 +422,7 @@ export default {
 
 
 
-    //内部bom同步
+    // 内部同步
     async innerSyncBom() {
       this.loading = true
       let intervalFlag = null
@@ -432,7 +433,8 @@ export default {
         }, 5000)
 
         await innerSyncBom({
-          syncTime: this.syncTime // 新增：传入选中的时间参数
+          syncTime: this.syncTime, // 新增：传入选中的时间参数
+          itemNo: this.syncItemNo // 新增：传入物料号
         })
         this.$message.success('内部同步 BOM 完成')
         this.getData()
@@ -443,7 +445,7 @@ export default {
         this.loading = false
       }
     },
-    //wai 部bom同步
+    //   外部同步
     async syncErpToMes() {
       this.loading = true
       let intervalFlag = null
