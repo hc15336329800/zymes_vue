@@ -76,26 +76,10 @@
         type="primary"
         icon="el-icon-plus"
          @click="confirmSyncErpToMes"
-      >外部同步物料和bom和工序
+      >外部同步bom和工序
       </el-button>
 
-      <!-- 内部同步bom -->
-      <el-button
-        v-if="showNewImport"
-        type="primary"
-        icon="el-icon-plus"
-        @click="confirmInnerSyncBom"
-      >内部同步bom和工序（根据物料号/时间同步bom）
-      </el-button>
 
-<!--      物料号-->
-      <el-input
-        v-if="showNewImport"
-        v-model="syncItemNo"
-        placeholder="请输入物料号"
-        size="mini"
-        style="width: 180px; margin-left: 10px;"
-      ></el-input>
 
 
       <!-- 新增：外部同步时间选择 -->
@@ -106,8 +90,33 @@
         value-format="yyyy-MM-dd HH:mm:ss"
         placeholder="选择同步时间"
         size="mini"
-        style="margin-left: 10px;width:200px;"
+        style="margin-left: 10px;width:150px;"
       ></el-date-picker>
+
+      <!-- 内部同步bom -->
+      <el-button
+        v-if="showNewImport"
+        type="primary"
+        icon="el-icon-plus"
+        @click="confirmInnerSyncBom"
+      >内部同步bom和工序（按时间）
+      </el-button>
+
+
+
+
+        <el-input       v-if="showNewImport" v-model="syncItemNo" placeholder="请输入 itemNo 号" clearable size="mini" style="width:150px;" />
+
+      <el-input       v-if="showNewImport" v-model="syncBomNo" placeholder="请输入 BOM 号" clearable size="mini" style="width:150px;" />
+
+
+        <el-button    v-if="showNewImport"  size="mini" type="primary" @click="handleInnerSyncBomByItem">内部同步bom和工序（按物料）</el-button>
+
+
+
+
+
+
 
 
       <div
@@ -262,7 +271,14 @@ import { getWarehouseSelected } from '@/api/item/warehouse'
 import UploadExcelComponent from '@/components/UploadExcel/index.vue'
 import { get_new_export } from '@/api/common'
 import { uploadProcedure } from '@/api/item/mesProcedure'
-import { refreshBomTree, uploadUsed, uploadUsedNew ,innerSyncBom,syncErpToMes} from '@/api/item/mesItemUsed' // 路径按实际调整
+import {
+  refreshBomTree,
+  uploadUsed,
+  uploadUsedNew,
+  innerSyncBom,
+  syncErpToMes,
+  innerSyncBomItem
+} from '@/api/item/mesItemUsed' // 路径按实际调整
 
 
 export default {
@@ -283,7 +299,8 @@ export default {
       // 新增状态控制
       showNewImport: false,
 
-      syncItemNo: '', // 新增：同步物料号
+      syncItemNo: '0', // 新增：同步物料号
+      syncBomNo: '0', // 新增：同步BOM号
 
 
       // ==================== 上传相关 ====================
@@ -379,6 +396,42 @@ export default {
     },
 
 
+    //  内部同步工序和用料（根据物料号）
+    async handleInnerSyncBomByItem() {
+      if (!this.syncItemNo) {
+        this.$message.warning('请先选择物料号');
+        return;
+      }
+      if (!this.syncBomNo) {
+        this.$message.warning('请先选择 BOM 号');
+        return;
+      }
+
+      try {
+        this.loading = true;
+        let intervalFlag = setInterval(() => {
+          this.$message.info('操作正在进行中，请耐心等待...');
+        }, 5000);
+
+        await innerSyncBomItem({
+          ItemNo: this.syncItemNo,
+          bomNo: this.syncBomNo
+        });
+
+        this.$message.success('内部同步（按物料）完成');
+        this.getData();
+        this.loading = false;
+
+        clearInterval(intervalFlag);
+      } catch (e) {
+        this.$message.error('内部同步（按物料）失败');
+        this.loading = false;
+      } finally {
+        if (intervalFlag) clearInterval(intervalFlag);  // 保证清理
+        this.loading = false;
+      }
+    },
+
     confirmInnerSyncBom() {
       this.$prompt('请输入同步密码', '内部同步 ERP 验证', {
         confirmButtonText: '确定',
@@ -399,27 +452,6 @@ export default {
       });
     },
 
-    // // 新增：内部同步时弹窗输入密码，验证通过后调用原方法
-    // confirmInnerSyncBom() {
-    //   this.$prompt('请输入同步密码', '内部同步 BOM 验证', {
-    //     confirmButtonText: '确定',
-    //     cancelButtonText: '取消',
-    //     inputType: 'password',
-    //     inputValidator: (value) => {
-    //       if (value === '135896') {
-    //         return true;
-    //       } else {
-    //         return '密码错误';
-    //       }
-    //     }
-    //   }).then(({ value }) => {
-    //     // 密码正确，调用原同步方法
-    //     this.innerSyncBom();
-    //   }).catch(() => {
-    //     this.$message.info('已取消同步操作');
-    //   });
-    // },
-
 
 
     // 内部同步
@@ -434,7 +466,6 @@ export default {
 
         await innerSyncBom({
           syncTime: this.syncTime, // 新增：传入选中的时间参数
-          itemNo: this.syncItemNo // 新增：传入物料号
         })
         this.$message.success('内部同步 BOM 完成')
         this.getData()

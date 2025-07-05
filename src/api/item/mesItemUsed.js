@@ -3,9 +3,22 @@ import request from '@/utils/request'
 // ==================== 同步更新测试 ====================
 
 
+/**
+ * 内部同步 BOM 树（触发后端内部同步接口）（按物料）
+ */
+export function innerSyncBomItem(data = {}) {
+  return request({
+    url: '/api/item/mes_item_use/inner_sync_bom_item',
+    method: 'post',
+    data // 新增：传递参数
+  })
+}
+
+
+
 
 /**
- * 内部同步 BOM 树（触发后端内部同步接口）
+ * 内部同步 BOM 树（触发后端内部同步接口）（按时间）
  */
 export function innerSyncBom(data = {}) {
   return request({
