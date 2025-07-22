@@ -1,18 +1,18 @@
-<!--工序下发-->
+<!--工序分配-->
 <template>
   <div class="app-container">
     <el-form :model="queryParams" ref="queryRef" class="query-form commen-search" :inline="true">
       <el-form-item label="图纸号" class="condition">
         <BomNoSelect :item-no.sync="queryParams.params.itemNo"/>
       </el-form-item>
-      <el-form-item label="车间" class="condition">
-        <el-select v-model="queryParams.params.deptId" clearable placeholder="请选择状态" style="width:140px;" filterable>
-          <el-option :key="dept.code" v-for="(dept) in workShopList" :label="dept.name" :value="dept.code"></el-option>
-        </el-select>
-      </el-form-item>
-      <el-form-item label="设备" class="condition">
-        <deviceSelected :bind-id.sync="queryParams.params.deviceId"/>
-      </el-form-item>
+<!--      <el-form-item label="车间" class="condition">-->
+<!--        <el-select v-model="queryParams.params.deptId" clearable placeholder="请选择状态" style="width:140px;" filterable>-->
+<!--          <el-option :key="dept.code" v-for="(dept) in workShopList" :label="dept.name" :value="dept.code"></el-option>-->
+<!--        </el-select>-->
+<!--      </el-form-item>-->
+<!--      <el-form-item label="设备" class="condition">-->
+<!--        <deviceSelected :bind-id.sync="queryParams.params.deviceId"/>-->
+<!--      </el-form-item>-->
       <el-form-item label="工序名称" class="condition">
         <multipleProcedure :bind-name.sync='queryParams.params.procedureNames'/>
       </el-form-item>
@@ -44,7 +44,7 @@
       <el-button type="primary" class="commen-button" icon="el-icon-plus" @click="handleAdd">工序下发</el-button>
       <el-button type="primary" class="commen-button" icon="el-icon-plus" @click="updateStatus('01')">启用</el-button>
       <el-button type="primary" class="commen-button" icon="el-icon-plus" @click="updateStatus('00')">停用</el-button>
-      <el-button type="primary" class="commen-button" icon="el-icon-plus" @click="handleOuter">外协分配</el-button>
+<!--      <el-button type="primary" class="commen-button" icon="el-icon-plus" @click="handleOuter">外协分配</el-button>-->
 
     </el-row>
     <el-table :data="pageList" class="commen-table mt_20" @selection-change="handleSelectionChange">
@@ -60,8 +60,8 @@
       <el-table-column label="使用中间件数" align="center" prop="midCount"/>
       <el-table-column label="外协量" align="center" prop="outerAllocCount"/>
       <el-table-column label="单号" align="center" prop="orderNo"/>
-      <el-table-column label="设备名称" align="center" prop="deviceName"/>
-      <el-table-column label="车间" align="center" prop="deptName"/>
+<!--      <el-table-column label="设备名称" align="center" prop="deviceName"/>-->
+<!--      <el-table-column label="车间" align="center" prop="deptName"/>-->
       <el-table-column label="状态" align="center" prop="procStatusDesc"/>
 
     </el-table>

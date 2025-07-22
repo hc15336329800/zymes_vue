@@ -178,6 +178,7 @@ export const constantRoutes = [
         }
       },
 
+
       {
         path: 'BOMManagement',
         component: () => import('@/views/inventoryManagement/BOMManagement'),
@@ -865,7 +866,16 @@ export const constantRoutes = [
         meta: {
           title: '库位货物管理'
         }
-      }
+      },
+      {
+        path: 'deviceLocationSetting',
+        component: () =>
+          import('@/views/inventoryManagement/deviceLocationSetting'),
+        name: 'deviceLocationSetting',
+        meta: {
+          title: '设备工位设置'
+        }
+      },
     ]
   },
   // 托盘管理

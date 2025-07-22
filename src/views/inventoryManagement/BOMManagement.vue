@@ -99,7 +99,7 @@
         type="primary"
         icon="el-icon-plus"
         @click="confirmInnerSyncBom"
-      >内部同步bom和工序（按时间）
+      >内部同步bom和工序（2025-03-19）
       </el-button>
 
 
