@@ -121,22 +121,22 @@
             @click="updateOrderStatus(scope.row,'06')"
           >关闭
           </el-button>
-          <el-button
-            link
-            type="primary"
-            icon="Delete"
-            v-if="(scope.row.orderDtlStatus == '03'||scope.row .orderDtlStatus== '04')  && hasPerm('B006002000006')"
-            @click="updateOrderStatus(scope.row,'07')"
-          >暂停
-          </el-button>
-          <el-button
-            link
-            type="primary"
-            icon="Delete"
-            v-if="(scope.row.orderDtlStatus == '07'|| scope.row .orderDtlStatus== '06') &&   hasPerm('B006002000007')"
-            @click="updateOrderStatus(scope.row,'04')"
-          >恢复
-          </el-button>
+<!--          <el-button-->
+<!--            link-->
+<!--            type="primary"-->
+<!--            icon="Delete"-->
+<!--            v-if="(scope.row.orderDtlStatus == '03'||scope.row .orderDtlStatus== '04')  && hasPerm('B006002000006')"-->
+<!--            @click="updateOrderStatus(scope.row,'07')"-->
+<!--          >暂停-->
+<!--          </el-button>-->
+<!--          <el-button-->
+<!--            link-->
+<!--            type="primary"-->
+<!--            icon="Delete"-->
+<!--            v-if="(scope.row.orderDtlStatus == '07'|| scope.row .orderDtlStatus== '06') &&   hasPerm('B006002000007')"-->
+<!--            @click="updateOrderStatus(scope.row,'04')"-->
+<!--          >恢复-->
+<!--          </el-button>-->
         </template>
         </template>
       </el-table-column>

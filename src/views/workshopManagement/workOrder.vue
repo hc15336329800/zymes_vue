@@ -106,12 +106,12 @@
           >下达
           </el-button>
 
-          <el-button v-if="scope.row.deviceName.indexOf('折弯机') !==-1" link type="primary" icon="Delete"
-                     @click="handleHastrue(scope.row,0)">开始
-          </el-button>
-          <el-button v-if="scope.row.deviceName.indexOf('折弯机') !==-1" link type="primary" icon="Delete"
-                     @click="handleHastrue(scope.row,1)">完成
-          </el-button>
+<!--          <el-button v-if="scope.row.deviceName.indexOf('折弯机') !==-1" link type="primary" icon="Delete"-->
+<!--                     @click="handleHastrue(scope.row,0)">开始-->
+<!--          </el-button>-->
+<!--          <el-button v-if="scope.row.deviceName.indexOf('折弯机') !==-1" link type="primary" icon="Delete"-->
+<!--                     @click="handleHastrue(scope.row,1)">完成-->
+<!--          </el-button>-->
         </template>
       </el-table-column>
     </el-table>
@@ -546,8 +546,10 @@ export default {
     },
     getData() {
       workOrderList(this.queryParams).then(res => {
-        this.pageList = res.data
-        this.pageTotal = Number(res.page.total_num)
+        // 【新增】只保留 state = "就绪" 的数据
+        const allData = res.data || []
+        this.pageList = allData.filter(item => item.state === '就绪') // ⭐只显示“就绪”
+        this.pageTotal = this.pageList.length // 更新总数
       })
     },
     // 下达按钮

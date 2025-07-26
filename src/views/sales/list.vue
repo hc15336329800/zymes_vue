@@ -268,7 +268,8 @@ export default {
 
       queryParams: {
         params: {
-          canPlace: '01'
+          canPlace: '01',
+          placeStatus: '00'
         },
         page: {
           page_num: 1,
