@@ -80,12 +80,15 @@
       <!--      <el-table-column label="已下达数量" align="center" prop="assignCount"/>-->
       <!-- 深黄色   加粗 -->
 
-      <!-- [新增] 可报工数量 = 已下达 - 正品数量 -->
+      <!-- [修改] 可报工数量 = assignCount - max(realCount, toReviewRealCount) -->
       <el-table-column label="可报工数量" align="center">
         <template slot-scope="scope">
-          <span class="assign-count-highlight">
-            {{ (Number(scope.row.assignCount || 0) - Number(scope.row.realCount || 0)) }}
-          </span>
+    <span class="assign-count-highlight">
+      {{
+        Number(scope.row.assignCount || 0) -
+        Math.max(Number(scope.row.realCount || 0), Number(scope.row.toReviewRealCount || 0))
+      }}
+    </span>
         </template>
       </el-table-column>
 
