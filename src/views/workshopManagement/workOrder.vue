@@ -548,7 +548,9 @@ export default {
       workOrderList(this.queryParams).then(res => {
         // 【新增】只保留 state = "就绪" 的数据
         const allData = res.data || []
-        this.pageList = allData.filter(item => item.state === '就绪') // ⭐只显示“就绪”
+        this.pageList = allData.filter(item =>
+          item.state === '就绪' || (item.state === '已下达' && Number(item.waitAssignCount) > 0)
+        )
         this.pageTotal = this.pageList.length // 更新总数
       })
     },

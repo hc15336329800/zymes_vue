@@ -41,3 +41,14 @@ export function getBomTreePage(data) {
     data
   })
 }
+
+
+
+
+// ✅ 新增：订单进度测试
+export function getOrderList() {
+  return request({
+    url: '/api/item/orderProgressSummary/list',
+    method: 'post'
+  })
+}

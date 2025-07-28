@@ -1,7 +1,7 @@
 <template>
   <div class style="width:100%;height:100%;">
     <!-- <component :is="currentRole" /> -->
-    12313
+    .
   </div>
 </template>
 
