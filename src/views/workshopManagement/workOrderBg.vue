@@ -5,7 +5,7 @@
     <!--    工具栏-->
     <el-form :model="queryParams" ref="queryRef" class="query-form commen-search" :inline="true">
       <el-form-item label="图纸号" class="condition">
-        <BomNoSelect :item-no.sync="queryParams.params.itemNo"/>
+        <BomNoSelect :item-no.sync="queryParams.params.itemNo" />
       </el-form-item>
       <!--      <el-form-item prop="workOrderNo" label="工单号" class="condition">-->
       <!--        <el-input v-model="queryParams.params.workOrderNo"/>-->
@@ -37,7 +37,7 @@
       <!--        </el-select>-->
       <!--      </el-form-item>-->
       <el-form-item label="工序名称" class="condition">
-        <multipleProcedure :bind-name.sync="queryParams.params.procedureNames"/>
+        <multipleProcedure :bind-name.sync="queryParams.params.procedureNames" />
       </el-form-item>
       <el-form-item class="commen-button">
         <el-button type="primary" icon="el-icon-search" @click="handleQuery">搜索</el-button>
@@ -54,60 +54,69 @@
       </el-form-item>
 
 
-
     </el-form>
     <el-row class="mb8">
       <!--      <el-button type="primary" class="commen-button" icon="el-icon-plus" @click="handleAdd">新增</el-button>-->
     </el-row>
 
-<!--    表格-->
-    <el-table :data="pageList" class="commen-table mt_20"  @selection-change="handleSelectionChange">
+    <!--    表格-->
+    <el-table :data="pageList" class="commen-table mt_20" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55"></el-table-column>
-<!--      <el-table-column type="index" width="50" label="序号"></el-table-column>-->
-      <el-table-column label="订单号" align="center" prop="orderNo"  min-width="100"/>
+      <!--      <el-table-column type="index" width="50" label="序号"></el-table-column>-->
+      <el-table-column label="订单号" align="center" prop="orderNo" min-width="100" />
 
-      <el-table-column label="分组编号" align="center"  v-if="false" prop="groupId"   min-width="100"/>
+      <el-table-column label="分组编号" align="center" v-if="false" prop="groupId" min-width="100" />
 
-      <el-table-column label="bom号" align="center" prop="bomNo"   min-width="100"/>
-      <el-table-column label="物料号" align="center" prop="itemNo"/>
-      <el-table-column label="物料名" align="center" prop="itemName"/>
-<!--      <el-table-column label="图纸号" align="center" prop="bomNo"/>-->
-       <el-table-column label="工单号" align="center" prop="workOrderNo"/>
-      <el-table-column label="工序" align="center" prop="procedureName"/>
-      <el-table-column label="设备" align="center" prop="deviceName"/>
-      <el-table-column label="车间" align="center" prop="deptName"/>
-<!--      <el-table-column label="班次" align="center" prop="shiftType" :formatter="statusFormatter"/>-->
-<!--      <el-table-column label="分配数量" align="center" prop="planTotalCount"/>-->
-<!--      <el-table-column label="已下达数量" align="center" prop="assignCount"/>-->
+      <el-table-column label="bom号" align="center" prop="bomNo" min-width="100" />
+      <el-table-column label="物料号" align="center" prop="itemNo" />
+      <el-table-column label="物料名" align="center" prop="itemName" />
+      <!--      <el-table-column label="图纸号" align="center" prop="bomNo"/>-->
+      <el-table-column label="工单号" align="center" prop="workOrderNo" />
+      <el-table-column label="工序" align="center" prop="procedureName" />
+      <el-table-column label="设备" align="center" prop="deviceName" />
+<!--      <el-table-column label="车间" align="center" prop="deptName" />-->
+      <!--      <el-table-column label="班次" align="center" prop="shiftType" :formatter="statusFormatter"/>-->
+      <!--      <el-table-column label="分配数量" align="center" prop="planTotalCount"/>-->
+      <!--      <el-table-column label="已下达数量" align="center" prop="assignCount"/>-->
       <!-- 深黄色   加粗 -->
-      <el-table-column label="已下达数量" align="center">
+
+      <!-- [新增] 可报工数量 = 已下达 - 正品数量 -->
+      <el-table-column label="可报工数量" align="center">
         <template slot-scope="scope">
-          <span class="assign-count-highlight">{{ scope.row.assignCount }}</span>
+          <span class="assign-count-highlight">
+            {{ (Number(scope.row.assignCount || 0) - Number(scope.row.realCount || 0)) }}
+          </span>
         </template>
       </el-table-column>
 
-<!--      <el-table-column label="可下达数量" align="center" prop="waitAssignCount"/>-->
-      <el-table-column label="待验收正品数量" align="center" prop="toReviewRealCount"/>
-      <el-table-column label="正品数量" align="center" prop="realCount"/>
-      <el-table-column label="待确认次品数量" align="center" prop="toReviewDeffCount"/>
-      <el-table-column label="次品数量" align="center" prop="deffCount"/>
-      <el-table-column label="工单状态" align="center" prop="state"/>
-      <el-table-column label="更新时间" align="center" prop="updatedTime" width="100"/>
-<!--      <el-table-column label="操作" align="center"  >-->
+<!--      <el-table-column label="已下达数量" align="center">-->
 <!--        <template slot-scope="scope">-->
-<!--          &lt;!&ndash; 确认后不能编辑和删除 &ndash;&gt;-->
-
-<!--          <el-button link type="primary"   icon="Delete" @click="handleReport(scope.row)" v-show="buttonShow">-->
-<!--            报工-->
-<!--          </el-button>-->
-<!--&lt;!&ndash;          <el-button v-if="scope.row.deviceName.indexOf('折弯机') !==-1" link type="primary" icon="Delete"&ndash;&gt;-->
-<!--&lt;!&ndash;                     @click="handleHastrue(scope.row,0)">开始&ndash;&gt;-->
-<!--&lt;!&ndash;          </el-button>&ndash;&gt;-->
-<!--&lt;!&ndash;          <el-button v-if="scope.row.deviceName.indexOf('折弯机') !==-1" link type="primary" icon="Delete"&ndash;&gt;-->
-<!--&lt;!&ndash;                     @click="handleHastrue(scope.row,1)">完成&ndash;&gt;-->
-<!--&lt;!&ndash;          </el-button>&ndash;&gt;-->
+<!--          <span class="assign-count-highlight">{{ scope.row.assignCount }}</span>-->
 <!--        </template>-->
 <!--      </el-table-column>-->
+
+      <!--      <el-table-column label="可下达数量" align="center" prop="waitAssignCount"/>-->
+      <el-table-column label="待验收正品数量" align="center" prop="toReviewRealCount" />
+      <el-table-column label="正品数量" align="center" prop="realCount" />
+      <el-table-column label="待确认次品数量" align="center" prop="toReviewDeffCount" />
+      <el-table-column label="次品数量" align="center" prop="deffCount" />
+      <el-table-column label="工单状态" align="center" prop="state" />
+      <el-table-column label="更新时间" align="center" prop="updatedTime" width="100" />
+      <!--      <el-table-column label="操作" align="center"  >-->
+      <!--        <template slot-scope="scope">-->
+      <!--          &lt;!&ndash; 确认后不能编辑和删除 &ndash;&gt;-->
+
+      <!--          <el-button link type="primary"   icon="Delete" @click="handleReport(scope.row)" v-show="buttonShow">-->
+      <!--            报工-->
+      <!--          </el-button>-->
+      <!--&lt;!&ndash;          <el-button v-if="scope.row.deviceName.indexOf('折弯机') !==-1" link type="primary" icon="Delete"&ndash;&gt;-->
+      <!--&lt;!&ndash;                     @click="handleHastrue(scope.row,0)">开始&ndash;&gt;-->
+      <!--&lt;!&ndash;          </el-button>&ndash;&gt;-->
+      <!--&lt;!&ndash;          <el-button v-if="scope.row.deviceName.indexOf('折弯机') !==-1" link type="primary" icon="Delete"&ndash;&gt;-->
+      <!--&lt;!&ndash;                     @click="handleHastrue(scope.row,1)">完成&ndash;&gt;-->
+      <!--&lt;!&ndash;          </el-button>&ndash;&gt;-->
+      <!--        </template>-->
+      <!--      </el-table-column>-->
     </el-table>
     <pagination
       style="text-align: right"
@@ -128,7 +137,7 @@
         label-width="80px"
       >
         <el-form-item prop="procedureName" label="工序名称" class="condition">
-          <el-input v-model="reportForm.procedureName" :disabled="true"/>
+          <el-input v-model="reportForm.procedureName" :disabled="true" />
         </el-form-item>
         <el-form-item label="报工类型" class="condition" prop="groupId" style="width:100%;">
           <el-select
@@ -148,25 +157,25 @@
           </el-select>
         </el-form-item>
 
-<!--        <el-form-item label="分组备用" class="condition" prop="groupId">-->
-<!--          <el-select-->
-<!--            v-model="reportForm.groupId"-->
-<!--            clearable-->
-<!--            placeholder="请选择分组"-->
-<!--            style="width:200px;"-->
-<!--            filterable-->
-<!--          >-->
-<!--            <el-option-->
-<!--              :key="dept.code"-->
-<!--              v-for="(dept) in groupList"-->
-<!--              :label="dept.name"-->
-<!--              :value="dept.code"-->
-<!--            ></el-option>-->
-<!--          </el-select>-->
-<!--        </el-form-item>-->
-<!--        -->
+        <!--        <el-form-item label="分组备用" class="condition" prop="groupId">-->
+        <!--          <el-select-->
+        <!--            v-model="reportForm.groupId"-->
+        <!--            clearable-->
+        <!--            placeholder="请选择分组"-->
+        <!--            style="width:200px;"-->
+        <!--            filterable-->
+        <!--          >-->
+        <!--            <el-option-->
+        <!--              :key="dept.code"-->
+        <!--              v-for="(dept) in groupList"-->
+        <!--              :label="dept.name"-->
+        <!--              :value="dept.code"-->
+        <!--            ></el-option>-->
+        <!--          </el-select>-->
+        <!--        </el-form-item>-->
+        <!--        -->
 
-          <!-- [MOD] 只读显示：禁用下拉 -->
+        <!-- [MOD] 只读显示：禁用下拉 -->
         <!-- 只读分组：用户无法修改，只做回显 -->
         <el-form-item label="所属分组" class="condition">
           <el-select v-model="reportForm.groupId" :disabled="true" style="width:100%;">
@@ -187,9 +196,9 @@
                       class="assign-input"
                       oninput="this.value=this.value.replace(/[^0-9.]/g,'')">
             </el-input>
-            <el-button-group   class="assign-btn-group"    style="margin-left:4px;">
-              <el-button icon="el-icon-minus" size="mini" @click="decAssignRealCount"/>
-              <el-button icon="el-icon-plus"  size="mini" @click="  incAssignRealCount"/>
+            <el-button-group class="assign-btn-group" style="margin-left:4px;">
+              <el-button icon="el-icon-minus" size="mini" @click="decAssignRealCount" />
+              <el-button icon="el-icon-plus" size="mini" @click="  incAssignRealCount" />
             </el-button-group>
           </div>
         </el-form-item>
@@ -202,9 +211,9 @@
                       class="assign-input"
                       oninput="this.value=this.value.replace(/[^0-9.]/g,'')">
             </el-input>
-            <el-button-group   class="assign-btn-group"    style="margin-left:4px;">
-              <el-button icon="el-icon-minus" size="mini" @click="decAssignDeffCount"/>
-              <el-button icon="el-icon-plus"  size="mini" @click="  incAssignDeffCount"/>
+            <el-button-group class="assign-btn-group" style="margin-left:4px;">
+              <el-button icon="el-icon-minus" size="mini" @click="decAssignDeffCount" />
+              <el-button icon="el-icon-plus" size="mini" @click="  incAssignDeffCount" />
             </el-button-group>
           </div>
         </el-form-item>
@@ -227,7 +236,7 @@
         label-width="80px"
       >
         <el-form-item prop="procedureName" label="已选择序号" class="condition" v-if="showFormItem">
-          <el-input v-model="reportForm1.ids" :disabled="true"/>
+          <el-input v-model="reportForm1.ids" :disabled="true" />
         </el-form-item>
         <el-form-item label="报工类型" class="condition" prop="groupId">
           <el-select
@@ -271,406 +280,405 @@
   </div>
 </template>
 <script>
-  import {dictInfo} from '@/api/common'
-  import {addAssign, addReport,addAllReport, workOrderList, saveItemand, getRealnumber,allAddAssign} from '@/api/workOrder/workOrder'
-  import {groupSelected} from '@/api/group/group'
+import { dictInfo } from '@/api/common'
+import { addAllReport, addReport, getRealnumber, saveItemand, workOrderList } from '@/api/workOrder/workOrder'
+import { groupSelected } from '@/api/group/group'
 
 
-  export default {
-    components: {
-      DateIntervals: () => import('@/components/DateIntervals'),
-      Pagination: () => import('@/components/Pagination'),
-      BomNoSelect: () => import('@/components/Item/BomNo'),
-      WorkShop: () => import('@/components/Dept/workShop'),
-      deviceSelected: () => import('@/components/Device/deviceSelected'),
-      multipleProcedure: () => import('@/components/Item/multipleProcedure')
-    },
-    data() {
-      return {
-        queryParams: {
-          params: {
-            status:'01'
-          },
-          page: {
-            page_num: 1,
-            page_size: 10
+export default {
+  components: {
+    DateIntervals: () => import('@/components/DateIntervals'),
+    Pagination: () => import('@/components/Pagination'),
+    BomNoSelect: () => import('@/components/Item/BomNo'),
+    WorkShop: () => import('@/components/Dept/workShop'),
+    deviceSelected: () => import('@/components/Device/deviceSelected'),
+    multipleProcedure: () => import('@/components/Item/multipleProcedure')
+  },
+  data() {
+    return {
+      queryParams: {
+        params: {
+          status: '01'
+        },
+        page: {
+          page_num: 1,
+          page_size: 10
+        }
+      },
+      reportForm: {},
+      reportForm1: {},
+      groupList: [],
+      reportTypeList: [],
+      pageTotal: 0,
+      pageList: {},
+      workShopList: [],
+      dialogShow1: false,
+      dialogShow2: false,
+      showFormItem: false,
+      buttonShow: false,
+      multipleSelection: [],
+      rules1: {
+        realCount: [
+          { required: true, message: '请输入正品数量', trigger: 'blur' },
+          {                                             // [MOD] 数值 0-100
+            validator: (r, v, cb) => {
+              const num = Number(v)
+              if (isNaN(num)) cb(new Error('只能输入数字'))
+              else if (num < 0 || num > 100) cb(new Error('范围 0-100'))
+              else cb()
+            }, trigger: 'blur'
           }
-        },
-        reportForm: {},
-        reportForm1: {},
-        groupList: [],
-        reportTypeList: [],
-        pageTotal: 0,
-        pageList: {},
-        workShopList: [],
-        dialogShow1: false,
-        dialogShow2: false,
-        showFormItem: false,
-        buttonShow: false,
-        multipleSelection: [],
-        rules1: {
-          realCount: [
-            { required: true, message: '请输入正品数量', trigger: 'blur' },
-            {                                             // [MOD] 数值 0-100
-              validator: (r, v, cb) => {
-                const num = Number(v);
-                if (isNaN(num))      cb(new Error('只能输入数字'));
-                else if (num < 0 || num > 100) cb(new Error('范围 0-100'));
-                else cb();
-              }, trigger: 'blur'
-            }
-          ],
-          deffCount: [
-            { required: true, message: '请输入次品数量', trigger: 'blur' },
-            {
-              validator: (r, v, cb) => {
-                const num = Number(v);
-                if (isNaN(num))      cb(new Error('只能输入数字'));
-                else if (num < 0 || num > 100) cb(new Error('范围 0-100'));
-                else cb();
-              }, trigger: 'blur'
-            }
-          ],
-          groupId: [{required: true, message: '请选择分组', trigger: 'blur'}],
-          reportType: [
-            {required: true, message: '请选择报工类型', trigger: 'blur'}
-          ]
-        },
-        rules2: {
-          groupId: [{required: true, message: '请选择分组', trigger: 'blur'}],
-          reportType: [
-            {required: true, message: '请选择报工类型', trigger: 'blur'}
-          ]
-        },
-        selectList: []
+        ],
+        deffCount: [
+          { required: true, message: '请输入次品数量', trigger: 'blur' },
+          {
+            validator: (r, v, cb) => {
+              const num = Number(v)
+              if (isNaN(num)) cb(new Error('只能输入数字'))
+              else if (num < 0 || num > 100) cb(new Error('范围 0-100'))
+              else cb()
+            }, trigger: 'blur'
+          }
+        ],
+        groupId: [{ required: true, message: '请选择分组', trigger: 'blur' }],
+        reportType: [
+          { required: true, message: '请选择报工类型', trigger: 'blur' }
+        ]
+      },
+      rules2: {
+        groupId: [{ required: true, message: '请选择分组', trigger: 'blur' }],
+        reportType: [
+          { required: true, message: '请选择报工类型', trigger: 'blur' }
+        ]
+      },
+      selectList: []
+    }
+  },
+  created() {
+    const user = localStorage.getItem('user_info')
+    const name = JSON.parse(user).userName
+    this.buttonShow = true
+    this.getSelectOptions()
+    this.getData()
+  },
+  methods: {
+
+
+    ///////////////////////////////////////////////////////////数值增减///////////////////////////////////////////////////////////
+
+    /* ---------- 数量 ±1 ---------- */
+    clamp(val) {                              // 公用限幅
+      if (isNaN(val) || val < 0) return 0
+      if (val > 100) return 100
+      return val
+    },
+
+    incAssignRealCount() {
+      this.reportForm.realCount = this.clamp((Number(this.reportForm.realCount) || 0) + 1)
+    },
+    decAssignRealCount() {
+      this.reportForm.realCount = this.clamp((Number(this.reportForm.realCount) || 0) - 1)
+    },
+    incAssignDeffCount() {
+      this.reportForm.deffCount = this.clamp((Number(this.reportForm.deffCount) || 0) + 1)
+    },
+    decAssignDeffCount() {
+      this.reportForm.deffCount = this.clamp((Number(this.reportForm.deffCount) || 0) - 1)
+    },
+
+    ///////////////////////////////////////////////////////////报工///////////////////////////////////////////////////////////
+
+    // [RESTORE] 单行报工 —— 打开 dialogShow1
+    handleReport(row) {
+
+      // 剩余可报工 = 已下达 − 已报正品 − 已报次品
+      const maxRemain = Math.max(
+        0,
+        Number(row.assignCount || 0) - Number(row.realCount || 0) - Number(row.deffCount || 0)
+      )
+
+      // 部分设备需实时获取已生产数量
+      const needFetch = row.deviceName.includes('切管机') ||
+        row.deviceName.includes('火焰切割机') ||
+        row.deviceName.includes('焊接')
+
+      const openDialog = (real) => {
+        this.reportForm = {
+          workOrderId: row.id,
+          procedureName: row.procedureName,
+          realCount: real,
+          deffCount: 0,
+          reportType: this.reportTypeList[2]?.code || '',
+          groupId: row.groupId || '',
+          maxRemain                    // <-- 保存到表单，后面校验用
+        }
+        this.dialogShow1 = true
+      }
+
+      if (needFetch) {
+        getRealnumber(row).then(res => openDialog(res.data || 0))
+      } else {
+        openDialog(row.waitReportCount || 0)
       }
     },
-    created() {
-      const user = localStorage.getItem('user_info');
-      const name = JSON.parse(user).userName;
-      this.buttonShow = true;
-      this.getSelectOptions()
-      this.getData()
-    },
-    methods: {
 
 
-      ///////////////////////////////////////////////////////////数值增减///////////////////////////////////////////////////////////
+    //  单个报工提交接口
+    submitForm1() {
+      this.$refs.reportForm.validate(valid => {
+        if (!valid) return
 
-      /* ---------- 数量 ±1 ---------- */
-      clamp(val) {                              // 公用限幅
-        if (isNaN(val) || val < 0)   return 0;
-        if (val > 100)               return 100;
-        return val;
-      },
+        /* ===== 业务层二次校验 ===== */
+        const real = Number(this.reportForm.realCount)
+        const deff = Number(this.reportForm.deffCount)
+        const remain = Number(this.reportForm.maxRemain)        // 可报工上限
 
-      incAssignRealCount() {
-        this.reportForm.realCount = this.clamp((Number(this.reportForm.realCount) || 0) + 1);
-      },
-      decAssignRealCount() {
-        this.reportForm.realCount = this.clamp((Number(this.reportForm.realCount) || 0) - 1);
-      },
-      incAssignDeffCount() {
-        this.reportForm.deffCount = this.clamp((Number(this.reportForm.deffCount) || 0) + 1);
-      },
-      decAssignDeffCount() {
-        this.reportForm.deffCount = this.clamp((Number(this.reportForm.deffCount) || 0) - 1);
-      },
-
-      ///////////////////////////////////////////////////////////报工///////////////////////////////////////////////////////////
-
-      // [RESTORE] 单行报工 —— 打开 dialogShow1
-      handleReport(row) {
-
-        // 剩余可报工 = 已下达 − 已报正品 − 已报次品
-        const maxRemain = Math.max(
-          0,
-          Number(row.assignCount || 0) - Number(row.realCount || 0) - Number(row.deffCount || 0)
-        );
-
-        // 部分设备需实时获取已生产数量
-        const needFetch = row.deviceName.includes('切管机') ||
-          row.deviceName.includes('火焰切割机') ||
-          row.deviceName.includes('焊接');
-
-        const openDialog = (real) => {
-          this.reportForm = {
-            workOrderId: row.id,
-            procedureName: row.procedureName,
-            realCount: real,
-            deffCount: 0,
-            reportType: this.reportTypeList[2]?.code || '',
-            groupId: row.groupId || '',
-            maxRemain                    // <-- 保存到表单，后面校验用
-          };
-          this.dialogShow1 = true;
-        };
-
-        if (needFetch) {
-          getRealnumber(row).then(res => openDialog(res.data || 0));
-        } else {
-          openDialog(row.waitReportCount || 0);
-        }
-      },
-
-
-      //  单个报工提交接口
-      submitForm1() {
-        this.$refs.reportForm.validate(valid => {
-          if (!valid) return;
-
-          /* ===== 业务层二次校验 ===== */
-          const real = Number(this.reportForm.realCount);
-          const deff = Number(this.reportForm.deffCount);
-          const remain = Number(this.reportForm.maxRemain);        // 可报工上限
-
-          // 正品：必须有值且 > 0
-          if (isNaN(real) || real <= 0) {
-            this.$message.error('正品数量必须大于 0');
-            return;
-          }
-
-          // 次品：允许 0，但不能为空
-          if (this.reportForm.deffCount === '' || this.reportForm.deffCount === null || isNaN(deff)) {
-            this.$message.error('次品数量不能为空，可填 0');
-            return;
-          }
-
-          // 可报工数量校验
-            if (real + deff > remain) {
-            this.$message.error(`正品+次品之和不能超过剩余可报工数量 ${remain}`);
-                return;
-          }
-
-          // （可选）再次确保两者均在 0–100 之间
-          if (real > 100 || deff > 100) {
-            this.$message.error('数量区间必须在 0–100');
-            return;
-          }
-          /* ======================== */
-
-          // addReport({ params: this.reportForm }).then(() => {
-          //   this.$message.success('报工成功');
-          //   this.dialogShow1 = false;
-          //   this.getData();
-          // });
-          // === 二次确认 ===
-          this.$confirm(
-            `确认完成本次报工吗？`,
-            '提示',
-            { confirmButtonText: '确定', cancelButtonText: '取消', type: 'warning' }
-          ).then(() => {
-            // 用户点击“确定”后才真正提交
-            addReport({ params: this.reportForm }).then(() => {
-              this.$message.success('报工成功');
-              this.dialogShow1 = false;
-              this.getData();
-            });
-          }).catch(() => {
-            /* 用户点取消——不做任何操作 */
-          });
-
-
-
-        });
-      },
-
-
-      // 批量报工
-      allHandleReport() {
-        if (this.multipleSelection.length === 0) {
-          this.$message.error('请勾选需要报工的数据！');
-          return;
+        // 正品：必须有值且 > 0
+        if (isNaN(real) || real <= 0) {
+          this.$message.error('正品数量必须大于 0')
+          return
         }
 
+        // 次品：允许 0，但不能为空
+        if (this.reportForm.deffCount === '' || this.reportForm.deffCount === null || isNaN(deff)) {
+          this.$message.error('次品数量不能为空，可填 0')
+          return
+        }
+
+        // 可报工数量校验
+        if (real + deff > remain) {
+          this.$message.error(`正品+次品之和不能超过剩余可报工数量 ${remain}`)
+          return
+        }
+
+        // （可选）再次确保两者均在 0–100 之间
+        if (real > 100 || deff > 100) {
+          this.$message.error('数量区间必须在 0–100')
+          return
+        }
+        /* ======================== */
+
+        // addReport({ params: this.reportForm }).then(() => {
+        //   this.$message.success('报工成功');
+        //   this.dialogShow1 = false;
+        //   this.getData();
+        // });
+        // === 二次确认 ===
         this.$confirm(
-          '确认对选中工单执行批量报工吗？',
+          `确认完成本次报工吗？`,
           '提示',
           { confirmButtonText: '确定', cancelButtonText: '取消', type: 'warning' }
         ).then(() => {
-          // 构建批量报工请求数据
-          const reportList = this.multipleSelection.map(row => {
-            const assign = Number(row.assignCount || 0);
-            const real = Number(row.realCount || 0);
-            const deff = Number(row.deffCount || 0);
-            const wait = Math.max(0, assign - real - deff); // 最大可报工数量
-
-            return {
-              workOrderId: row.id,
-              realCount: wait,
-              deffCount: 0,
-              groupId: row.groupId || '',     // 可选，后端可不校验
-              reportType: row.reportType || '' // 可选，后端可不校验
-            };
-          });
-
-          addAllReport(reportList).then(res => {
-            if (res.code === 0) {
-              const successCount = res.data?.successCount || 0;
-              const failedOrders = res.data?.failedWorkOrders || [];
-              const failCount = failedOrders.length;
-
-              this.$message.success(`批量报工成功：${successCount} 条`);
-
-              if (failCount > 0) {
-                this.$message.warning(`批量报工失败：${failCount} 条，工单ID：${failedOrders.join(', ')}`);
-              }
-
-              this.getData();
-            } else {
-              this.$message.error(res.msg || '批量报工失败');
-            }
-          }).catch(err => {
-            this.$message.error('批量报工请求异常');
-            console.error('批量报工异常:', err);
-          });
-
-
-        }).catch(() => {
-          // 用户点击取消，不处理
-        });
-      },
-
-
-      // // [RESTORE] 批量报工（不推荐  ）
-      // allHandleReport() {
-      //   if (this.selectList.length === 0) {
-      //     this.$message.error('请勾选数据！');
-      //     return;
-      //   }
-      //   this.reportForm1 = {
-      //     ids: this.selectList,
-      //     reportType: '',
-      //     groupId: ''
-      //   };
-      //   this.showFormItem = true;
-      //   this.dialogShow2 = true;
-      // },
-      //
-      // // [RESTORE] 批量报工提交
-      // submitForm2() {
-      //   this.$refs.reportForm1.validate(valid => {
-      //     if (!valid) return;
-      //     addAllReport({ params: this.reportForm1 }).then(() => {
-      //       this.$message.success('批量报工成功');
-      //       this.dialogShow2 = false;
-      //       this.getData();
-      //     });
-      //   });
-      // },
-
-      ///////////////////////////////////////////////////////////其他///////////////////////////////////////////////////////////
-
-      getSelectOptions() {
-        dictInfo('WORK_SHOP', r => (this.workShopList = r))
-        dictInfo('REPORT_TYPE', r => (this.reportTypeList = r))
-
-
-        groupSelected({}).then(res => {
-          this.groupList = res.data
-        })
-      },
-      /** 搜索按钮操作 */
-      handleQuery() {
-        this.queryParams.page.page_num = 1
-        this.getData()
-      },
-      beforeClose1() {
-        this.reportForm = {}
-        this.$refs['reportForm'].clearValidate()
-      },
-
-      /** 重置操作表单 */
-      handleReset() {
-        this.queryParams = {
-          page: {
-            page_num: 1,
-            page_size: 10
-          },
-          params: {}
-        }
-        this.getData()
-      },
-      getData() {
-        workOrderList(this.queryParams).then(res => {
-          // 【新增】只保留 state = "就绪" 的数据
-          const allData = res.data || []
-          this.pageList = allData.filter(item => item.state === '已下达') // ⭐只显示“就绪”
-          this.pageTotal = this.pageList.length // 更新总数
-        })
-      },
-
-
-      handleHastrue(row, statu) {
-        row.dataStatus = statu;
-        saveItemand({
-          params: row
-        }).then(res => {
-          this.getData()
-          this.$message({
-            type: 'success',
-            message: '开始加工'
+          // 用户点击“确定”后才真正提交
+          addReport({ params: this.reportForm }).then(() => {
+            this.$message.success('报工成功')
+            this.dialogShow1 = false
+            this.getData()
           })
+        }).catch(() => {
+          /* 用户点取消——不做任何操作 */
         })
-      },
 
 
-      cancel1() {
-        this.dialogShow1 = false
-        this.reportForm = {}
-        this.$refs['reportForm'].clearValidate()
-      },
-      statusFormatter(row, column) {
-        if (row.shiftType === '01') {
-          return '白班';
-        } else if (row.shiftType === '02') {
-          return '夜班';
-        }
-        return '未知';
-      },
+      })
+    },
 
-      handleSelectionChange(val) {
-        if (val.length == this.pageList.length) {
-          // console.log(this.pageList)
-          //当前页数据全选
-          this.pageList.forEach(item => {
-            console.log(item)
-            if (this.selectList.every(it => it != item.id)) {
+
+    // 批量报工
+    allHandleReport() {
+      if (this.multipleSelection.length === 0) {
+        this.$message.error('请勾选需要报工的数据！')
+        return
+      }
+
+      this.$confirm(
+        '确认对选中工单执行批量报工吗？',
+        '提示',
+        { confirmButtonText: '确定', cancelButtonText: '取消', type: 'warning' }
+      ).then(() => {
+        // 构建批量报工请求数据
+        const reportList = this.multipleSelection.map(row => {
+          const assign = Number(row.assignCount || 0)
+          const real = Number(row.realCount || 0)
+          const deff = Number(row.deffCount || 0)
+          const wait = Math.max(0, assign - real - deff) // 最大可报工数量
+
+          return {
+            workOrderId: row.id,
+            realCount: wait,
+            deffCount: 0,
+            groupId: row.groupId || '',     // 可选，后端可不校验
+            reportType: row.reportType || '' // 可选，后端可不校验
+          }
+        })
+
+        addAllReport(reportList).then(res => {
+          if (res.code === 0) {
+            const successCount = res.data?.successCount || 0
+            const failedOrders = res.data?.failedWorkOrders || []
+            const failCount = failedOrders.length
+
+            this.$message.success(`批量报工成功：${successCount} 条`)
+
+            if (failCount > 0) {
+              this.$message.warning(`批量报工失败：${failCount} 条，工单ID：${failedOrders.join(', ')}`)
+            }
+
+            this.getData()
+          } else {
+            this.$message.error(res.msg || '批量报工失败')
+          }
+        }).catch(err => {
+          this.$message.error('批量报工请求异常')
+          console.error('批量报工异常:', err)
+        })
+
+
+      }).catch(() => {
+        // 用户点击取消，不处理
+      })
+    },
+
+
+    // // [RESTORE] 批量报工（不推荐  ）
+    // allHandleReport() {
+    //   if (this.selectList.length === 0) {
+    //     this.$message.error('请勾选数据！');
+    //     return;
+    //   }
+    //   this.reportForm1 = {
+    //     ids: this.selectList,
+    //     reportType: '',
+    //     groupId: ''
+    //   };
+    //   this.showFormItem = true;
+    //   this.dialogShow2 = true;
+    // },
+    //
+    // // [RESTORE] 批量报工提交
+    // submitForm2() {
+    //   this.$refs.reportForm1.validate(valid => {
+    //     if (!valid) return;
+    //     addAllReport({ params: this.reportForm1 }).then(() => {
+    //       this.$message.success('批量报工成功');
+    //       this.dialogShow2 = false;
+    //       this.getData();
+    //     });
+    //   });
+    // },
+
+    ///////////////////////////////////////////////////////////其他///////////////////////////////////////////////////////////
+
+    getSelectOptions() {
+      dictInfo('WORK_SHOP', r => (this.workShopList = r))
+      dictInfo('REPORT_TYPE', r => (this.reportTypeList = r))
+
+
+      groupSelected({}).then(res => {
+        this.groupList = res.data
+      })
+    },
+    /** 搜索按钮操作 */
+    handleQuery() {
+      this.queryParams.page.page_num = 1
+      this.getData()
+    },
+    beforeClose1() {
+      this.reportForm = {}
+      this.$refs['reportForm'].clearValidate()
+    },
+
+    /** 重置操作表单 */
+    handleReset() {
+      this.queryParams = {
+        page: {
+          page_num: 1,
+          page_size: 10
+        },
+        params: {}
+      }
+      this.getData()
+    },
+    getData() {
+      workOrderList(this.queryParams).then(res => {
+        // 【新增】只保留 state = "就绪" 的数据
+        const allData = res.data || []
+        this.pageList = allData.filter(item => item.state === '已下达') // ⭐只显示“就绪”
+        this.pageTotal = this.pageList.length // 更新总数
+      })
+    },
+
+
+    handleHastrue(row, statu) {
+      row.dataStatus = statu
+      saveItemand({
+        params: row
+      }).then(res => {
+        this.getData()
+        this.$message({
+          type: 'success',
+          message: '开始加工'
+        })
+      })
+    },
+
+
+    cancel1() {
+      this.dialogShow1 = false
+      this.reportForm = {}
+      this.$refs['reportForm'].clearValidate()
+    },
+    statusFormatter(row, column) {
+      if (row.shiftType === '01') {
+        return '白班'
+      } else if (row.shiftType === '02') {
+        return '夜班'
+      }
+      return '未知'
+    },
+
+    handleSelectionChange(val) {
+      if (val.length == this.pageList.length) {
+        // console.log(this.pageList)
+        //当前页数据全选
+        this.pageList.forEach(item => {
+          console.log(item)
+          if (this.selectList.every(it => it != item.id)) {
+            this.selectList.push(item.id)
+            this.multipleSelection.push(item)
+          }
+        })
+      } else if (val.length > 0) {
+        //当前页数据部分改动
+        this.pageList.forEach(item => {
+          let index = val.findIndex(it => it.id == item.id)
+          if (index > -1) {
+            if (this.selectList.every(i => i != item.id)) {
               this.selectList.push(item.id)
               this.multipleSelection.push(item)
             }
-          })
-        } else if (val.length > 0) {
-          //当前页数据部分改动
-          this.pageList.forEach(item => {
-            let index = val.findIndex(it => it.id == item.id)
-            if (index > -1) {
-              if (this.selectList.every(i => i != item.id)) {
-                this.selectList.push(item.id)
-                this.multipleSelection.push(item)
-              }
-            } else {
-              let i = this.selectList.findIndex(i => i == item.id)
-              if (i > -1) {
-                this.selectList.splice(i, 1)
-                this.multipleSelection.splice(i, 1)
-              }
+          } else {
+            let i = this.selectList.findIndex(i => i == item.id)
+            if (i > -1) {
+              this.selectList.splice(i, 1)
+              this.multipleSelection.splice(i, 1)
             }
-          })
-        } else if (val.length == 0) {
-          //当前页数据全删除
-          this.pageList.forEach(item => {
-            let index = this.selectList.findIndex(it => it == item.id)
-            if (index > -1) {
-              this.selectList.splice(index, 1)
-              this.multipleSelection.splice(index, 1)
-            }
-          })
-        }
-        console.log(this.multipleSelection, 'this.selectList')
+          }
+        })
+      } else if (val.length == 0) {
+        //当前页数据全删除
+        this.pageList.forEach(item => {
+          let index = this.selectList.findIndex(it => it == item.id)
+          if (index > -1) {
+            this.selectList.splice(index, 1)
+            this.multipleSelection.splice(index, 1)
+          }
+        })
       }
+      console.log(this.multipleSelection, 'this.selectList')
     }
   }
+}
 </script>
 
 <style lang="scss" scoped>
@@ -683,7 +691,7 @@
   align-items: center;
 
   .assign-input {
-    width:  60%;      // 输入框宽度
+    width: 60%; // 输入框宽度
     margin: 0 4px;
   }
 }
@@ -702,9 +710,9 @@
   /* 按钮组 */
   .assign-btn-group {
     .el-button {
-      height: 35px;        /* 同输入框 */
-      width: 60px;         /* ← 自行调整按钮宽度 */
-      padding: 0;          /* 去掉左右内边距 */
+      height: 35px; /* 同输入框 */
+      width: 60px; /* ← 自行调整按钮宽度 */
+      padding: 0; /* 去掉左右内边距 */
     }
   }
 }
@@ -715,41 +723,41 @@
 /* 高亮“已下达数量已下达数量” */
 .assign-count-highlight {
   font-weight: 700;
-  color: #d48806;   /* 深黄色，可按需微调 */
+  color: #d48806; /* 深黄色，可按需微调 */
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-  .input {
-    width: 380px;
+.input {
+  width: 380px;
+}
+
+::v-deep .el-form--inline .el-form-item {
+  margin-right: 20px;
+}
+
+::v-deep .my_label {
+  width: 120px;
+}
+
+.add_img {
+  width: 148px;
+  height: 148px;
+
+  img {
+    width: 100%;
+    height: 100%;
   }
 
-  ::v-deep .el-form--inline .el-form-item {
-    margin-right: 20px;
+  .delete_img {
+    width: 20px;
+    height: 20px;
+    right: -10px;
+    top: -15px;
   }
+}
 
-  ::v-deep .my_label {
-    width: 120px;
-  }
-
-  .add_img {
-    width: 148px;
-    height: 148px;
-
-    img {
-      width: 100%;
-      height: 100%;
-    }
-
-    .delete_img {
-      width: 20px;
-      height: 20px;
-      right: -10px;
-      top: -15px;
-    }
-  }
-
-  .btn {
-    width: 200px;
-  }
+.btn {
+  width: 200px;
+}
 </style>

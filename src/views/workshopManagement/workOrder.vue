@@ -73,7 +73,7 @@
       <el-table-column label="工单号" align="center" prop="workOrderNo" />
       <el-table-column label="工序" align="center" prop="procedureName" />
       <el-table-column label="设备" align="center" prop="deviceName" />
-      <el-table-column label="车间" align="center" prop="deptName" />
+<!--      <el-table-column label="车间" align="center" prop="deptName" />-->
       <!--      <el-table-column label="班次" align="center" prop="shiftType" :formatter="statusFormatter"/>-->
       <el-table-column label="分配数量" align="center" prop="planTotalCount" />
       <el-table-column label="已下达数量" align="center" prop="assignCount" />

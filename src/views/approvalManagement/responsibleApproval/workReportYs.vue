@@ -105,7 +105,7 @@
       <el-table-column label="组名" align="center" prop="groupName"/>
       <el-table-column label="报工类型" align="center" prop="reportTypeDesc"/>
       <el-table-column label="工序" align="center" prop="procedureName"/>
-      <el-table-column label="分配数量" align="center" prop="planTotalCount"/>
+      <el-table-column label="分配数量" align="center" prop="planTotalCount" v-if="false"/>
       <el-table-column label="正品数量" align="center" prop="realCount"/>
       <el-table-column label="次品数量" align="center" prop="deffCount"/>
 
