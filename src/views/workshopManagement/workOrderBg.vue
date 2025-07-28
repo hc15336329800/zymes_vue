@@ -93,21 +93,21 @@
       <el-table-column label="次品数量" align="center" prop="deffCount"/>
       <el-table-column label="工单状态" align="center" prop="state"/>
       <el-table-column label="更新时间" align="center" prop="updatedTime" width="100"/>
-      <el-table-column label="操作" align="center"  >
-        <template slot-scope="scope">
-          <!-- 确认后不能编辑和删除 -->
+<!--      <el-table-column label="操作" align="center"  >-->
+<!--        <template slot-scope="scope">-->
+<!--          &lt;!&ndash; 确认后不能编辑和删除 &ndash;&gt;-->
 
-          <el-button link type="primary"   icon="Delete" @click="handleReport(scope.row)" v-show="buttonShow">
-            报工
-          </el-button>
-<!--          <el-button v-if="scope.row.deviceName.indexOf('折弯机') !==-1" link type="primary" icon="Delete"-->
-<!--                     @click="handleHastrue(scope.row,0)">开始-->
+<!--          <el-button link type="primary"   icon="Delete" @click="handleReport(scope.row)" v-show="buttonShow">-->
+<!--            报工-->
 <!--          </el-button>-->
-<!--          <el-button v-if="scope.row.deviceName.indexOf('折弯机') !==-1" link type="primary" icon="Delete"-->
-<!--                     @click="handleHastrue(scope.row,1)">完成-->
-<!--          </el-button>-->
-        </template>
-      </el-table-column>
+<!--&lt;!&ndash;          <el-button v-if="scope.row.deviceName.indexOf('折弯机') !==-1" link type="primary" icon="Delete"&ndash;&gt;-->
+<!--&lt;!&ndash;                     @click="handleHastrue(scope.row,0)">开始&ndash;&gt;-->
+<!--&lt;!&ndash;          </el-button>&ndash;&gt;-->
+<!--&lt;!&ndash;          <el-button v-if="scope.row.deviceName.indexOf('折弯机') !==-1" link type="primary" icon="Delete"&ndash;&gt;-->
+<!--&lt;!&ndash;                     @click="handleHastrue(scope.row,1)">完成&ndash;&gt;-->
+<!--&lt;!&ndash;          </el-button>&ndash;&gt;-->
+<!--        </template>-->
+<!--      </el-table-column>-->
     </el-table>
     <pagination
       style="text-align: right"
