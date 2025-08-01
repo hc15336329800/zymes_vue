@@ -44,7 +44,7 @@
         :default-checked-keys="defaultObj"
         @check-change="hanleCheck"
         :default-expanded-keys="expandedCodes"
-
+        :check-strictly="true"
       />
       <span slot="footer" class="dialog-footer">
         <el-button @click="box = false">取消</el-button>
