@@ -44,6 +44,7 @@
         :default-checked-keys="defaultObj"
         @check-change="hanleCheck"
         :default-expanded-keys="expandedCodes"
+
       />
       <span slot="footer" class="dialog-footer">
         <el-button @click="box = false">取消</el-button>
@@ -275,37 +276,40 @@
        * 选中逻辑
        */
       hanleCheck(data, node) {
-        const _this = this
-        const isChecked = this.$refs.roleMenuTree.getNode(data.id).checked
-        const isNotRoot = data.parId !== 'JBY_ROOT'
-        if (isChecked) {
-          data.parId && setParentChecked(data.parId)
-          if (isNotRoot) {
-            data.children && setChildrenChecked(data.children, true)
-          }
-        } else {
-          data.children && setChildrenChecked(data.children, false)
-        }
+        // console.log('checked:', this.$refs.roleMenuTree.getCheckedKeys())
 
-        function setParentChecked(parentId) {
-          const parentNode = _this.$refs.roleMenuTree.getNode(parentId)
-          parentNode &&
-          parentNode.data.parId &&
-          setParentChecked(parentNode.data.parId)
-          _this.$refs.roleMenuTree.setChecked(parentId, true)
-        }
-
-        /**
-         * 将子节点选中 或者反选
-         */
-        function setChildrenChecked(node, isChecked) {
-          node.forEach(item => {
-            if (item.children) {
-              setChildrenChecked(item.children, isChecked)
-              _this.$refs.roleMenuTree.setChecked(item.id, isChecked)
-            }
-          })
-        }
+        // const _this = this
+        // const isChecked = this.$refs.roleMenuTree.getNode(data.id).checked
+        // const isNotRoot = data.parId !== 'JBY_ROOT'
+        // if (isChecked) {
+        //   data.parId && setParentChecked(data.parId)
+        //   if (isNotRoot) {
+        //     data.children && setChildrenChecked(data.children, true)
+        //   }
+        // } else {
+        //   data.children && setChildrenChecked(data.children, false)
+        // }
+        //
+        // function setParentChecked(parentId) {
+        //   const parentNode = _this.$refs.roleMenuTree.getNode(parentId)
+        //   parentNode &&
+        //   parentNode.data.parId &&
+        //   setParentChecked(parentNode.data.parId)
+        //   _this.$refs.roleMenuTree.setChecked(parentId, true)
+        // }
+        //
+        // /**
+        //  * 将子节点选中 或者反选
+        //  */
+        // function setChildrenChecked(node, isChecked) {
+        //   node.forEach(item => {
+        //     if (item.children) {
+        //       setChildrenChecked(item.children, isChecked)
+        //       _this.$refs.roleMenuTree.setChecked(item.id, isChecked)
+        //     }
+        //   })
+        // }
+        //
       }
     }
   }
