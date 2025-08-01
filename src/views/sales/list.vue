@@ -157,7 +157,7 @@
         </el-form-item>
 
         <el-form-item label="需求数量" prop="needNum">
-          <el-input-number v-model="form.needNum" :min="1" :max="100" />
+          <el-input-number v-model="form.needNum" :min="1" :max="10000" />
         </el-form-item>
       </el-form>
 
@@ -297,7 +297,7 @@ export default {
         itemNo: [{ required: true, message: '请选择产品', trigger: 'change' }],
         needNum: [
           { required: true, message: '请输入数量', trigger: 'blur' },
-          { type: 'number', min: 1, max: 100, message: '数量必须为1-100的整数', trigger: 'blur' }
+          { type: 'number', min: 1, max: 10000, message: '数量必须为1-100的整数', trigger: 'blur' }
         ]
       },
 

@@ -74,29 +74,29 @@
       <el-table-column label="工单号" align="center" prop="workOrderNo" />
       <el-table-column label="工序" align="center" prop="procedureName" />
       <el-table-column label="设备" align="center" prop="deviceName" />
-<!--      <el-table-column label="车间" align="center" prop="deptName" />-->
+      <!--      <el-table-column label="车间" align="center" prop="deptName" />-->
       <!--      <el-table-column label="班次" align="center" prop="shiftType" :formatter="statusFormatter"/>-->
       <!--      <el-table-column label="分配数量" align="center" prop="planTotalCount"/>-->
       <!--      <el-table-column label="已下达数量" align="center" prop="assignCount"/>-->
       <!-- 深黄色   加粗 -->
 
-      <!-- [修改] 可报工数量 = assignCount - max(realCount, toReviewRealCount) -->
       <el-table-column label="可报工数量" align="center">
         <template slot-scope="scope">
-    <span class="assign-count-highlight">
-      {{
-        Number(scope.row.assignCount || 0) -
-        Math.max(Number(scope.row.realCount || 0), Number(scope.row.toReviewRealCount || 0))
-      }}
-    </span>
+              <span class="assign-count-highlight">
+                {{
+                  Number(scope.row.assignCount || 0)
+                  - (Number(scope.row.toReviewRealCount || 0) + Number(scope.row.realCount || 0))
+                }}
+              </span>
         </template>
       </el-table-column>
 
-<!--      <el-table-column label="已下达数量" align="center">-->
-<!--        <template slot-scope="scope">-->
-<!--          <span class="assign-count-highlight">{{ scope.row.assignCount }}</span>-->
-<!--        </template>-->
-<!--      </el-table-column>-->
+
+      <!--      <el-table-column label="已下达数量" align="center">-->
+      <!--        <template slot-scope="scope">-->
+      <!--          <span class="assign-count-highlight">{{ scope.row.assignCount }}</span>-->
+      <!--        </template>-->
+      <!--      </el-table-column>-->
 
       <!--      <el-table-column label="可下达数量" align="center" prop="waitAssignCount"/>-->
       <el-table-column label="待验收正品数量" align="center" prop="toReviewRealCount" />
