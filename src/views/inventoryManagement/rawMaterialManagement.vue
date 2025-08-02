@@ -379,17 +379,41 @@ import {
       },
 
       // 无聊导入 new
+      // 修改位置：handleSuccessNew 方法
       async handleSuccessNew(file) {
         let res = await uploadStockNew(file)
         this.$refs.uploadGong.loading = false
-        if (res) {
-          this.$message({
-            type: 'success',
-            message: '导入成功'
-          })
+        if (res && res.code === 0) {
+          // 优化提示逻辑
+          const { successList = [], failList = [] } = res.data || {}
+          // 1. 成功
+          if (successList.length > 0) {
+            this.$message({
+              type: 'success',
+              message: `成功导入${successList.length}条：${successList.join('、')}`
+            })
+          }
+          // 2. 失败
+          if (failList.length > 0) {
+            // 支持多条失败原因
+            let failMsg = failList.map((f, idx) =>
+              `序号${idx + 1}：${f.itemNo ? `物料编码【${f.itemNo}】` : ''}，原因：${f.reason}`
+            ).join('<br>')
+            this.$alert(
+              `<div style="max-height:500px;overflow:auto;text-align:left;">${failMsg}</div>`,
+              `导入失败${failList.length}条，详情如下：`,
+              { dangerouslyUseHTMLString: true }
+            )
+          }
+          // 3. 都为空
+          if (successList.length === 0 && failList.length === 0) {
+            this.$message({ type: 'info', message: res.msg || '导入完成' })
+          }
           this.getData()
+        } else {
+          this.$message({ type: 'error', message: res && res.msg ? res.msg : '导入失败' })
         }
-      },
+      }      ,
 
       cancel() {
         this.dialogShow = false

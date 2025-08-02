@@ -60,9 +60,8 @@
 
 
       <upload-excel-component
-        text="工序导入"
-        v-if="hasPerm('B002004000004')"
-        :on-success="uploadProcedureSuccess"
+        text="工序导入1"
+         :on-success="uploadProcedureSuccess"
         class="ml_20"
         :loading="loading"
         ref="uploadGong"
@@ -688,14 +687,41 @@ export default {
       }
     },
     async uploadProcedureSuccess(file) {
-      let res = await uploadProcedure(file)
-      this.$refs.uploadYong.loading = false
-      if (res) {
-        this.$message({
-          type: 'success',
-          message: '导入成功'
-        })
-        this.getData()
+      try {
+        let res = await uploadProcedure(file);
+        this.$refs.uploadGong.loading = false;
+
+        if (res && res.tx_code === "00") {
+          // 导入成功
+          if (res.data.failCount === 0) {
+            this.$message({
+              type: 'success',
+              message: `导入成功，共导入 ${res.data.successCount} 条数据`
+            });
+          } else {
+            // 部分成功
+            let failReasons = res.data.failList.map(item =>
+              `第 ${item.rowNum} 行: ${item.reason}`
+            ).join('\n');
+
+            this.$alert(
+              `导入结果:\n\n成功: ${res.data.successCount} 条\n失败: ${res.data.failCount} 条\n\n失败原因:\n${failReasons}`,
+              '导入结果',
+              {
+                confirmButtonText: '确定',
+                customClass: 'import-result-alert'
+              }
+            );
+          }
+          this.getData();
+        } else {
+          // 接口返回错误
+          let errorMsg = res.error_info || '导入失败';
+          this.$message.error(errorMsg);
+        }
+      } catch (error) {
+        this.$refs.uploadGong.loading = false;
+        this.$message.error('导入过程中发生错误: ' + (error.message || '未知错误'));
       }
     },
 
@@ -757,5 +783,10 @@ export default {
 
 .btn {
   width: 200px;
+}
+
+.import-result-alert {
+  white-space: pre-line;
+  max-width: 500px;
 }
 </style>
