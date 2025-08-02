@@ -57,17 +57,17 @@
     <el-row class="flex_row pb_10 c_b fw_bold fs_24">
 
       <el-button type="primary" class="commen-button" icon="el-icon-plus" @click="handleAdd">新增</el-button>
-      <upload-excel-component
-        text="物料导入"
-        :on-success="handleSuccess"
-        class="ml_20"
-        :loading="loading"
-        ref="uploadGong"
-      />
+<!--      <upload-excel-component-->
+<!--        text="物料导入"-->
+<!--        :on-success="handleSuccess"-->
+<!--        class="ml_20"-->
+<!--        :loading="loading"-->
+<!--        ref="uploadGong"-->
+<!--      />-->
       <!-- 完全隐藏但仍可点击的NEW按钮 -->
       <upload-excel-component
         text="物料导入NEW"
-        v-if="showNewImport"
+
         :on-success="handleSuccessNew"
         class="invisible-white-btn"
         :loading="loading"

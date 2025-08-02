@@ -46,6 +46,19 @@
       >新增
       </el-button>
 
+
+      <!--       ==================== 上传相关 ====================-->
+
+
+      <!-- 上传控件    v-if="showNewImport"-->
+      <el-upload
+        action="#"
+        :show-file-list="false"
+        :http-request="doUpload">
+        <el-button size="mini" type="primary" style="margin-left: 20px; margin-right: 20px">用料导入</el-button>
+      </el-upload>
+
+
       <upload-excel-component
         text="工序导入"
         v-if="hasPerm('B002004000004')"
@@ -57,16 +70,7 @@
 
 
 
-      <!--       ==================== 上传相关 ====================-->
 
-
-      <!-- 上传控件    v-if="showNewImport"-->
-      <el-upload
-        action="#"
-        :show-file-list="false"
-        :http-request="doUpload">
-        <el-button size="mini" type="primary" style="margin-left: 20px; margin-right: 20px">用料导入NEW</el-button>
-      </el-upload>
 
       <!--      ==================== 手动同步相关 ====================-->
 

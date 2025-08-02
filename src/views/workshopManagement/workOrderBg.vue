@@ -46,11 +46,11 @@
         <el-button icon="el-icon-refresh" @click="handleReset">重置</el-button>
       </el-form-item>
 
-
       <el-form-item class="commen-button">
-        <el-button type="primary" @click="allHandleReport" v-show="buttonShow">
+        <el-button type="primary" @click="allHandleReport" >
           批量报工
         </el-button>
+
       </el-form-item>
 
 
