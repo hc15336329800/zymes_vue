@@ -607,9 +607,10 @@ export default {
       // 获取所有数据后在前端进行分页处理
       const params = JSON.parse(JSON.stringify(this.queryParams))
       params.page.page_num = 1
-      params.page.page_size = 100000
+      params.page.page_size = 10000
       workOrderList(params).then(res => {
-        this.allList = res.data
+        // ⭐只显示“已下达”工单
+        this.allList = res.data.filter(item => item.state === '已下达') // 【修改点1】
         this.pageTotal = this.allList.length
         this.updatePageList()
       })

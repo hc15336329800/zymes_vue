@@ -121,7 +121,7 @@
       :total="pageTotal"
       :page.sync="queryParams.page.page_num"
       :limit.sync="queryParams.page.page_size"
-      @pagination="getData"
+      @pagination="updatePageList"
     />
 
 
@@ -360,7 +360,8 @@ export default {
       groupList: [],
       reportTypeList: [],
       pageTotal: 0,
-      pageList: {},
+      pageList: [],
+      allList: [],
       title: '',
       workShopList: [],
       dialogShow: false,
@@ -545,14 +546,24 @@ export default {
       this.getData()
     },
     getData() {
-      workOrderList(this.queryParams).then(res => {
-        // 【新增】只保留 state = "就绪" 的数据
-        const allData = res.data || []
-        this.pageList = allData.filter(item =>
-          item.state === '就绪' || (item.state === '已下达' && Number(item.waitAssignCount) > 0)
+      // 获取所有数据后在前端进行分页处理
+      const params = JSON.parse(JSON.stringify(this.queryParams))
+      params.page.page_num = 1
+      params.page.page_size = 10000
+      workOrderList(params).then(res => {
+        // 只保留状态为“就绪”或“已下达且可下达数量>0”的工单
+        this.allList = (res.data || []).filter(
+          item => item.state === '就绪' || (item.state === '已下达' && Number(item.waitAssignCount) > 0)
         )
-        this.pageTotal = this.pageList.length // 更新总数
+        this.pageTotal = this.allList.length
+        this.updatePageList()
       })
+    } ,
+    updatePageList() {
+      const { page_num, page_size } = this.queryParams.page
+      const start = (page_num - 1) * page_size
+      const end = start + page_size
+      this.pageList = this.allList.slice(start, end)
     },
     // 下达按钮
     handleAssign(row) {
