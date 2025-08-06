@@ -35,6 +35,10 @@
         <el-button type="primary" icon="el-icon-download" @click="handleExport">导出工资表</el-button>
       </el-form-item>
 
+      <el-form-item class="commen-button">
+        <el-button type="primary" icon="el-icon-download" @click="handleExportAll">导出全部工资表（测试）</el-button>
+      </el-form-item>
+
       <el-form-item></el-form-item>
     </el-form>
 
@@ -65,7 +69,7 @@
 <script>
   import {dictInfo} from '@/api/common'
   import {workReportPage} from '@/api/workOrder/workReport'
-  import { wages_detail_page_list, wages_export_detail, wages_page_list } from '@/api/wages'
+  import { wages_detail_page_list, wages_export_detail, wages_page_list ,download_salary_summary} from '@/api/wages'
   import pinyinSelect from '@/components/pinyinSelect.vue'
 
   export default {
@@ -121,7 +125,6 @@
     methods: {
 
 
-      //导出
       // 导出工资明细
       handleExport() {
         // 前端必填校验（可选）
@@ -144,6 +147,44 @@
         }).catch(() => this.$message.error('导出失败'))
       },
 
+
+      // 导出全部工资汇总（携带时间参数）
+      handleExportAll() {
+        // 显示 loading 提示
+        this.$message.loading && this.$message.loading('导出中...')
+
+        // 从 queryParams.params 中取出时间段
+        const { beginTime, endTime } = this.queryParams.params
+        if (!beginTime || !endTime) {
+          this.$message.error('请先选择报工时间范围')
+          return
+        }
+
+        // 调用接口并传递时间参数
+        download_salary_summary({ beginTime, endTime })
+          .then(res => {
+            // 构造 Blob 对象
+            const blob = new Blob([res.data], {
+              type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+            })
+            // 创建临时链接并触发下载
+            const link = document.createElement('a')
+            link.href = window.URL.createObjectURL(blob)
+            // 文件名：工人工资汇总_开始时间-结束时间.xlsx
+            const start = beginTime.replace(/-/g, '')
+            const end   = endTime.replace(/-/g, '')
+            link.download = `工人工资汇总_${start}-${end}.xlsx`
+            document.body.appendChild(link)
+            link.click()
+            document.body.removeChild(link)
+            window.URL.revokeObjectURL(link.href)
+            // 成功提示
+            this.$message.success('导出成功')
+          })
+          .catch(() => {
+            this.$message.error('导出失败')
+          })
+      },
 
       getSelectOptions() {
         dictInfo("USER_INFO", r => (this.userList = r))

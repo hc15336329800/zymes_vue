@@ -19,7 +19,6 @@ export function wages_detail_page_list(data) {
 
 
 // 导出工资明细（下载 Excel）
-// 导出工资明细（参数扁平化）
 export function wages_export_detail(params) {
   return request({
     url: '/api/work/worker_report_dtl/download_salary',
@@ -28,3 +27,13 @@ export function wages_export_detail(params) {
     responseType: 'blob'
   })
 }
+
+
+// 导出工资汇总（带时间参数）
+export function download_salary_summary(params) {
+  return request({
+    url: '/api/work/worker_report_dtl/download_salary_summary',
+    method: 'post',
+    data: params,            // 传递 { beginTime, endTime }
+    responseType: 'blob'
+  })}
