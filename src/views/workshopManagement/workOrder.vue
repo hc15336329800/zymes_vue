@@ -285,7 +285,7 @@
     </el-dialog>
 
     <!-- 批量下达对话框 -->
-    <el-dialog title="批量设置下达数量" :visible.sync="batchAssignDialogVisible" width="55%">
+    <el-dialog title="批量设置下达数量" :visible.sync="batchAssignDialogVisible" width="55%" @close="handleBatchDialogClose">
       <el-table :data="batchAssignList" border>
         <el-table-column prop="orderNo" label="订单号" min-width="50" />
         <el-table-column prop="bomNo" label="图纸号" min-width="50" />
@@ -486,10 +486,25 @@ export default {
         assignInput: Math.min(item.waitAssignCount, 100)
       }))
 
-      this.batchAssignDialogVisible = true
-    }
-    ,
+      // 确保每次打开都是全新的数据
+      this.batchAssignList = filtered.map(item => ({
+        ...item,
+        assignInput: Math.min(item.waitAssignCount, 100)
+      }));
 
+      this.batchAssignDialogVisible = true
+    }  ,
+    handleBatchDialogClose() {
+      // 清空批量下达相关数据
+      this.batchAssignList = [];
+
+      // 重置选择状态（可选）
+      this.multipleSelection = [];
+      this.selectList = [];
+
+      // 如果有表格选中状态也需要清除
+      this.$refs.multipleTable?.clearSelection();
+    },
 
     getMaxAssign(row) {
       // 与 handleAssign 一致逻辑
@@ -565,6 +580,13 @@ export default {
       const end = start + page_size
       this.pageList = this.allList.slice(start, end)
     },
+
+    // 【新增】批量下达弹窗关闭时清空数据
+    onBatchAssignDialogClose() {
+      this.batchAssignList = []
+    },
+
+
     // 下达按钮
     handleAssign(row) {
 
