@@ -46,11 +46,11 @@
         <el-button icon="el-icon-refresh" @click="handleReset">重置</el-button>
       </el-form-item>
 
+
       <el-form-item class="commen-button">
-        <el-button type="primary" @click="allHandleReport" >
+        <el-button type="primary" @click="allHandleReport" v-show="buttonShow">
           批量报工
         </el-button>
-
       </el-form-item>
 
 
@@ -543,7 +543,32 @@ export default {
     },
 
 
-
+    // // [RESTORE] 批量报工（不推荐  ）
+    // allHandleReport() {
+    //   if (this.selectList.length === 0) {
+    //     this.$message.error('请勾选数据！');
+    //     return;
+    //   }
+    //   this.reportForm1 = {
+    //     ids: this.selectList,
+    //     reportType: '',
+    //     groupId: ''
+    //   };
+    //   this.showFormItem = true;
+    //   this.dialogShow2 = true;
+    // },
+    //
+    // // [RESTORE] 批量报工提交
+    // submitForm2() {
+    //   this.$refs.reportForm1.validate(valid => {
+    //     if (!valid) return;
+    //     addAllReport({ params: this.reportForm1 }).then(() => {
+    //       this.$message.success('批量报工成功');
+    //       this.dialogShow2 = false;
+    //       this.getData();
+    //     });
+    //   });
+    // },
 
     ///////////////////////////////////////////////////////////其他///////////////////////////////////////////////////////////
 

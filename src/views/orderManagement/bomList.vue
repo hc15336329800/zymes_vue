@@ -118,7 +118,7 @@
       this.getOptionData()
 
       // 🌟 默认加载指定 bomNo 的数据
-      this.queryParams.bomNo = 'BOM20240501'  // ⚠️ 可根据需要调整默认值
+      this.queryParams.bomNo = '2516001917-1'  // ⚠️ 可根据需要调整默认值
       this.getData()
     },
 
