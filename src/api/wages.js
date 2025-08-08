@@ -29,11 +29,13 @@ export function wages_export_detail(params) {
 }
 
 
-// 导出工资汇总（带时间参数）
-export function download_salary_summary(params) {
+// 导出所有人工资
+// api.js
+export function downloadSalaryAll(params) {
   return request({
-    url: '/api/work/worker_report_dtl/download_salary_summary',
+    url: '/api/work/worker_report_dtl/download_salary_all',
     method: 'post',
-    data: params,            // 传递 { beginTime, endTime }
+    data: params,            // { beginTime, endTime }
     responseType: 'blob'
-  })}
+  });
+}

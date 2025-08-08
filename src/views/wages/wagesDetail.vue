@@ -4,17 +4,17 @@
     <el-form :model="queryParams" ref="queryRef" class="query-form commen-search" :inline="true">
 
       <el-form-item label="图纸号" class="condition">
-        <BomNoSelect :item-no.sync="queryParams.params.itemNo"/>
+        <BomNoSelect :item-no.sync="queryParams.params.itemNo" />
       </el-form-item>
       <el-form-item prop="workOrderNo" label="工单号" class="condition">
-        <el-input v-model="queryParams.params.workOrderNo"/>
+        <el-input v-model="queryParams.params.workOrderNo" />
       </el-form-item>
       <el-form-item label="工人" class="condition">
         <pinyinSelect :selectList="userList" labelName="name" lableId="code" :value="queryParams.params.userId"
                       :selectChange.sync="queryParams.params.userId"></pinyinSelect>
       </el-form-item>
       <el-form-item label="工序名称" class="condition">
-        <multipleProcedure :bind-name.sync='queryParams.params.procedureNames'/>
+        <multipleProcedure :bind-name.sync='queryParams.params.procedureNames' />
       </el-form-item>
       <el-form-item label="报工时间" class="condition">
         <DateIntervals
@@ -44,16 +44,16 @@
 
     <el-table :data="pageList" class="commen-table mt_20">
       <el-table-column type="index" width="55" label="序号"></el-table-column>
-      <el-table-column label="订单号" align="center" prop="orderNo"/>
-      <el-table-column label="图纸号" align="center" prop="bomNo"/>
-      <el-table-column label="工人" align="center" prop="userName"/>
+      <el-table-column label="订单号" align="center" prop="orderNo" />
+      <el-table-column label="图纸号" align="center" prop="bomNo" />
+      <el-table-column label="工人" align="center" prop="userName" />
 
-      <el-table-column label="工单号" align="center" prop="workOrderNo"/>
-      <el-table-column label="工序" align="center" prop="procedureName"/>
-      <el-table-column label="加工件数" align="center" prop="userCount"/>
-      <el-table-column label="单价" align="center" prop="hoursFixed"/>
-      <el-table-column label="工资" align="center" prop="wages"/>
-      <el-table-column label="报工时间" align="center" prop="createdTime"/>
+      <el-table-column label="工单号" align="center" prop="workOrderNo" />
+      <el-table-column label="工序" align="center" prop="procedureName" />
+      <el-table-column label="加工件数" align="center" prop="userCount" />
+      <el-table-column label="单价" align="center" prop="hoursFixed" />
+      <el-table-column label="工资" align="center" prop="wages" />
+      <el-table-column label="报工时间" align="center" prop="createdTime" />
     </el-table>
 
     <pagination
@@ -67,188 +67,180 @@
   </div>
 </template>
 <script>
-  import {dictInfo} from '@/api/common'
-  import {workReportPage} from '@/api/workOrder/workReport'
-  import { wages_detail_page_list, wages_export_detail, wages_page_list ,download_salary_summary} from '@/api/wages'
-  import pinyinSelect from '@/components/pinyinSelect.vue'
+import { dictInfo } from '@/api/common'
+import { downloadSalaryAll, wages_detail_page_list, wages_export_detail } from '@/api/wages'
+import pinyinSelect from '@/components/pinyinSelect.vue'
 
-  export default {
-    components: {
-      pinyinSelect,
-      DateIntervals: () => import('@/components/DateIntervals'),
-      Pagination: () => import('@/components/Pagination'),
-      BomNoSelect: () => import('@/components/Item/BomNo'),
-      UserSelect: () => import('@/components/user/userSelect'),
-      multipleProcedure: () => import('@/components/Item/multipleProcedure'),
-    },
-    data() {
-      return {
-        userTitle: '工人',
-        workShopList: [],
-        statusList: [],
-        userList: [],
-        queryParams: {
-          params: {},
-          page: {
-            page_num: 1,
-            page_size: 10
-          }
-        },
-        form: {},
-        pageTotal: 0,
-        pageList: {},
-        title: '',
-        dialogShow: false,
-        rules: {
-          name: [{required: true, message: '请输入名称', trigger: 'blur'}],
-          remark: [{required: true, message: '请输入备注', trigger: 'blur'}]
+export default {
+  components: {
+    pinyinSelect,
+    DateIntervals: () => import('@/components/DateIntervals'),
+    Pagination: () => import('@/components/Pagination'),
+    BomNoSelect: () => import('@/components/Item/BomNo'),
+    UserSelect: () => import('@/components/user/userSelect'),
+    multipleProcedure: () => import('@/components/Item/multipleProcedure')
+  },
+  data() {
+    return {
+      userTitle: '工人',
+      workShopList: [],
+      statusList: [],
+      userList: [],
+      queryParams: {
+        params: {},
+        page: {
+          page_num: 1,
+          page_size: 10
         }
+      },
+      form: {},
+      pageTotal: 0,
+      pageList: {},
+      title: '',
+      dialogShow: false,
+      rules: {
+        name: [{ required: true, message: '请输入名称', trigger: 'blur' }],
+        remark: [{ required: true, message: '请输入备注', trigger: 'blur' }]
       }
+    }
+  },
+  created() {
+
+    //获取用户信息  当前登录用户  当前用户
+    const userInfo = JSON.parse(localStorage.getItem('user_info') || '{}')
+    console.log('当前登录用户id----:', userInfo.id)
+
+
+    // const user = localStorage.getItem('user_info');
+    // const name = JSON.parse(user).userName;
+    // console.log('当前登录用户名称----:', name)
+
+    // ✅ 初始化时设置 userId 为当前用户
+    this.queryParams.params.userId = userInfo.id
+
+    this.getSelectOptions()
+    this.getData()
+  },
+  methods: {
+
+
+    // 导出工资明细
+    handleExport() {
+      // 前端必填校验（可选）
+      const { userId, beginTime, endTime } = this.queryParams.params
+      if (!userId || !beginTime || !endTime) {
+        this.$message.error('工人和报工时间为必填！')
+        return
+      }
+      this.$message.loading && this.$message.loading('导出中...')
+      wages_export_detail(this.queryParams.params).then(res => {
+        const blob = new Blob([res.data], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' })
+        const link = document.createElement('a')
+        link.href = window.URL.createObjectURL(blob)
+        link.download = '工人工资明细.xlsx'
+        document.body.appendChild(link)
+        link.click()
+        document.body.removeChild(link)
+        window.URL.revokeObjectURL(link.href)
+        this.$message.success('导出成功')
+      }).catch(() => this.$message.error('导出失败'))
     },
-    created() {
-
-      //获取用户信息  当前登录用户  当前用户
-      const userInfo = JSON.parse(localStorage.getItem('user_info') || '{}')
-      console.log('当前登录用户id----:', userInfo.id)
 
 
-      // const user = localStorage.getItem('user_info');
-      // const name = JSON.parse(user).userName;
-      // console.log('当前登录用户名称----:', name)
+// 组件中：导出全部工资明细（仅包含有工资的记录）
+    handleExportAll() {
+      this.$message.loading && this.$message.loading('导出中...')
 
-      // ✅ 初始化时设置 userId 为当前用户
-      this.queryParams.params.userId = userInfo.id
+      const { beginTime, endTime } = this.queryParams.params
+      if (!beginTime || !endTime) {
+        this.$message.error('请先选择报工时间范围')
+        return
+      }
 
-      this.getSelectOptions()
-      this.getData()
-    },
-    methods: {
-
-
-      // 导出工资明细
-      handleExport() {
-        // 前端必填校验（可选）
-        const { userId, beginTime, endTime } = this.queryParams.params
-        if (!userId || !beginTime || !endTime) {
-          this.$message.error('工人和报工时间为必填！')
-          return
-        }
-        this.$message.loading && this.$message.loading('导出中...')
-        wages_export_detail(this.queryParams.params).then(res => {
-          const blob = new Blob([res.data], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' })
+      downloadSalaryAll({ beginTime, endTime })
+        .then(res => {
+          // 将返回数据转成 Blob（zip）
+          const blob = new Blob([res.data], { type: 'application/zip' })
           const link = document.createElement('a')
           link.href = window.URL.createObjectURL(blob)
-          link.download = '工人工资明细.xlsx'
+          // 文件名：工人工资明细_开始-结束.zip
+          const start = beginTime.replace(/-/g, '')
+          const end = endTime.replace(/-/g, '')
+          link.download = `工人工资明细_${start}-${end}.zip`
           document.body.appendChild(link)
           link.click()
           document.body.removeChild(link)
           window.URL.revokeObjectURL(link.href)
           this.$message.success('导出成功')
-        }).catch(() => this.$message.error('导出失败'))
-      },
-
-
-      // 导出全部工资汇总（携带时间参数）
-      handleExportAll() {
-        // 显示 loading 提示
-        this.$message.loading && this.$message.loading('导出中...')
-
-        // 从 queryParams.params 中取出时间段
-        const { beginTime, endTime } = this.queryParams.params
-        if (!beginTime || !endTime) {
-          this.$message.error('请先选择报工时间范围')
-          return
-        }
-
-        // 调用接口并传递时间参数
-        download_salary_summary({ beginTime, endTime })
-          .then(res => {
-            // 构造 Blob 对象
-            const blob = new Blob([res.data], {
-              type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-            })
-            // 创建临时链接并触发下载
-            const link = document.createElement('a')
-            link.href = window.URL.createObjectURL(blob)
-            // 文件名：工人工资汇总_开始时间-结束时间.xlsx
-            const start = beginTime.replace(/-/g, '')
-            const end   = endTime.replace(/-/g, '')
-            link.download = `工人工资汇总_${start}-${end}.xlsx`
-            document.body.appendChild(link)
-            link.click()
-            document.body.removeChild(link)
-            window.URL.revokeObjectURL(link.href)
-            // 成功提示
-            this.$message.success('导出成功')
-          })
-          .catch(() => {
-            this.$message.error('导出失败')
-          })
-      },
-
-      getSelectOptions() {
-        dictInfo("USER_INFO", r => (this.userList = r))
-
-
-      },
-      /** 搜索按钮操作 */
-      handleQuery() {
-        this.queryParams.page.page_num = 1
-        this.getData()
-      },
-      /** 重置操作表单 */
-      handleReset() {
-        this.queryParams = {
-          page: {
-            page_num: 1,
-            page_size: 10
-          },
-          params: {}
-        }
-        this.$refs.userInfoDateIntervals.initDateData()
-        this.getData()
-      },
-      getData() {
-        wages_detail_page_list(this.queryParams).then(res => {
-          this.pageList = res.data
-          this.pageTotal = Number(res.page.total_num)
         })
-      },
+        .catch(() => {
+          this.$message.error('导出失败')
+        })
+    },
+
+    getSelectOptions() {
+      dictInfo('USER_INFO', r => (this.userList = r))
+
+
+    },
+    /** 搜索按钮操作 */
+    handleQuery() {
+      this.queryParams.page.page_num = 1
+      this.getData()
+    },
+    /** 重置操作表单 */
+    handleReset() {
+      this.queryParams = {
+        page: {
+          page_num: 1,
+          page_size: 10
+        },
+        params: {}
+      }
+      this.$refs.userInfoDateIntervals.initDateData()
+      this.getData()
+    },
+    getData() {
+      wages_detail_page_list(this.queryParams).then(res => {
+        this.pageList = res.data
+        this.pageTotal = Number(res.page.total_num)
+      })
     }
   }
+}
 </script>
 
 <style lang="scss" scoped>
-  .input {
-    width: 380px;
+.input {
+  width: 380px;
+}
+
+::v-deep .el-form--inline .el-form-item {
+  margin-right: 20px;
+}
+
+::v-deep .my_label {
+  width: 120px;
+}
+
+.add_img {
+  width: 148px;
+  height: 148px;
+
+  img {
+    width: 100%;
+    height: 100%;
   }
 
-  ::v-deep .el-form--inline .el-form-item {
-    margin-right: 20px;
+  .delete_img {
+    width: 20px;
+    height: 20px;
+    right: -10px;
+    top: -15px;
   }
+}
 
-  ::v-deep .my_label {
-    width: 120px;
-  }
-
-  .add_img {
-    width: 148px;
-    height: 148px;
-
-    img {
-      width: 100%;
-      height: 100%;
-    }
-
-    .delete_img {
-      width: 20px;
-      height: 20px;
-      right: -10px;
-      top: -15px;
-    }
-  }
-
-  .btn {
-    width: 200px;
-  }
+.btn {
+  width: 200px;
+}
 </style>
