@@ -36,7 +36,7 @@
       </el-form-item>
 
       <el-form-item class="commen-button">
-        <el-button type="primary" icon="el-icon-download" @click="handleExportAll">导出全部工资表（测试）</el-button>
+        <el-button type="primary" icon="el-icon-download" @click="handleExportAllSign">导出全部工资表（测试）</el-button>
       </el-form-item>
 
       <el-form-item></el-form-item>
@@ -68,7 +68,7 @@
 </template>
 <script>
 import { dictInfo } from '@/api/common'
-import { downloadSalaryAll, wages_detail_page_list, wages_export_detail } from '@/api/wages'
+import { downloadSalaryAll, wages_detail_page_list, wages_export_detail ,downloadSalaryAllTable} from '@/api/wages'
 import pinyinSelect from '@/components/pinyinSelect.vue'
 
 export default {
@@ -134,6 +134,28 @@ export default {
       }
       this.$message.loading && this.$message.loading('导出中...')
       wages_export_detail(this.queryParams.params).then(res => {
+        const blob = new Blob([res.data], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' })
+        const link = document.createElement('a')
+        link.href = window.URL.createObjectURL(blob)
+        link.download = '工人工资明细.xlsx'
+        document.body.appendChild(link)
+        link.click()
+        document.body.removeChild(link)
+        window.URL.revokeObjectURL(link.href)
+        this.$message.success('导出成功')
+      }).catch(() => this.$message.error('导出失败'))
+    },
+
+    // 导出工资明细
+    handleExportAllSign() {
+      // 前端必填校验（可选）
+      const { userId, beginTime, endTime } = this.queryParams.params
+      if ( !beginTime || !endTime) {
+        this.$message.error('报工时间为必填！')
+        return
+      }
+      this.$message.loading && this.$message.loading('导出中...')
+      downloadSalaryAllTable(this.queryParams.params).then(res => {
         const blob = new Blob([res.data], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' })
         const link = document.createElement('a')
         link.href = window.URL.createObjectURL(blob)
