@@ -1,3 +1,4 @@
+<!--下单记录-->
 <template>
   <div class="app-container">
     <el-form :model="queryParams" ref="queryRef" class="query-form commen-search" :inline="true">
@@ -38,7 +39,7 @@
       <!--      <el-table-column type="index" width="55" label="序号" />-->
       <el-table-column label="订单号" align="center" prop="orderNo" />
       <el-table-column label="客户名称" align="center" prop="custName" />
-      <!--      <el-table-column label="物料编号" align="center" prop="itemNo" />-->
+            <el-table-column label="BOM编号" align="center" prop="bomNo" />
       <el-table-column label="物料名称" align="center" prop="itemName" />
       <el-table-column label="需求数量" align="center" prop="needNum" />
 
