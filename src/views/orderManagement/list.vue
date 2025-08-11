@@ -61,8 +61,9 @@
       <el-table-column label="优先级" align="center" prop="bizType"
                        :formatter="row => bizTypeMap[row.bizType] || row.bizType"   sortable="custom"/>
 
+      <el-table-column label="创建时间" align="center" prop="createdTime" sortable="custom"  min-width="100px"/>
 
-      <el-table-column label="交付时间" align="center" prop="deliverTime" sortable="custom"/>
+      <el-table-column label="交付时间" align="center" prop="deliverTime" sortable="custom"  min-width="100px"/>
       <el-table-column label="计划数量" align="center" prop="itemCount" sortable="custom"/>
 <!--      <el-table-column label="工序名称" align="center" prop="procedureName"/>-->
       <el-table-column label="状态" align="center" prop="statusDesc" sortable="custom"/>
