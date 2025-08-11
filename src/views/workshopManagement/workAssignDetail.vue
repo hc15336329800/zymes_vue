@@ -1,17 +1,20 @@
+<!--下达记录-->
 <template>
   <div class="app-container">
     <el-form :model="queryParams" ref="queryRef" class="query-form commen-search" :inline="true">
       <el-form-item label="图纸号" class="condition">
-        <BomNoSelect :item-no.sync="queryParams.params.itemNo"/>
+<!--        <BomNoSelect :item-no.sync="queryParams.params.bomNo"/>-->
+        <el-input v-model="queryParams.params.bomNo" />
+
       </el-form-item>
       <el-form-item prop="workOrderNo" label="工单号" class="condition">
         <el-input v-model="queryParams.params.workOrderNo" />
       </el-form-item>
-      <el-form-item label="车间" class="condition">
-        <el-select v-model="queryParams.params.deptId" clearable placeholder="请选择状态" style="width:140px;" filterable>
-          <el-option :key="dept.code" v-for="(dept) in workShopList" :label="dept.name" :value="dept.code"></el-option>
-        </el-select>
-      </el-form-item>
+<!--      <el-form-item label="车间" class="condition">-->
+<!--        <el-select v-model="queryParams.params.deptId" clearable placeholder="请选择状态" style="width:140px;" filterable>-->
+<!--          <el-option :key="dept.code" v-for="(dept) in workShopList" :label="dept.name" :value="dept.code"></el-option>-->
+<!--        </el-select>-->
+<!--      </el-form-item>-->
       <el-form-item label="设备" class="condition">
         <deviceSelected :bind-id.sync="queryParams.params.deviceId"  />
       </el-form-item>
