@@ -79,6 +79,8 @@
       :load="loadChildren"
       :tree-props="{ children: 'children', hasChildren: 'hasChildren' }"
       class="commen-table mt_20"
+      @sort-change="handleSortChange"
+
     >
 
       <!-- 自定义选择列 -->
