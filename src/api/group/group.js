@@ -47,3 +47,14 @@ export function groupSelected(data) {
     data
   })
 }
+
+
+
+
+// 查询用户列表
+export function userInfoAll() {
+  return request({
+    url: '/api/user/info/userInfoAll',
+    method: 'post'
+  })
+}
