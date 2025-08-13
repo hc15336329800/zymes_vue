@@ -1,3 +1,4 @@
+<!--分配详情-->
 <template>
   <div class="app-container">
     <el-form :model="queryParams" ref="queryRef" class="query-form commen-search" :inline="true">
@@ -44,7 +45,7 @@
       <el-table-column label="设备" align="center" prop="deviceName"/>
       <el-table-column label="班次" align="center" prop="shiftTypeDesc"/>
       <el-table-column label="分配人" align="center" prop="createdByName"/>
-      <el-table-column label="指派给" align="center" prop="workerName"/>
+      <el-table-column label="指派给" align="center" prop="groupName"/>
       <el-table-column label="分配时间" align="center" prop="createdTime"/>
     </el-table>
     <pagination
