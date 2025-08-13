@@ -10,6 +10,16 @@
       <!--      <el-form-item label="子件图纸号" class="condition">-->
       <!--        <multipleBomNo ref="multipleBomNo" :item-nos.sync="queryParams.params.childItemNos"/>-->
       <!--      </el-form-item>-->
+       <el-form-item label="BOM号" class="condition">
+        <el-input
+          v-model="queryParams.bomNo"
+          maxlength="50"
+          show-word-limit
+          placeholder="请输入BOM号"
+          clearable
+          style="width:180px"
+        />
+      </el-form-item>
       <el-form-item label="状态" class="condition">
         <el-select v-model="queryParams.orderDtlStatus" placeholder="请选择状态" clearable>
           <el-option
@@ -180,9 +190,9 @@ export default {
         orderNo: '',
         parentItemNo: '',
         // childItemNos: [],
-        orderDtlStatus: '03',  //待生产
-        // ========== 新增 ==========
         itemName: '',
+        bomNo: '', //  BOM号查询条件
+        orderDtlStatus: '03',  //待生产
         pageNum: 1,
         pageSize: 20
       },

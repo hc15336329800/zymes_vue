@@ -1,4 +1,4 @@
-<!--订单审批页面-->
+<!--生产下单审批-->
 <template>
   <div class="app-container">
     <el-form :model="queryParams" ref="queryRef" class="query-form commen-search" :inline="true">
@@ -80,7 +80,7 @@
     <el-table :data="pageList" class="commen-table mt_20">
       <el-table-column label="订单号" align="center" prop="orderNo" />
       <el-table-column label="客户名称" align="center" prop="custName" />
-      <el-table-column label="BOM号" align="center" prop="itemNo" />
+      <el-table-column label="BOM号" align="center" prop="bomNo" />
       <el-table-column label="物料名称" align="center" prop="itemName" />
       <el-table-column label="需求数量" align="center" prop="needNum" />
       <el-table-column label="紧急情况" align="center" prop="bizType" />

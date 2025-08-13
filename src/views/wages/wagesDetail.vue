@@ -3,8 +3,9 @@
   <div class="app-container">
     <el-form :model="queryParams" ref="queryRef" class="query-form commen-search" :inline="true">
 
+      <!-- 改成输入框绑定筛选参数 bomNo -->
       <el-form-item label="图纸号" class="condition">
-        <BomNoSelect :item-no.sync="queryParams.params.itemNo" />
+        <el-input v-model="queryParams.params.bomNo" placeholder="请输入图纸号" clearable />
       </el-form-item>
       <el-form-item prop="workOrderNo" label="工单号" class="condition">
         <el-input v-model="queryParams.params.workOrderNo" />
@@ -32,11 +33,11 @@
       </el-form-item>
 
       <el-form-item class="commen-button">
-        <el-button type="primary" icon="el-icon-download" @click="handleExport">导出工资表</el-button>
+        <el-button type="primary" icon="el-icon-download" @click="handleExport">导出个人工资表</el-button>
       </el-form-item>
 
       <el-form-item class="commen-button">
-        <el-button type="primary" icon="el-icon-download" @click="handleExportAllSign">导出全部工资表（测试）</el-button>
+        <el-button type="primary" icon="el-icon-download" @click="handleExportAllSign">导出全部工资表</el-button>
       </el-form-item>
 
       <el-form-item></el-form-item>
@@ -87,7 +88,9 @@ export default {
       statusList: [],
       userList: [],
       queryParams: {
-        params: {},
+        params: {
+          bomNo: ''
+        },
         page: {
           page_num: 1,
           page_size: 10

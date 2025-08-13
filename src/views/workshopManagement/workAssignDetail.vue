@@ -2,11 +2,11 @@
 <template>
   <div class="app-container">
     <el-form :model="queryParams" ref="queryRef" class="query-form commen-search" :inline="true">
-      <el-form-item label="图纸号" class="condition">
-<!--        <BomNoSelect :item-no.sync="queryParams.params.bomNo"/>-->
-        <el-input v-model="queryParams.params.bomNo" />
+<!--      <el-form-item label="图纸号" class="condition">-->
+<!--&lt;!&ndash;        <BomNoSelect :item-no.sync="queryParams.params.bomNo"/>&ndash;&gt;-->
+<!--        <el-input v-model="queryParams.params.bomNo" />-->
 
-      </el-form-item>
+<!--      </el-form-item>-->
       <el-form-item prop="workOrderNo" label="工单号" class="condition">
         <el-input v-model="queryParams.params.workOrderNo" />
       </el-form-item>
@@ -15,12 +15,17 @@
 <!--          <el-option :key="dept.code" v-for="(dept) in workShopList" :label="dept.name" :value="dept.code"></el-option>-->
 <!--        </el-select>-->
 <!--      </el-form-item>-->
-      <el-form-item label="设备" class="condition">
-        <deviceSelected :bind-id.sync="queryParams.params.deviceId"  />
-      </el-form-item>
+<!--      <el-form-item label="设备" class="condition">-->
+<!--        <deviceSelected :bind-id.sync="queryParams.params.deviceId"  />-->
+<!--      </el-form-item>-->
       <el-form-item label="工序名称" class="condition">
         <multipleProcedure :bind-name.sync='queryParams.params.procedureNames' />
       </el-form-item>
+      <el-form-item label="下达人" class="condition">
+        <!-- 修改位置：原本绑定多余空格且复用 multipleProcedure 组件，这里改为普通输入框，直接绑定 createdByName -->
+        <el-input v-model="queryParams.params.createdByName" placeholder="请输入下达人" />
+      </el-form-item>
+
       <el-form-item label="下达时间" class="condition">
         <DateIntervals
           ref="userInfoDateIntervals"
@@ -78,7 +83,10 @@ export default {
     return {
       workShopList:[],
       queryParams: {
-        params: {},
+        params: {
+          // 新增字段，绑定下达人查询条件
+          createdByName: '' // 【新增】下达人
+        },
         page: {
           page_num: 1,
           page_size: 10
