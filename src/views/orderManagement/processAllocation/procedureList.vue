@@ -289,32 +289,48 @@ export default {
     },
 
     // 保存按钮
+    // 保存按钮
     async save() {
       this.saveList = []
 
-      // ✅ 新增：循环验证每一行 workItemCount 的合法性
+      // [MOD] 目的：统一把参与比较的值数值化，并校验为正整数，避免字符串/NaN/小数导致的误判
       for (const [index, item] of this.list.entries()) {
-        const val = item.workItemCount
-        const max = item.waitAllocCount
+        // [MOD] 新增：保留原始值，转为数字用于比较
+        const rawVal = item.workItemCount
+        const rawMax = item.waitAllocCount
+        const val = Number(rawVal)
+        const max = Number(rawMax)
 
-        // ✅ 新增：为空判断
-        if (val == null || val === '') {
+        // [MOD] 新增：必填校验（保持原有语义）
+        if (rawVal == null || rawVal === '') {
           this.$message.error(`第 ${index + 1} 行未填写分配数量`)
           return
         }
 
-        // ✅ 新增：超出范围判断
-        if (val < 1 || val > max) {
-          this.$message.error(`第 ${index + 1} 行分配数量必须在 0 ~ ${max} 之间`)
+        // [MOD] 新增：类型与取值校验——必须为正整数（≥1）
+        if (!Number.isFinite(val) || !Number.isInteger(val) || val < 1) {
+          this.$message.error(`第 ${index + 1} 行分配数量必须为正整数（≥1）`)
           return
         }
 
-        // ✅ 原 saveList 构造逻辑保留
+        // [MOD] 新增：max 合法性校验
+        if (!Number.isFinite(max) || max < 0) {
+          this.$message.error(`第 ${index + 1} 行可分配数异常，请检查数据源`)
+          return
+        }
+
+        // [MOD] 修改：范围提示与逻辑统一为 1 ~ max（原提示为 0 ~ max 且代码用 val < 1）
+        if (val > max) {
+          this.$message.error(`第 ${index + 1} 行分配数量必须在 1 ~ ${max} 之间`)
+          return
+        }
+
+        // ✅ 原 saveList 构造逻辑保留（仅将 allocCount 使用数值化后的 val）
         this.saveList.push({
           id: item.id,
           workOrderId: item.workId,
           deviceId: item.workDeviceId,
-          allocCount: val
+          allocCount: val // [MOD] 用数值化后的 val，避免后端再转型
         })
       }
 
@@ -330,8 +346,8 @@ export default {
       this.$message({ type: 'success', message: '提交成功' })
       // this.getList('clear');
       this.back() // 👈 执行返回
-
     },
+
 
 
     async getList(str, id) {
