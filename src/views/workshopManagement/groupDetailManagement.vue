@@ -40,7 +40,10 @@
       <el-table-column label="创建时间" align="center" prop="createdTime" />
       <el-table-column label="操作" align="center" width="310" class-name="small-padding fixed-width">
         <template slot-scope="scope">
-          <el-button link type="primary" icon="Edit" @click="handleUpdate(scope.row)">编辑</el-button>
+<!--          <el-button link type="primary" icon="Edit" @click="handleUpdate(scope.row)">编辑</el-button>-->
+          <el-button type="text" icon="el-icon-edit" v-if="!isLeader(scope.row)" @click="handleUpdate(scope.row)">编辑
+          </el-button>
+
           <el-button link type="primary" icon="Delete" v-if="scope.row.leaderType=='00'"
                      @click="handleDelete(scope.row)">删除
           </el-button>
@@ -175,6 +178,10 @@ export default {
 
 
   methods: {
+
+    //  统一判断是否为组长
+    isLeader(row){ const t=row?.leaderType, d=row?.leaderTypeDesc; return t==='01' || d==='组长'; },
+
 
     // 浏览器关闭、刷新（用 beforeunload，但必须返回字符串！）
     handleBeforeUnload(e) {
