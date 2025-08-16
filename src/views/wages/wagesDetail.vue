@@ -49,8 +49,8 @@
 
     <el-table :data="pageList" class="commen-table mt_20">
       <el-table-column type="index" width="55" label="序号"></el-table-column>
-      <el-table-column label="订单号" align="center" prop="orderNo" />
-      <el-table-column label="图纸号" align="center" prop="bomNo" />
+      <el-table-column label="订单号" align="center" prop="orderNo"  :formatter="fmtDash"/>
+      <el-table-column label="图纸号" align="center" prop="bomNo"  :formatter="fmtDash"/>
       <el-table-column label="工人" align="center" prop="userName" />
 
       <el-table-column label="工单号" align="center" prop="workOrderNo" />
@@ -83,7 +83,15 @@
       @pagination="getData"
     />
 
+<!--    编辑按钮-->
     <el-dialog :visible.sync="editDialogVisible" title="编辑工资明细" width="480px" append-to-body>
+      <el-alert
+        title="此功能为以及功能，修改有风险，可能导致数据无法溯源，请谨慎操作。"
+        type="warning"
+        show-icon
+        :closable="false"
+        style="margin-bottom: 12px"
+      />
       <el-form :model="editForm" :rules="editRules" ref="editRef" label-width="90px" class="commen-form">
 
         <el-form-item label="加工件数" prop="userCount">
@@ -91,7 +99,7 @@
         </el-form-item>
 
         <el-form-item label="单价" prop="hoursFixed">
-          <el-input-number v-model="editForm.hoursFixed" :min="0" :step="0.5" :precision="2" @change="recalcWages" />
+          <el-input-number v-model="editForm.hoursFixed" :min="-999" :step="0.5" :precision="2" @change="recalcWages" />
         </el-form-item>
 
         <el-form-item label="工资">
@@ -113,8 +121,24 @@
 
     <!-- 新增：工资明细 -->
     <el-dialog :visible.sync="addDialogVisible" title="新增工资明细" width="520px" append-to-body>
+      <el-alert
+        title="此功能为以及功能，新增会直接写入工资明细数据，请确认信息真实准确。"
+        type="warning"
+        show-icon
+        :closable="false"
+        style="margin-bottom: 12px"
+      />
       <el-form :model="addForm" :rules="addRules" ref="addRef" label-width="100px" class="commen-form">
+<!--        <el-form-item label="订单号" prop="orderNo">-->
+<!--          <el-input v-model="addForm.orderNo" placeholder="请输入订单号" clearable />-->
+<!--        </el-form-item>-->
 
+<!--        <el-form-item label="图纸号" prop="bomNo">-->
+<!--          <el-input v-model="addForm.bomNo" placeholder="请输入图纸号" clearable />-->
+<!--        </el-form-item>-->
+        <el-form-item label="工序" prop="procedureName">
+          <el-input v-model="addForm.procedureName" placeholder="请输入工序名称" clearable  maxlength="20" />
+        </el-form-item>
         <el-form-item label="工人" prop="userId">
           <!-- 用你已经在页面里加载过的 userList -->
           <pinyinSelect :selectList="userList" labelName="name" lableId="code"
@@ -123,7 +147,7 @@
         </el-form-item>
 
         <el-form-item label="工单号" prop="workOrderNo">
-          <el-input v-model="addForm.workOrderNo" placeholder="请输入工单号（或在后端用它换取 workOrderId）" clearable />
+          <el-input v-model="addForm.workOrderNo" placeholder="请输入工单号" clearable maxlength="20"  />
         </el-form-item>
 
         <!-- 若你的后端 create 直接用 workOrderId，可把上面这项改成选择框或隐藏，改为给 addForm.workOrderId 赋值 -->
@@ -133,15 +157,26 @@
         </el-form-item>
 
         <el-form-item label="单价" prop="hoursFixed">
-          <el-input-number v-model="addForm.hoursFixed" :min="0" :step="0.1" :precision="2" @change="recalcAddWages" />
+          <el-input-number v-model="addForm.hoursFixed" :min="-999" :step="0.1" :precision="2" @change="recalcAddWages" />
         </el-form-item>
 
         <el-form-item label="工资">
           <el-input v-model="addForm.wages" disabled />
         </el-form-item>
 
+
         <el-form-item label="备注" prop="remark">
           <el-input type="textarea" v-model="addForm.remark" :rows="3" maxlength="100" show-word-limit />
+        </el-form-item>
+        <el-form-item label="报工时间" prop="createdTime">
+          <!-- 直接用字符串格式，提交即是后端常用的 yyyy-MM-dd HH:mm:ss -->
+          <el-date-picker
+            v-model="addForm.createdTime"
+            type="datetime"
+            value-format="yyyy-MM-dd HH:mm:ss"
+            placeholder="选择报工时间"
+            :picker-options="{ disabledDate: time => time.getTime() > Date.now() }"
+          />
         </el-form-item>
       </el-form>
 
@@ -209,9 +244,12 @@ export default {
       //新增接口
       addDialogVisible: false,
       addForm: {
-        userId: '',        // 默认赋值为当前登录人
-        workOrderNo: '',   // 或者使用 workOrderId（看你的后端）
-        // workOrderId: '', // 如果你的后端按 id 入参，打开它并在提交时带上
+        userId: '',        // 默认当前登录人
+        workOrderNo: '',   // 若你是按 workOrderId 入参，换成 workOrderId
+        orderNo: '',
+        bomNo: '',
+        procedureName: '',
+        createdTime: '',   // 用字符串：yyyy-MM-dd HH:mm:ss
         userCount: 0,
         hoursFixed: 0,
         wages: 0,
@@ -219,9 +257,11 @@ export default {
       },
       addRules: {
         userId: [{ required: true, message: '请选择工人', trigger: 'change' }],
-        // 二选一：一般推荐至少要有工单号（由后端换 id）
-        workOrderNo: [{ required: true, message: '请输入工单号', trigger: 'blur' }],
-        // 如果你的后端只吃 workOrderId，就把上面的校验换成对 workOrderId 的校验
+        workOrderNo: [{ required: true, message: '请输入工单号', trigger: 'blur' }], // 或改为 workOrderId
+        orderNo: [{ required: true, message: '请输入订单号', trigger: 'blur' }],
+        bomNo: [{ required: true, message: '请输入图纸号', trigger: 'blur' }],
+        procedureName: [{ required: true, message: '请输入工序', trigger: 'blur' }],
+        createdTime: [{ required: true, message: '请选择报工时间', trigger: 'change' }],
         userCount: [{ required: true, message: '请输入加工件数', trigger: 'change' }],
         hoursFixed: [{ required: true, message: '请输入单价', trigger: 'change' }],
         remark: [{ required: true, message: '请输入备注', trigger: 'blur' }]
@@ -251,6 +291,26 @@ export default {
   },
   methods: {
 
+    fmtDash(row, column, cellValue) {
+      if (cellValue === 0) return 0;           // 0 需要保留
+      const s = (cellValue == null) ? '' : String(cellValue).trim();
+      return s ? cellValue : '-';
+    },
+
+
+    riskConfirm(message) {
+      // 返回 Promise：确认则 resolve，取消则 reject
+      return this.$confirm(
+        message || '该操作可能影响工资数据的真实性与溯源，是否继续？',
+        '操作确认',
+        {
+          confirmButtonText: '继续',
+          cancelButtonText: '取消',
+          type: 'warning',
+          center: true
+        }
+      )
+    },
 
     // 导出工资明细
     handleExport() {
@@ -358,23 +418,48 @@ export default {
     },
 
 
-    // 打开编辑弹窗
+    // 修改后的 openEdit（增加确认）
     openEdit(row) {
       if (!row.id) {
         this.$message.error('缺少记录ID');
         return;
       }
-      // 接口返回是字符串数字，这里统一转为 Number
-      const uc = Number(row.userCount || 0);
-      const hf = Number(row.hoursFixed || 0);
-      this.editForm = {
-        id: row.id,
-        userCount: uc,
-        hoursFixed: hf,
-        wages: this.mul(uc, hf),
-        remark: row.remark || ''
-      };
-      this.editDialogVisible = true;
+      this.riskConfirm('【修改提醒】修改工资明细有风险，可能导致数据无法溯源，是否继续？')
+        .then(() => {
+          const uc = Number(row.userCount || 0);
+          const hf = Number(row.hoursFixed || 0);
+          this.editForm = {
+            id: row.id,
+            userCount: uc,
+            hoursFixed: hf,
+            wages: this.mul(uc, hf),
+            remark: (row.remark && String(row.remark).trim()) || '变动'
+          };
+          this.editDialogVisible = true;
+        })
+        .catch(() => {}); // 取消则不打开
+    },
+
+    // 修改后的 openCreate（增加确认）
+    openCreate() {
+      this.riskConfirm('【新增提醒】新增记录将写入工资明细，确认信息无误再继续操作。')
+        .then(() => {
+          const userInfo = JSON.parse(localStorage.getItem('user_info') || '{}');
+          this.addForm = {
+            userId: userInfo.id || '',
+            workOrderNo: '',
+            orderNo: '',
+            bomNo: '',
+            procedureName: '',
+            createdTime: this.nowString(),
+            userCount: 0,
+            hoursFixed: 0,
+            wages: 0,
+            remark: '变动'
+          };
+          this.addDialogVisible = true;
+        })
+        .catch(() => {}); // 取消则不打开
     },
 
     // 保存
@@ -410,28 +495,22 @@ export default {
       return Number((a * b).toFixed(2));
     },
 
-    openCreate() {
-      // 初始化表单（默认工人仍用当前登录人）
-      const userInfo = JSON.parse(localStorage.getItem('user_info') || '{}')
-      this.addForm = {
-        userId: userInfo.id || '',
-        workOrderNo: '',
-        // workOrderId: '',
-        userCount: 0,
-        hoursFixed: 0,
-        wages: 0,
-        remark: ''
-      }
-      this.addDialogVisible = true
+// 工具：生成当前时间字符串 yyyy-MM-dd HH:mm:ss
+    nowString() {
+      const p = n => (n < 10 ? '0' + n : '' + n)
+      const d = new Date()
+      return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}`
     },
-
     handleCreateOk() {
       this.$refs.addRef.validate(valid => {
         if (!valid) return
         const payload = {
           userId: this.addForm.userId,
-          workOrderNo: (this.addForm.workOrderNo || '').trim(),
-          // 如果你的后端要求 workOrderId，就把这行换成 workOrderId: this.addForm.workOrderId
+          workOrderNo: (this.addForm.workOrderNo || '').trim(), // 或替换成 workOrderId
+          orderNo: (this.addForm.orderNo || '').trim(),
+          bomNo: (this.addForm.bomNo || '').trim(),
+          procedureName: (this.addForm.procedureName || '').trim(),
+          createdTime: this.addForm.createdTime, // 已是 yyyy-MM-dd HH:mm:ss 字符串
           userCount: Number(this.addForm.userCount),
           hoursFixed: Number(this.addForm.hoursFixed),
           wages: Number(this.addForm.wages),
@@ -441,7 +520,7 @@ export default {
           .then(() => {
             this.$message.success('新增成功')
             this.addDialogVisible = false
-            this.getData() // 刷新列表
+            this.getData()
           })
           .catch(() => this.$message.error('新增失败'))
       })
