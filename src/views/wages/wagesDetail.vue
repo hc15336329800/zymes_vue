@@ -40,6 +40,10 @@
         <el-button type="primary" icon="el-icon-download" @click="handleExportAllSign">导出全部工资表</el-button>
       </el-form-item>
 
+      <el-form-item class="commen-button">
+        <el-button type="primary" icon="el-icon-plus" @click="openCreate">新增</el-button>
+      </el-form-item>
+
       <el-form-item></el-form-item>
     </el-form>
 
@@ -54,7 +58,20 @@
       <el-table-column label="加工件数" align="center" prop="userCount" />
       <el-table-column label="单价" align="center" prop="hoursFixed" />
       <el-table-column label="工资" align="center" prop="wages" />
-      <el-table-column label="报工时间" align="center" prop="createdTime" />
+      <el-table-column label="报工时间" align="center" prop="createdTime" min-width="110"/>
+      <el-table-column
+        label="备注"
+        align="center"
+        prop="remark"
+        min-width="80"
+        show-overflow-tooltip
+      />
+
+      <el-table-column label="操作" align="center" width="120" min-width="120" show-overflow-tooltip>
+        <template slot-scope="{ row }">
+          <el-button type="text" size="mini" @click="openEdit(row)">编辑</el-button>
+        </template>
+      </el-table-column>
     </el-table>
 
     <pagination
@@ -65,11 +82,85 @@
       :limit.sync="queryParams.page.page_size"
       @pagination="getData"
     />
+
+    <el-dialog :visible.sync="editDialogVisible" title="编辑工资明细" width="480px" append-to-body>
+      <el-form :model="editForm" :rules="editRules" ref="editRef" label-width="90px" class="commen-form">
+
+        <el-form-item label="加工件数" prop="userCount">
+          <el-input-number v-model="editForm.userCount" :min="0" :step="0.5" :precision="2" @change="recalcWages" />
+        </el-form-item>
+
+        <el-form-item label="单价" prop="hoursFixed">
+          <el-input-number v-model="editForm.hoursFixed" :min="0" :step="0.5" :precision="2" @change="recalcWages" />
+        </el-form-item>
+
+        <el-form-item label="工资">
+          <el-input v-model="editForm.wages" disabled />
+        </el-form-item>
+
+        <el-form-item label="备注" prop="remark">
+          <el-input type="textarea" v-model="editForm.remark" :rows="3" maxlength="100" show-word-limit />
+        </el-form-item>
+
+      </el-form>
+
+      <span slot="footer">
+    <el-button @click="editDialogVisible = false">取 消</el-button>
+    <el-button type="primary" @click="handleEditOk">保 存</el-button>
+  </span>
+    </el-dialog>
+
+
+    <!-- 新增：工资明细 -->
+    <el-dialog :visible.sync="addDialogVisible" title="新增工资明细" width="520px" append-to-body>
+      <el-form :model="addForm" :rules="addRules" ref="addRef" label-width="100px" class="commen-form">
+
+        <el-form-item label="工人" prop="userId">
+          <!-- 用你已经在页面里加载过的 userList -->
+          <pinyinSelect :selectList="userList" labelName="name" lableId="code"
+                        :value="addForm.userId"
+                        :selectChange.sync="addForm.userId" />
+        </el-form-item>
+
+        <el-form-item label="工单号" prop="workOrderNo">
+          <el-input v-model="addForm.workOrderNo" placeholder="请输入工单号（或在后端用它换取 workOrderId）" clearable />
+        </el-form-item>
+
+        <!-- 若你的后端 create 直接用 workOrderId，可把上面这项改成选择框或隐藏，改为给 addForm.workOrderId 赋值 -->
+
+        <el-form-item label="加工件数" prop="userCount">
+          <el-input-number v-model="addForm.userCount" :min="0" :step="0.1" :precision="2" @change="recalcAddWages" />
+        </el-form-item>
+
+        <el-form-item label="单价" prop="hoursFixed">
+          <el-input-number v-model="addForm.hoursFixed" :min="0" :step="0.1" :precision="2" @change="recalcAddWages" />
+        </el-form-item>
+
+        <el-form-item label="工资">
+          <el-input v-model="addForm.wages" disabled />
+        </el-form-item>
+
+        <el-form-item label="备注" prop="remark">
+          <el-input type="textarea" v-model="addForm.remark" :rows="3" maxlength="100" show-word-limit />
+        </el-form-item>
+      </el-form>
+
+      <span slot="footer">
+    <el-button @click="addDialogVisible = false">取 消</el-button>
+    <el-button type="primary" @click="handleCreateOk">确 定</el-button>
+  </span>
+    </el-dialog>
+
+
   </div>
 </template>
 <script>
 import { dictInfo } from '@/api/common'
 import { downloadSalaryAll, wages_detail_page_list, wages_export_detail ,downloadSalaryAllTable} from '@/api/wages'
+import { wages_update } from '@/api/wages'
+import { wages_create } from '@/api/wages'
+
+
 import pinyinSelect from '@/components/pinyinSelect.vue'
 
 export default {
@@ -100,9 +191,39 @@ export default {
       pageTotal: 0,
       pageList: {},
       title: '',
+
+      //修改接口
       dialogShow: false,
       rules: {
         name: [{ required: true, message: '请输入名称', trigger: 'blur' }],
+        remark: [{ required: true, message: '请输入备注', trigger: 'blur' }]
+      },
+      editDialogVisible: false,
+      editForm: { id: '', userCount: 0, hoursFixed: 0, wages: 0, remark: '' },
+      editRules: {
+        userCount: [{ required: true, message: '请输入加工件数', trigger: 'change' }],
+        hoursFixed: [{ required: true, message: '请输入单价', trigger: 'change' }],
+        remark: [{ required: true, message: '请输入备注', trigger: 'blur' }] // 后端要求备注必填
+      },
+
+      //新增接口
+      addDialogVisible: false,
+      addForm: {
+        userId: '',        // 默认赋值为当前登录人
+        workOrderNo: '',   // 或者使用 workOrderId（看你的后端）
+        // workOrderId: '', // 如果你的后端按 id 入参，打开它并在提交时带上
+        userCount: 0,
+        hoursFixed: 0,
+        wages: 0,
+        remark: ''
+      },
+      addRules: {
+        userId: [{ required: true, message: '请选择工人', trigger: 'change' }],
+        // 二选一：一般推荐至少要有工单号（由后端换 id）
+        workOrderNo: [{ required: true, message: '请输入工单号', trigger: 'blur' }],
+        // 如果你的后端只吃 workOrderId，就把上面的校验换成对 workOrderId 的校验
+        userCount: [{ required: true, message: '请输入加工件数', trigger: 'change' }],
+        hoursFixed: [{ required: true, message: '请输入单价', trigger: 'change' }],
         remark: [{ required: true, message: '请输入备注', trigger: 'blur' }]
       }
     }
@@ -123,6 +244,10 @@ export default {
 
     this.getSelectOptions()
     this.getData()
+
+    // 设置新增默认工人 = 当前登录人
+     this.addForm.userId = userInfo.id
+
   },
   methods: {
 
@@ -230,8 +355,113 @@ export default {
         this.pageList = res.data
         this.pageTotal = Number(res.page.total_num)
       })
-    }
+    },
+
+
+    // 打开编辑弹窗
+    openEdit(row) {
+      if (!row.id) {
+        this.$message.error('缺少记录ID');
+        return;
+      }
+      // 接口返回是字符串数字，这里统一转为 Number
+      const uc = Number(row.userCount || 0);
+      const hf = Number(row.hoursFixed || 0);
+      this.editForm = {
+        id: row.id,
+        userCount: uc,
+        hoursFixed: hf,
+        wages: this.mul(uc, hf),
+        remark: row.remark || ''
+      };
+      this.editDialogVisible = true;
+    },
+
+    // 保存
+    handleEditOk() {
+      this.$refs.editRef.validate(valid => {
+        if (!valid) return;
+        // wages 按件数*单价自动带给后端
+        const payload = {
+          id: this.editForm.id,
+          userCount: Number(this.editForm.userCount),
+          hoursFixed: Number(this.editForm.hoursFixed),
+          wages: Number(this.editForm.wages),
+          remark: (this.editForm.remark || '').trim()
+        };
+        wages_update(payload)
+          .then(() => {
+            this.$message.success('保存成功');
+            this.editDialogVisible = false;
+            this.getData();
+          })
+          .catch(() => this.$message.error('保存失败'));
+      });
+    },
+
+    // 联动计算工资
+    recalcWages() {
+      const { userCount, hoursFixed } = this.editForm;
+      this.editForm.wages = this.mul(Number(userCount || 0), Number(hoursFixed || 0));
+    },
+
+    // 小数乘法保留两位
+    mul(a, b) {
+      return Number((a * b).toFixed(2));
+    },
+
+    openCreate() {
+      // 初始化表单（默认工人仍用当前登录人）
+      const userInfo = JSON.parse(localStorage.getItem('user_info') || '{}')
+      this.addForm = {
+        userId: userInfo.id || '',
+        workOrderNo: '',
+        // workOrderId: '',
+        userCount: 0,
+        hoursFixed: 0,
+        wages: 0,
+        remark: ''
+      }
+      this.addDialogVisible = true
+    },
+
+    handleCreateOk() {
+      this.$refs.addRef.validate(valid => {
+        if (!valid) return
+        const payload = {
+          userId: this.addForm.userId,
+          workOrderNo: (this.addForm.workOrderNo || '').trim(),
+          // 如果你的后端要求 workOrderId，就把这行换成 workOrderId: this.addForm.workOrderId
+          userCount: Number(this.addForm.userCount),
+          hoursFixed: Number(this.addForm.hoursFixed),
+          wages: Number(this.addForm.wages),
+          remark: (this.addForm.remark || '').trim()
+        }
+        wages_create(payload)
+          .then(() => {
+            this.$message.success('新增成功')
+            this.addDialogVisible = false
+            this.getData() // 刷新列表
+          })
+          .catch(() => this.$message.error('新增失败'))
+      })
+    },
+
+    recalcAddWages() {
+      const { userCount, hoursFixed } = this.addForm
+      this.addForm.wages = this.mul(Number(userCount || 0), Number(hoursFixed || 0))
+    },
+
+
+
+  },
+  watch: {
+    'editForm.userCount'(v) { this.recalcWages() },
+    'editForm.hoursFixed'(v) { this.recalcWages() },
+    'addForm.userCount'() { this.recalcAddWages() },
+    'addForm.hoursFixed'() { this.recalcAddWages() }
   }
+
 }
 </script>
 
