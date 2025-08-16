@@ -41,8 +41,10 @@
       <el-table-column label="操作" align="center" width="310" class-name="small-padding fixed-width">
         <template slot-scope="scope">
 <!--          <el-button link type="primary" icon="Edit" @click="handleUpdate(scope.row)">编辑</el-button>-->
-          <el-button type="text" icon="el-icon-edit" v-if="!isLeader(scope.row)" @click="handleUpdate(scope.row)">编辑
-          </el-button>
+<!--                <el-button type="text" icon="el-icon-edit" v-if="!isLeader(scope.row)" @click="handleUpdate(scope.row)">编辑-->
+                  <el-button type="text" icon="el-icon-edit"  @click="handleUpdate(scope.row)">编辑
+
+                  </el-button>
 
           <el-button link type="primary" icon="Delete" v-if="scope.row.leaderType=='00'"
                      @click="handleDelete(scope.row)">删除
@@ -73,8 +75,10 @@
             :required="true"
             @change="handleUserChange"
             style="width: 100%"
+            :disabled="form.leaderType==='01' || form.leaderTypeDesc==='组长'"
           />
         </el-form-item>
+
 
         <!--      工资占比-->
         <el-form-item prop="percentage" label="占比" status-icon  style="margin-top: 25px ;margin-bottom: 25px">
@@ -266,6 +270,8 @@ export default {
 
     handleAdd() {
       this.title = '新增'
+      this.form = { userId: '', percentage: '0.1', leaderType: '00' } // ★ 默认非组长
+
       this.dialogShow = true
     },
     handleUpdate(row) {
@@ -275,6 +281,9 @@ export default {
         }
       }).then(res => {
         this.form = res.data
+        this.form.leaderType = row.leaderType        // ★ 确保带上类型
+        this.form.leaderTypeDesc = row.leaderTypeDesc
+
         // 确保编辑时的值也在0.1-1.0范围内
         if (this.form.percentage < 0.1) {
           this.form.percentage = 0.1

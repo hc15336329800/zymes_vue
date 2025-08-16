@@ -59,6 +59,15 @@
       <!--      <el-button type="primary" class="commen-button" icon="el-icon-plus" @click="handleAdd">新增</el-button>-->
     </el-row>
 
+    <!-- 放在工具栏表单的 </el-form> 之后、表格 <el-table> 之前 -->
+    <el-alert
+      class="list-tip"
+      title="只有当工序全部下达并且报工，这里的工序才会消失"
+      type="warning"
+      show-icon
+      :closable="false"
+    />
+
     <!--    表格-->
     <el-table :data="pageList" class="commen-table mt_20" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55"></el-table-column>
@@ -105,21 +114,21 @@
       <el-table-column label="次品数量" align="center" prop="deffCount" />
       <el-table-column label="工单状态" align="center" prop="state" />
       <el-table-column label="更新时间" align="center" prop="updatedTime" width="100" />
-      <!--      <el-table-column label="操作" align="center"  >-->
-      <!--        <template slot-scope="scope">-->
-      <!--          &lt;!&ndash; 确认后不能编辑和删除 &ndash;&gt;-->
+            <el-table-column label="操作" align="center"  >
+              <template slot-scope="scope">
+                <!-- 确认后不能编辑和删除 -->
 
-      <!--          <el-button link type="primary"   icon="Delete" @click="handleReport(scope.row)" v-show="buttonShow">-->
-      <!--            报工-->
-      <!--          </el-button>-->
+                <el-button link type="primary"   icon="Delete" @click="handleReport(scope.row)" v-show="buttonShow">
+                  报工
+                </el-button>
       <!--&lt;!&ndash;          <el-button v-if="scope.row.deviceName.indexOf('折弯机') !==-1" link type="primary" icon="Delete"&ndash;&gt;-->
       <!--&lt;!&ndash;                     @click="handleHastrue(scope.row,0)">开始&ndash;&gt;-->
       <!--&lt;!&ndash;          </el-button>&ndash;&gt;-->
       <!--&lt;!&ndash;          <el-button v-if="scope.row.deviceName.indexOf('折弯机') !==-1" link type="primary" icon="Delete"&ndash;&gt;-->
       <!--&lt;!&ndash;                     @click="handleHastrue(scope.row,1)">完成&ndash;&gt;-->
       <!--&lt;!&ndash;          </el-button>&ndash;&gt;-->
-      <!--        </template>-->
-      <!--      </el-table-column>-->
+              </template>
+            </el-table-column>
     </el-table>
     <pagination
       style="text-align: right"
@@ -142,9 +151,9 @@
         <el-form-item prop="procedureName" label="工序名称" class="condition">
           <el-input v-model="reportForm.procedureName" :disabled="true" />
         </el-form-item>
-        <el-form-item label="报工类型" class="condition" prop="groupId" style="width:100%;">
+        <el-form-item label="报工类型" class="condition" prop="reportType" style="width:100%;">
           <el-select
-            v-model="reportForm.reportType"
+            v-model="reportForm.groupId"
             clearable
             placeholder="请选择分组"
             style="width:100%;"
@@ -241,7 +250,7 @@
         <el-form-item prop="procedureName" label="已选择序号" class="condition" v-if="showFormItem">
           <el-input v-model="reportForm1.ids" :disabled="true" />
         </el-form-item>
-        <el-form-item label="报工类型" class="condition" prop="groupId">
+        <el-form-item label="报工类型" class="condition" prop="reportType">
           <el-select
             v-model="reportForm1.reportType"
             clearable
@@ -327,8 +336,10 @@ export default {
           {                                             // [MOD] 数值 0-100
             validator: (r, v, cb) => {
               const num = Number(v)
+              const max = Number(this.reportForm.maxRemain) || 0
               if (isNaN(num)) cb(new Error('只能输入数字'))
-              else if (num < 0 || num > 100) cb(new Error('范围 0-100'))
+              else if (num < 0) cb(new Error('不能小于 0'))
+              else if (num > max) cb(new Error(`不能超过可报工数量 ${max}`))
               else cb()
             }, trigger: 'blur'
           }
@@ -338,8 +349,10 @@ export default {
           {
             validator: (r, v, cb) => {
               const num = Number(v)
+              const max = Number(this.reportForm.maxRemain) || 0
               if (isNaN(num)) cb(new Error('只能输入数字'))
-              else if (num < 0 || num > 100) cb(new Error('范围 0-100'))
+              else if (num < 0) cb(new Error('不能小于 0'))
+              else if (num > max) cb(new Error(`不能超过可报工数量 ${max}`))
               else cb()
             }, trigger: 'blur'
           }
@@ -370,26 +383,25 @@ export default {
 
     ///////////////////////////////////////////////////////////数值增减///////////////////////////////////////////////////////////
 
-    /* ---------- 数量 ±1 ---------- */
-    clamp(val) {                              // 公用限幅
-      if (isNaN(val) || val < 0) return 0
-      if (val > 100) return 100
-      return val
-    },
 
     incAssignRealCount() {
-      this.reportForm.realCount = this.clamp((Number(this.reportForm.realCount) || 0) + 1)
-    },
+      const remain = Number(this.reportForm.maxRemain) || 0
+      const next = (Number(this.reportForm.realCount) || 0) + 1
+      this.reportForm.realCount = next > remain ? remain : next       // ✅【修改】上限 = remain
+       },
     decAssignRealCount() {
-      this.reportForm.realCount = this.clamp((Number(this.reportForm.realCount) || 0) - 1)
+      const next = (Number(this.reportForm.realCount) || 0) - 1
+      this.reportForm.realCount = next < 0 ? 0 : next                 // ✅【修改】下限 = 0
     },
     incAssignDeffCount() {
-      this.reportForm.deffCount = this.clamp((Number(this.reportForm.deffCount) || 0) + 1)
+      const remain = Number(this.reportForm.maxRemain) || 0
+      const next = (Number(this.reportForm.deffCount) || 0) + 1
+      this.reportForm.deffCount = next > remain ? remain : next       // ✅【修改】上限 = remain
     },
     decAssignDeffCount() {
-      this.reportForm.deffCount = this.clamp((Number(this.reportForm.deffCount) || 0) - 1)
+      const next = (Number(this.reportForm.deffCount) || 0) - 1
+      this.reportForm.deffCount = next < 0 ? 0 : next                 // ✅【修改】下限 = 0
     },
-
     ///////////////////////////////////////////////////////////报工///////////////////////////////////////////////////////////
 
     // [RESTORE] 单行报工 —— 打开 dialogShow1
@@ -410,11 +422,11 @@ export default {
         this.reportForm = {
           workOrderId: row.id,
           procedureName: row.procedureName,
-          realCount: real,
+          realCount: Math.min(Number(real || 0), maxRemain),
           deffCount: 0,
           reportType: this.reportTypeList[2]?.code || '',
           groupId: row.groupId || '',
-          maxRemain                    // <-- 保存到表单，后面校验用
+          maxRemain: maxRemain   // ✅ 修正
         }
         this.dialogShow1 = true
       }
@@ -455,18 +467,7 @@ export default {
           return
         }
 
-        // （可选）再次确保两者均在 0–100 之间
-        if (real > 100 || deff > 100) {
-          this.$message.error('数量区间必须在 0–100')
-          return
-        }
-        /* ======================== */
 
-        // addReport({ params: this.reportForm }).then(() => {
-        //   this.$message.success('报工成功');
-        //   this.dialogShow1 = false;
-        //   this.getData();
-        // });
         // === 二次确认 ===
         this.$confirm(
           `确认完成本次报工吗？`,
@@ -480,8 +481,7 @@ export default {
             this.getData()
           })
         }).catch(() => {
-          /* 用户点取消——不做任何操作 */
-        })
+         })
 
 
       })

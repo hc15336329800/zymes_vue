@@ -139,7 +139,9 @@
           <div class="assign-input-group">
             <el-input v-model.number="form.assignCount"
                       class="assign-input"
-                      oninput="this.value=this.value.replace(/[^0-9.]/g,'')">
+                      oninput="this.value=this.value.replace(/[^0-9.]/g,'')"
+                      @blur="normalizeAssign"  >
+
             </el-input>
             <el-button-group class="assign-btn-group" style="margin-left:4px;">
               <el-button icon="el-icon-minus" size="mini" @click="decAssign" />
@@ -470,10 +472,15 @@ export default {
         return
       }
 
-      // 过滤掉工单状态 = '已下达' 的数据 + 可下达数量 > 0
+      // 【改】仅保留“可下达数量 > 0”的行
       const filtered = this.multipleSelection.filter(item =>
-        item.state !== '已下达' || Number(item.waitAssignCount) > 0
+        Number(item.waitAssignCount) > 0
       )
+
+      // // 过滤掉工单状态 = '已下达' 的数据 + 可下达数量 > 0
+      // const filtered = this.multipleSelection.filter(item =>
+      //   item.state !== '已下达' || Number(item.waitAssignCount) > 0
+      // )
 
 
       if (filtered.length === 0) {
@@ -481,16 +488,11 @@ export default {
         return
       }
 
+      // 【改】默认下达数量 = 可下达数量（不再截到 100）
       this.batchAssignList = filtered.map(item => ({
         ...item,
-        assignInput: Math.min(item.waitAssignCount, 100)
+        assignInput: Number(item.waitAssignCount) || 0
       }))
-
-      // 确保每次打开都是全新的数据
-      this.batchAssignList = filtered.map(item => ({
-        ...item,
-        assignInput: Math.min(item.waitAssignCount, 100)
-      }));
 
       this.batchAssignDialogVisible = true
     }  ,
@@ -508,7 +510,7 @@ export default {
 
     getMaxAssign(row) {
       // 与 handleAssign 一致逻辑
-      return Math.min(Number(row.waitAssignCount) || 0, 100)
+      return Number(row.waitAssignCount) || 0
     },
 
 
@@ -597,12 +599,9 @@ export default {
         return
       }
 
-      // [MOD] 最大值 = min(waitAssignCount, 100)
-      this.maxAssign = Math.min(waitCnt, 100)
+      this.maxAssign = waitCnt                              // 上限 = 可下达数量
+      this.$set(this.form, 'assignCount', this.maxAssign)   // ✅【改】默认值 = 可下达数量
 
-
-      // [MOD] 预填默认值 = 最大值
-      this.$set(this.form, 'assignCount', this.maxAssign)
 
       this.$set(this.form, 'workOrderId', row.id)
       this.$set(this.form, 'procedureName', row.procedureName)
@@ -657,12 +656,23 @@ export default {
     //下达确定按钮
     submitForm() {
 
+      // 【改】先触发表单规则校验（避免未失焦时规则不生效）
+      this.$refs.form.validate((valid) => {
+          if (!valid) return
+
+
       // [MOD] 额外校验：下达数量必须 > 0
       const cnt = Number(this.form.assignCount)
       if (!cnt || isNaN(cnt)) {                     // 0、空值、非法均拦截
         this.$message.error('下达数量不能为 0')
         return
       }
+
+        // 【改】核心：超过可下达数量则直接提醒并拦截
+        if (cnt > this.maxAssign) {
+          this.$message.warning(`下达数量不能超过可下达数量（${this.maxAssign}）`)
+          return
+        }
 
       // [MOD] ② 二次确认
       this.$confirm(`确定下达 ${cnt} 件么？`, '提示', {
@@ -679,7 +689,7 @@ export default {
       }).catch(() => {
         /* 用户点取消：不做任何事，弹窗保持 */
       })
-
+      })
     },
     submitForm1() {
       addReport({
@@ -764,6 +774,7 @@ export default {
       console.log(this.multipleSelection, 'this.selectList')
     }
   }
+
 }
 </script>
 
