@@ -91,12 +91,17 @@
 
       <el-table-column label="可报工数量" align="center">
         <template slot-scope="scope">
-              <span class="assign-count-highlight">
-                {{
-                  Number(scope.row.assignCount || 0)
-                  - (Number(scope.row.toReviewRealCount || 0) + Number(scope.row.realCount || 0))
-                }}
-              </span>
+    <span class="assign-count-highlight">
+      {{
+        Number(scope.row.assignCount || 0)
+        - (
+          Number(scope.row.realCount || 0) +
+          Number(scope.row.toReviewRealCount || 0) +
+          Number(scope.row.deffCount || 0) +
+          Number(scope.row.toReviewDeffCount || 0)
+        )
+      }}
+    </span>
         </template>
       </el-table-column>
 
