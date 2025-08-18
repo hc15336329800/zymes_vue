@@ -74,7 +74,7 @@
 </template>
 <script>
 import { deleteData, proc_procedure_list, submit_alloc_proc } from '@/api/order'
-import { devicePageList } from '@/api/device/deviceInfo' // [修改] 使用设备台账接口
+ import { devicePageList } from '@/api/device/deviceInfo' // [修改] 使用设备台账接口
 
 
 // [MOD] 写死：deviceId → 设备名称，用于显示名称
@@ -190,7 +190,7 @@ export default {
   },
   components: {
     CommenTable: () => import('./commenTable.vue')
-  },
+   },
   methods: {
 
     //去除后三位小数点
