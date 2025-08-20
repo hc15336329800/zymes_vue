@@ -47,17 +47,12 @@
 
 
 
-      <el-table-column align="center" label="分配数量" prop="bomNo" width="160">
+      <el-table-column align="center" label="分配数量" prop="workItemCount" width="160">
         <template slot-scope="scope">
 
-          <el-input
-            v-model="scope.row.workItemCount"
-            class="input1"
-            type="text"
-            :ref="'input' + scope.$index"
-            @input="scope.row.workItemCount = formatToInt(scope.row.workItemCount)"
-            @keyup.enter.native="handleEnter(scope.$index)"
-          />
+          <el-input v-model="scope.row.workItemCount" class="input1" type="text" :ref="'input'+scope.$index"
+                    placeholder="追加数量" @input="scope.row.workItemCount = formatToInt(scope.row.workItemCount)"
+                    @keyup.enter.native="handleEnter(scope.$index)" />
 
         </template>
       </el-table-column>
@@ -135,19 +130,16 @@ export default {
       return isNaN(intVal) ? '' : intVal.toString()
     },
 
-    // [修改] 使用设备台账接口获取设备列表 + 构建集合/映射，供自动匹配
-    async getDeviceList() {
-      const query = {
-        page: { page_num: 1, page_size: 100 }, // [修改] 固定每页100条
-        params: {}
-      }
-      const res = await devicePageList(query) // [修改] async/await
-      const raw = Array.isArray(res && res.data) ? res.data : []
-      // 统一转为字符串ID，避免类型不一致导致的匹配失败
-      this.deviceList = raw.map(item => ({ code: String(item.id), name: item.deviceName }))
-      this.deviceIdSet = new Set(this.deviceList.map(d => d.code)) // [新增]
-      this.deviceMap = this.deviceList.reduce((m, d) => (m[d.code] = d.name, m), {}) // [新增]
+// ================= 【设备台账】补充健壮性 =================
+    async getDeviceList(){
+      const query={ page:{page_num:1,page_size:100}, params:{} };
+      const res=await devicePageList(query);
+      const raw=Array.isArray(res&&res.data)?res.data:[];
+      this.deviceList = raw.map(it=>({ code:String(it.id), name:it.deviceName }));
+      this.deviceIdSet = new Set(this.deviceList.map(d=>d.code));
+      this.deviceMap  = this.deviceList.reduce((m,d)=>(m[d.code]=d.name,m),{});
     },
+
 
     // [移除] 根据写死的 DEVICE_ID_NAME_MAP 查名称（已不再使用）
 //  getDeviceName(id) {
@@ -209,117 +201,102 @@ export default {
     },
 
     // 保存按钮
-    // 保存按钮
-    async save() {
-      this.saveList = []
+     async save() {
+      this.saveList = [];
+       const getInt = v => {
+        if (v == null || v === '') return NaN;
+        const s = String(v).replace(/[^\d.]/g, '');
+        const n = parseInt(s, 10);
+        return Number.isFinite(n) ? n : NaN;
+      };
+       const groupSum = new Map(); // key: item.id, val: { sum, max }
 
-      // [MOD] 目的：统一把参与比较的值数值化，并校验为正整数，避免字符串/NaN/小数导致的误判
-      for (const [index, item] of this.list.entries()) {
-        // [MOD] 新增：保留原始值，转为数字用于比较
-        const rawVal = item.workItemCount
-        const rawMax = item.waitAllocCount
-        const val = Number(rawVal)
-        const max = Number(rawMax)
+       for (let i = 0; i < this.list.length; i++) {
+        const item = this.list[i];
+        const rowNo = i + 1;
 
-        // [MOD] 新增：必填校验（保持原有语义）
-        if (rawVal == null || rawVal === '') {
-          this.$message.error(`第 ${index + 1} 行未填写分配数量`)
-          return
+         if (!item.workDeviceId) {
+          this.$message.error(`第 ${rowNo} 行未选择设备`);
+          return;
         }
 
-        // [MOD] 新增：类型与取值校验——必须为正整数（≥1）
-        if (!Number.isFinite(val) || !Number.isInteger(val) || val < 1) {
-          this.$message.error(`第 ${index + 1} 行分配数量必须为正整数（≥1）`)
-          return
-        }
+         // —— 数字规整 ——
+         const delta=getInt(item.workItemCount);                         // 本次“追加数”
+         const wait =getInt(item.waitAllocCount);                        // 可分配口径（前端口径）
+         const issued = getInt(item.workerAllocCount) || 0;              // 已分配（展示口径）
+         // 【新增-稳妥兜底】旧计划数优先取接口的 planTotalCount；缺失时在“行内已有工单且只有一单”的情况下回退到 issued
+         const prevPlanRaw = Number(item.__prevPlanTotalCount||0);
+         const prevPlan = item.workId ? (prevPlanRaw>0 ? prevPlanRaw : issued) : 0;  // 【修改点①】追加时的“旧计划数”
 
-        // [MOD] 新增：max 合法性校验
-        if (!Number.isFinite(max) || max < 0) {
-          this.$message.error(`第 ${index + 1} 行可分配数异常，请检查数据源`)
-          return
-        }
+         // —— 基本校验 ——
+         if(!Number.isInteger(delta)||delta<1){ this.$message.error(`第 ${rowNo} 行分配数量必须为正整数（≥1）`); return; }
+         if(!Number.isInteger(wait) ||wait<0){ this.$message.error(`第 ${rowNo} 行可分配数异常，请检查数据源`); return; }
+         if(delta>wait){ this.$message.error(`第 ${rowNo} 行本次分配不得超过可分配数 ${wait}`); return; }
 
-        // [MOD] 修改：范围提示与逻辑统一为 1 ~ max（原提示为 0 ~ max 且代码用 val < 1）
-        if (val > max) {
-          this.$message.error(`第 ${index + 1} 行分配数量必须在 1 ~ ${max} 之间`)
-          return
-        }
 
-        // ✅ 原 saveList 构造逻辑保留（仅将 allocCount 使用数值化后的 val）
-        this.saveList.push({
+         // —— 关键转换：追加→最终 ——
+         const allocTotal = item.workId ? (prevPlan + delta) : delta;    // 【修改点②】有工单=追加，无工单=新增
+
+         // —— 同工序多行合计不超发 ——
+         const gk=item.id; const cur=groupSum.get(gk)||{sum:0,max:wait}; cur.sum+=delta; cur.max=wait; groupSum.set(gk,cur);
+
+
+         this.saveList.push({
           id: item.id,
-          workOrderId: item.workId,
+           workOrderId: item.workId || '',    // 有=更新，无=新增
           deviceId: item.workDeviceId,
-          allocCount: val // [MOD] 用数值化后的 val，避免后端再转型
-        })
+           allocCount: allocTotal             // 【修改点③】传“最终计划数”
+        });
       }
 
-      // ✅ 原提交逻辑保留
-      await submit_alloc_proc({
-        params: {
-          shiftType: this.$route.query.shiftType,
-          groupId: this.$route.query.groupId,
-          list: this.saveList
-        }
-      })
+       // —— 合计校验（同一工序多行） ——
+       for (const {sum,max} of groupSum.values()){
+         if(sum>max){ this.$message.error(`存在同一工序/图纸的多行合计超出可分配：合计 ${sum} > 可分配 ${max}`); return; }
+       }
 
-      this.$message({ type: 'success', message: '提交成功' })
-      // this.getList('clear');
-      this.back() // 👈 执行返回
+       // —— 提交 ——
+       await submit_alloc_proc({ params:{ shiftType:this.$route.query.shiftType, groupId:this.$route.query.groupId, list:this.saveList }});
+       this.$message({type:'success',message:'提交成功'});
+       // this.back();
+
+       this.$router.go(-1);
+
     },
 
-    async getList(str, id) {
-      this.listLoading = true
-      this.editIdx = null
-      try {
-        if (str == 'clear') {
-          this.paramForm = {}
+// ================= 【获取工序分配列表】关键映射 =================
+    async getList(str,id){
+      this.listLoading=true; this.editIdx=null;
+      try{
+        if(str=='clear'){ this.paramForm={}; this.pages={total:0,page_num:1,page_size:100}; }
+        const paramsId=JSON.parse(this.$route.query.id);
+        const res=await proc_procedure_list({ params:{ ids:paramsId, shiftType:this.$route.query.shiftType, groupId:this.$route.query.groupId }});
 
-          this.pages = {
-            total: 0,
-            page_num: 1,
-            page_size: 100
-          }
-        }
-        var paramsId = JSON.parse(this.$route.query.id)
-        const res = await proc_procedure_list({
-          params: {
-            ids: paramsId,
-            shiftType: this.$route.query.shiftType,
-            groupId: this.$route.query.groupId      // [MOD] 新增
-          }
-        })
-        this.listLoading = false
-        if (res.data) {
+        if(res && res.data){
+          this.list=(res.data||[]).map(it=>{
+            const total = Number(it.totalCount||0);
+            const allocated = Number(it.workerAllocCount||0);
+            const wait = Math.max(total - allocated, 0);                         // 【修改】统一“可分配”口径
+            // 【新增】旧计划数优先级：planTotalCount > workPlanTotalCount > workItemPlan(候选) > assignCount > workerAllocCount > 0
+            const prevPlan = it.workId
+              ? Number(it.planTotalCount ?? it.workPlanTotalCount ?? it.workItemPlan ?? it.assignCount ?? it.workerAllocCount ?? 0) || 0
+              : 0;
 
-
-          this.list = (res.data || []).map(it => {
-            const total = Number(it.totalCount || 0);
-            const allocated = Number(it.workerAllocCount || 0);
-            const wait = Math.max(total - allocated, 0); // 可分配 = 总数 - 已分配
-            // [关键] 初始化“分配数量”的默认值：不要沿用后端的 workItemCount，避免出现等于 totalCount 的 4
-            // 方案A（推荐）：默认填充为“可分配数”
-            const initAlloc = wait;             // 如果你想默认留空，改成：const initAlloc = '';
-            // 同时把设备做一次映射，避免二次 forEach
-            const devId = it.deviceId != null ? String(it.deviceId) : null;
+            const devId = it.deviceId!=null ? String(it.deviceId) : null;
             const mappedDev = (devId && this.deviceIdSet.has(devId)) ? devId : null;
-            return { ...it, waitAllocCount: wait, workItemCount: initAlloc, workDeviceId: mappedDev };
+
+            return {
+              ...it,
+              waitAllocCount: wait,                               // 展示/校验用
+              workItemCount: this.formatToInt(wait),              // 默认“把剩余可分配一次加满”，也可手改
+              workDeviceId: mappedDev,
+              __prevPlanTotalCount: prevPlan                      // 【新增】保存旧计划数，供 save() 使用
+            };
           });
-
-          this.list.forEach(item => {
-            // 【关键步骤】[修改] 用接口返回的 deviceId 自动匹配台账（存在则选中，不存在留空）
-            const id = item.deviceId != null ? String(item.deviceId) : null
-            this.$set(item, 'workDeviceId', (id && this.deviceIdSet.has(id)) ? id : null)
-
-            // 🌟 新增：初始化时直接过滤掉小数
-            if (item.workItemCount !== undefined && item.workItemCount !== null) {
-              item.workItemCount = this.formatToInt(item.workItemCount)
-            }
-          })
         }
-      } finally {
-      }
+      } finally { this.listLoading=false; }
     },
+
+
     handleEnter(index) {
       if (index < this.list.length - 1) {
         this.$nextTick(() => {
