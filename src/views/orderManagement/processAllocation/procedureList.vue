@@ -291,7 +291,21 @@ export default {
         })
         this.listLoading = false
         if (res.data) {
-          this.list = res.data
+
+
+          this.list = (res.data || []).map(it => {
+            const total = Number(it.totalCount || 0);
+            const allocated = Number(it.workerAllocCount || 0);
+            const wait = Math.max(total - allocated, 0); // 可分配 = 总数 - 已分配
+            // [关键] 初始化“分配数量”的默认值：不要沿用后端的 workItemCount，避免出现等于 totalCount 的 4
+            // 方案A（推荐）：默认填充为“可分配数”
+            const initAlloc = wait;             // 如果你想默认留空，改成：const initAlloc = '';
+            // 同时把设备做一次映射，避免二次 forEach
+            const devId = it.deviceId != null ? String(it.deviceId) : null;
+            const mappedDev = (devId && this.deviceIdSet.has(devId)) ? devId : null;
+            return { ...it, waitAllocCount: wait, workItemCount: initAlloc, workDeviceId: mappedDev };
+          });
+
           this.list.forEach(item => {
             // 【关键步骤】[修改] 用接口返回的 deviceId 自动匹配台账（存在则选中，不存在留空）
             const id = item.deviceId != null ? String(item.deviceId) : null
