@@ -1,4 +1,4 @@
-<!--工序下发页面-->
+<!--生产任务 页面-->
 <template>
   <div class="app-container">
     <el-form :model="queryParams" ref="queryRef" class="query-form commen-search" :inline="true">
@@ -149,7 +149,7 @@
           params: {},
           page: {
             page_num: 1,
-            page_size: 10
+            page_size: 200
           }
         },
         statusList: [],
@@ -216,7 +216,7 @@
         this.queryParams = {
           page: {
             page_num: 1,
-            page_size: 10
+            page_size: 200
           },
           params: {}
         }

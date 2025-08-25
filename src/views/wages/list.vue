@@ -86,7 +86,7 @@
           params: {},
           page: {
             page_num: 1,
-            page_size: 10
+            page_size: 20
           }
         },
         form: {},
@@ -128,7 +128,7 @@
         this.queryParams = {
           page: {
             page_num: 1,
-            page_size: 10
+            page_size: 20
           },
           params: {}
         }

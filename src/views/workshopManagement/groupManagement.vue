@@ -117,7 +117,7 @@ export default {
         params: {},
         page: {
           page_num: 1,
-          page_size: 10
+          page_size: 200
         }
       },
       form: {},
@@ -161,7 +161,7 @@ export default {
       this.queryParams = {
         page: {
           page_num: 1,
-          page_size: 10
+          page_size: 200
         },
         params: {}
       }

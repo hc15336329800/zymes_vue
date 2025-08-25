@@ -17,6 +17,7 @@
       highlight-current-row
       class="table mb_10 isTable2"
     >
+      <el-table-column type="index" label="序号" width="60" align="center"></el-table-column>
       <el-table-column align="center" label="图纸号" prop="bomNo"></el-table-column>
       <el-table-column align="center" label="工序名称" prop="procedureName"></el-table-column>
       <el-table-column align="center" label="总数" prop="totalCount"></el-table-column>
