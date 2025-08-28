@@ -74,7 +74,7 @@
 import { deleteData, proc_procedure_list, submit_alloc_proc } from '@/api/order'
 import { devicePageList } from '@/api/device/deviceInfo' // 使用设备台账接口
 
-/ / 工序名称与设备ID的固定映射表
+// 工序名称与设备ID的固定映射表
 const procedureDeviceMap = {
   '激光切割下料': '424949962023788544',
   '预装焊接': '424859913508773888',
@@ -206,6 +206,8 @@ export default {
       // deviceOptions: Object.entries(DEVICE_ID_NAME_MAP).map(([value, label]) => ({ value, label })),
 
       deviceList: [],                     // [修改] 台账设备数据（下拉源）
+      procedureDeviceMap: {              // [MOD] 新增：工序名称 → 设备号映射
+      },
       deviceIdSet: new Set(),             // [新增] 台账设备ID集合（字符串），用于快速校验
       deviceMap: {}                       // [新增] 台账设备映射：{ id(字符串): name }
     }
@@ -351,7 +353,7 @@ export default {
        }
 
        // —— 提交 ——
-       await submit_alloc_proc({ params:{ shiftType:this.$route.query.shiftType, groupId:this.$route.query.groupId, list:this.saveList }});
+       await submit_alloc_proc({ params:{ shiftType:this.$route.query.shiftType, groupId:this.$route.query.groupId,  list:this.saveList }});
        this.$message({type:'success',message:'提交成功'});
        // this.back();
 
