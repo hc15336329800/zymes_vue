@@ -102,7 +102,7 @@
 
 
       <!-- 自定义选择列 -->
-      <el-table-column label="选择" width="80">
+      <el-table-column label="多选框" width="80">
         <template slot-scope="scope">
           <el-checkbox
             :value="checkedMap[scope.row.id] || false"
