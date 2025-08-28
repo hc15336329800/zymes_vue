@@ -1,4 +1,4 @@
-<!--工序分配列表-->
+<!--工序分配页面-->
 <template>
   <div
     class="w_100 pt_30 plr_30 ptb_30 process-allocation"
@@ -17,7 +17,6 @@
       highlight-current-row
       class="table mb_10 isTable2"
     >
-      <el-table-column type="index" label="序号" width="60" align="center"></el-table-column>
       <el-table-column align="center" label="图纸号" prop="bomNo"></el-table-column>
       <el-table-column align="center" label="工序名称" prop="procedureName"></el-table-column>
       <el-table-column align="center" label="总数" prop="totalCount"></el-table-column>
@@ -25,66 +24,172 @@
       <el-table-column align="center" label="已生产数量" prop="prodCount"></el-table-column>
       <el-table-column align="center" label="可分配数" prop="waitAllocCount"></el-table-column>
       <el-table-column align="center" label="中间件使用数" prop="midCount"></el-table-column>
-
-      <!-- 设备列 -->
       <el-table-column align="center" label="设备" prop="bomNo" width="220">
         <template slot-scope="scope">
-          <el-select
-            v-model="scope.row.workDeviceId"
-            placeholder="请选择设备"
-            clearable
-            filterable
-            style="width: 100%;"
-          > <!-- [修改] 使用原生 el-select -->
-            <el-option
-              v-for="item in deviceList"
-              :key="item.code"
-              :label="item.name"
-              :value="item.code"
-            ></el-option> <!-- [修改] 绑定台账数据 -->
-          </el-select>
+          <Device
+            :bind-id.sync="scope.row.workDeviceId"
+            :pageName="'procedureList'"
+            :deviceList.sync="deviceList"
+          />
         </template>
       </el-table-column>
 
-
-
-      <el-table-column align="center" label="分配数量" prop="workItemCount" width="160">
+      <el-table-column align="center" label="分配数量" prop="bomNo" width="160">
         <template slot-scope="scope">
-
-          <el-input v-model="scope.row.workItemCount" class="input1" type="text" :ref="'input'+scope.$index"
-                    placeholder="追加数量" @input="scope.row.workItemCount = formatToInt(scope.row.workItemCount)"
-                    @keyup.enter.native="handleEnter(scope.$index)" />
-
+          <el-input
+            v-model.number="scope.row.workItemCount"
+            class="input1"
+            type="number"
+            :ref="'input' + scope.$index"
+            @keyup.enter.native="handleEnter(scope.$index)"
+          />
         </template>
       </el-table-column>
+      <el-table-column align="center" label="工单号" prop="workOrderNo"></el-table-column>
+      <el-table-column align="center" label="报工数量" prop="workReportCount"></el-table-column>
 
-
-
+      <el-table-column align="center" label="操作" width="180">
+        <template slot-scope="scope">
+          <div style="display:flex;align-items:center;justify-content:space-between;">
+            <el-button
+              link
+              type="primary"
+              icon="Edit"
+              @click="addRow(scope.$index,scope.row)"
+            >再次分配</el-button>
+            <el-button
+              link
+              type="primary"
+              icon="Edit"
+              @click="deleteData(scope.$index,scope.row)"
+            >删除
+            </el-button>
+          </div>
+        </template>
+      </el-table-column>
     </el-table>
 
     <div style="width:100%;text-align:center;">
       <el-button type="primary" plain class @click="back()">返回</el-button>
-      <el-button type="primary" class @click="save()">分配</el-button>
+      <el-button type="primary" class @click="save()">保存</el-button>
     </div>
   </div>
 </template>
 
-
 <script>
-import { deleteData, proc_procedure_list, submit_alloc_proc } from '@/api/order'
-import { devicePageList } from '@/api/device/deviceInfo' // 使用设备台账接口
+import {
+  proc_procedure_list,
+  submit_alloc_proc,
+  deleteData,
+  proc_detail
+} from '@/api/order'
+import {deviceSelect} from '@/api/device/deviceInfo'
 
-// ===================== ⚠️ 以下两段为“保留原注释但移除实现”的硬映射，已弃用 =====================
-// [移除] 写死：deviceId → 设备名称，用于显示名称（已改为动态台账映射）
-// const DEVICE_ID_NAME_MAP = { ... }
-
-// [移除] 写死：procedureCode → deviceId（已改为按接口返回的 deviceId 自动匹配台账）
-// const PROCEDURE_DEVICE_MAP = { ... }
-// ========================================================================
+// [新增] 工序名称与设备ID的固定映射表
+const procedureDeviceMap = {
+  '激光切割下料': '424949962023788544',
+  '预装焊接': '424859913508773888',
+  '打码': '424949505515741184',
+  '铆铭牌': '424974103321927680',
+  '包装': '424859706293379072',
+  '倒角': '424950346687602688',
+  '左立板预装': '424860069373304832',
+  '左立板焊接': '424859913508773888',
+  '右立板预装': '424860069373304832',
+  '右立板焊接': '424859913508773888',
+  '预装': '424860069373304832',
+  '左立板焊后调平': '424859994123296768',
+  '右立板焊后调平': '424859994123296768',
+  '装框入库发货': '427747339575123968',
+  '打磨遮蔽': '424983016339562496',
+  '喷粉': '424973040892141568',
+  '检验组挂防护上件': '424951282155806720',
+  '装配调整': '424974103321927680',
+  '调整平面度及尺寸': '424859994123296768',
+  '火焰校正': '424859994123296768',
+  '机头座预装': '424860069373304832',
+  '焊接': '424859913508773888',
+  '机头座焊接': '424859913508773888',
+  '预装小件': '424860069373304832',
+  '焊后调平': '424859994123296768',
+  '砸轴套': '424974103321927680',
+  '改成预装焊接及螺母': '424860069373304832',
+  '加工平面及孔': '424950493689569280',
+  '预装焊接前贴板': '424860069373304832',
+  '焊接油缸座': '424859913508773888',
+  '焊接后调整': '424859994123296768',
+  '组装焊接电线环': '424859913508773888',
+  '焊接固定板': '424859913508773888',
+  '机器人预装焊接上板': '424950932417961984',
+  '铣平面': '424950493689569280',
+  '预装上板焊合': '424860069373304832',
+  '铆钉': '424974103321927680',
+  '喷砂': '424951176589369344',
+  '预装油缸座': '424860069373304832',
+  '总成平整度，尺寸矫正': '424859994123296768',
+  '总成试装装配护栏': '424974103321927680',
+  '焊后加工': '424950493689569280',
+  '总装': '424974103321927680',
+  '喷砂前防护': '424983016339562496',
+  '修磨切割纹': '424949846894338048',
+  '卸防护': '425239381603672064',
+  '一次预装': '424860069373304832',
+  '二次预装': '424860069373304832',
+  '攻丝': '424948342544293888',
+  '预装下件': '425239381603672064',
+  '调整平面': '424950828344696832',
+  '折弯': '424950245286109184',
+  '车床加工': '424950493689569280',
+  '清渣修磨': '424859821687070720',
+  '调整检验': '424859994123296768',
+  '装运总装车间': '424960035571785728',
+  '下件': '425239381603672064',
+  '总成顺丝及调整': '424973656825683968',
+  '装配油箱电池侧': '424974103321927680',
+  '下料': '424949962023788544',
+  '装框': '427747339575123968',
+  '沉孔': '424950640133693440',
+  '预装焊接螺母': '424860069373304832',
+  '火焰切割外形': '424950120539119616',
+  '加工坡口': '424950346687602688',
+  '打磨机修磨': '424949846894338048',
+  '装车': '424960035571785728',
+  '调整': '424859994123296768',
+  '火焰切割下料': '424950120539119616',
+  '调平': '424950828344696832',
+  '加工2个R弧': '424950493689569280',
+  '机器人折弯': '424950245286109184',
+  '钻孔': '424950640133693440',
+  'U型抬杠装配': '424974103321927680',
+  '圆管切割机下料': '424950740994121728',
+  '焊接机器人预装焊接': '424950932417961984',
+  '围弯': '424871737725706240',
+  '衬管下料': '424950740994121728',
+  '钻孔攻丝': '424950640133693440',
+  '切除多余部分': '001',
+  '切割圆弧': '424859821687070720',
+  '压型': '424951108410957824',
+  '压边': '424950245286109184',
+  '总成修整装配': '424974103321927680',
+  '修磨圆弧': '424859821687070720',
+  '下料围弯': '424950740994121728',
+  '机器人补焊': '424950932417961984',
+  '机器人焊接': '424950932417961984',
+  '人工焊接': '424859913508773888',
+  '人工补焊': '424859913508773888',
+  '机器人预装': '424860069373304832',
+  '改为修磨毛刺及微连接': '424859821687070720',
+  '焊接后调平': '424859994123296768',
+  '清抛': '424951176589369344',
+  '装片1个': '424951176589369344',
+  '吹砂': '424951176589369344',
+  '吹水': '424979166555693056',
+  '成品': '424974103321927680',
+  '铆接': '002'
+}
 
 export default {
   name: 'procedureList',
-
   data() {
     return {
       listLoading: false,
@@ -95,7 +200,7 @@ export default {
       list: [],
       isUpdate: Math.random(),
       workOptions: [],
-      // deviceList: [],
+      deviceList: [],
       modelTypes: [],
       modelTypeName: null,
       allocTypeModel: null,
@@ -106,48 +211,20 @@ export default {
         page_num: 1,
         page_size: 100
       },
-
-      // [移除] 根据写死的 DEVICE_ID_NAME_MAP 初始化设备下拉选项（已弃用，改用接口台账）
-      // deviceOptions: Object.entries(DEVICE_ID_NAME_MAP).map(([value, label]) => ({ value, label })),
-
-      deviceList: [],                     // [修改] 台账设备数据（下拉源）
-      deviceIdSet: new Set(),             // [新增] 台账设备ID集合（字符串），用于快速校验
-      deviceMap: {}                       // [新增] 台账设备映射：{ id(字符串): name }
+      procedureDeviceMap   // [新增] 将映射表挂载到组件实例
     }
   },
   components: {
-    CommenTable: () => import('./commenTable.vue')
+    CommenTable: () => import('./commenTable.vue'),
+    Device: () => import('@/components/Device')
   },
   methods: {
-
-    //去除后三位小数点
-    formatToInt(val) {
-      // 只保留正整数，去掉小数部分
-      if (val == null || val === '') return ''
-      // 去掉非数字和小数点字符
-      val = val.toString().replace(/[^\d.]/g, '')
-      // 取整数部分
-      const intVal = parseInt(val, 10)
-      return isNaN(intVal) ? '' : intVal.toString()
+    getDeviceList() {
+      deviceSelect({}).then(res => {
+        this.deviceList = res.data
+      })
     },
-
-// ================= 【设备台账】补充健壮性 =================
-    async getDeviceList(){
-      const query={ page:{page_num:1,page_size:100}, params:{} };
-      const res=await devicePageList(query);
-      const raw=Array.isArray(res&&res.data)?res.data:[];
-      this.deviceList = raw.map(it=>({ code:String(it.id), name:it.deviceName }));
-      this.deviceIdSet = new Set(this.deviceList.map(d=>d.code));
-      this.deviceMap  = this.deviceList.reduce((m,d)=>(m[d.code]=d.name,m),{});
-    },
-
-
-    // [移除] 根据写死的 DEVICE_ID_NAME_MAP 查名称（已不再使用）
-//  getDeviceName(id) {
-//    return DEVICE_ID_NAME_MAP[id] || '未知设备'
-//  },
-
-    objectSpanMethod({ row, column, rowIndex, columnIndex }) {
+    objectSpanMethod({row, column, rowIndex, columnIndex}) {
       if (columnIndex <= 6 && row.colLen >= 1) {
         return {
           colspan: 1,
@@ -202,122 +279,89 @@ export default {
     },
 
     // 保存按钮
-     async save() {
-      this.saveList = [];
-       const getInt = v => {
-        if (v == null || v === '') return NaN;
-        const s = String(v).replace(/[^\d.]/g, '');
-        const n = parseInt(s, 10);
-        return Number.isFinite(n) ? n : NaN;
-      };
-       const groupSum = new Map(); // key: item.id, val: { sum, max }
-
-       for (let i = 0; i < this.list.length; i++) {
-        const item = this.list[i];
-        const rowNo = i + 1;
-
-         if (!item.workDeviceId) {
-          this.$message.error(`第 ${rowNo} 行未选择设备`);
-          return;
-        }
-
-         // —— 数字规整 ——
-         const delta=getInt(item.workItemCount);                         // 本次“追加数”
-         const wait =getInt(item.waitAllocCount);                        // 可分配口径（前端口径）
-         const issued = getInt(item.workerAllocCount) || 0;              // 已分配（展示口径）
-         // 【新增-稳妥兜底】旧计划数优先取接口的 planTotalCount；缺失时在“行内已有工单且只有一单”的情况下回退到 issued
-         const prevPlanRaw = Number(item.__prevPlanTotalCount||0);
-         const prevPlan = item.workId ? (prevPlanRaw>0 ? prevPlanRaw : issued) : 0;  // 【修改点①】追加时的“旧计划数”
-
-         // —— 基本校验 ——
-         if(!Number.isInteger(delta)||delta<1){ this.$message.error(`第 ${rowNo} 行分配数量必须为正整数（≥1）`); return; }
-         if(!Number.isInteger(wait) ||wait<0){ this.$message.error(`第 ${rowNo} 行可分配数异常，请检查数据源`); return; }
-         if(delta>wait){ this.$message.error(`第 ${rowNo} 行本次分配不得超过可分配数 ${wait}`); return; }
-
-
-         // —— 关键转换：追加→最终 ——
-         const allocTotal = item.workId ? (prevPlan + delta) : delta;    // 【修改点②】有工单=追加，无工单=新增
-
-         // —— 同工序多行合计不超发 ——
-         const gk=item.id; const cur=groupSum.get(gk)||{sum:0,max:wait}; cur.sum+=delta; cur.max=wait; groupSum.set(gk,cur);
-
-
-         this.saveList.push({
+    async save(item, k) {
+      this.saveList = []
+      console.log("....", this.list)
+      this.list.forEach(item => {
+        this.saveList.push({
           id: item.id,
-           workOrderId: item.workId || '',
+          workOrderId: item.workId,
           deviceId: item.workDeviceId,
-           allocCount: delta
-         });
-      }
+          allocCount: item.workItemCount
+        })
+      })
 
-
-       for (const {sum,max} of groupSum.values()){
-         if(sum>max){ this.$message.error(`存在同一工序/图纸的多行合计超出可分配：合计 ${sum} > 可分配 ${max}`); return; }
-       }
-
-       await submit_alloc_proc({ params:{ shiftType:this.$route.query.shiftType, groupId:this.$route.query.groupId, list:this.saveList }});
-       this.$message({type:'success',message:'提交成功'});
-       // this.back();
-
-       this.$router.go(-1);
-
-    },
-
-// ================= 【获取工序分配列表】关键映射 =================
-    async getList(str,id){
-      this.listLoading=true; this.editIdx=null;
-      try{
-        if(str=='clear'){ this.paramForm={}; this.pages={total:0,page_num:1,page_size:100}; }
-        const paramsId=JSON.parse(this.$route.query.id);
-        const res=await proc_procedure_list({ params:{ ids:paramsId, shiftType:this.$route.query.shiftType, groupId:this.$route.query.groupId }});
-
-        if(res && res.data){
-          this.list=(res.data||[]).map(it=>{
-            const total = Number(it.totalCount||0);
-            const allocated = Number(it.workerAllocCount||0);
-            const wait = Math.max(total - allocated, 0);                         // 【修改】统一“可分配”口径
-            // 【新增】旧计划数优先级：planTotalCount > workPlanTotalCount > workItemPlan(候选) > assignCount > workerAllocCount > 0
-            const prevPlan = it.workId
-              ? Number(it.planTotalCount ?? it.workPlanTotalCount ?? it.workItemPlan ?? it.assignCount ?? it.workerAllocCount ?? 0) || 0
-              : 0;
-
-            const devId = it.deviceId!=null ? String(it.deviceId) : null;
-            const mappedDev = (devId && this.deviceIdSet.has(devId)) ? devId : null;
-
-            return {
-              ...it,
-              waitAllocCount: wait,                               // 展示/校验用
-              workItemCount: this.formatToInt(wait),              // 默认“把剩余可分配一次加满”，也可手改
-              workDeviceId: mappedDev,
-              __prevPlanTotalCount: prevPlan                      // 【新增】保存旧计划数，供 save() 使用
-            };
-          });
+      await submit_alloc_proc({
+        params: {
+          shiftType: this.$route.query.shiftType,
+          groupId:   this.$route.query.groupId,  // ← 新增
+          list: this.saveList
         }
-      } finally { this.listLoading=false; }
+      })
+      this.$message({
+        type: 'success',
+        message: '提交成功'
+      })
+      this.getList('clear')
     },
 
+    async getList(str, id) {
+      this.listLoading = true
+      this.editIdx = null
+      try {
+        if (str == 'clear') {
+          this.paramForm = {}
 
+          this.pages = {
+            total: 0,
+            page_num: 1,
+            page_size: 100
+          }
+        }
+        var paramsId = JSON.parse(this.$route.query.id)
+        const res = await proc_procedure_list({
+          params: {
+            ids: paramsId,
+            shiftType: this.$route.query.shiftType,
+            groupId:   this.$route.query.groupId      // [MOD] 新增
+          }
+        })
+        this.listLoading = false
+        if (res.data) {
+          this.list = res.data
+          this.list.forEach(item => {
+            if (!item.workDeviceId) {
+              // [新增] 根据工序名称自动映射设备ID
+              const mapped = this.procedureDeviceMap[item.procedureName]
+              if (mapped) {
+                this.$set(item, 'workDeviceId', mapped)
+              } else if (item.deviceId) {
+                this.$set(item, 'workDeviceId', item.deviceId)
+              }
+            }
+          })
+        }
+      } finally {
+      }
+    },
     handleEnter(index) {
       if (index < this.list.length - 1) {
         this.$nextTick(() => {
-          this.$refs[`input${index + 1}`].focus()
-        })
+          this.$refs[`input${index + 1}`].focus();
+        });
       }
     }
   },
   async created() {
-    // [修改] 顺序：先加载台账，再加载工序列表，确保自动映射可用
-    await this.getDeviceList()                 // [修改] 页面初始化加载台账数据
+    this.getDeviceList()
     await this.getList('clear')
   },
   async activated() {
     // await this.getGroupSelect()
     await this.getList('clear')
-  }
+  },
 }
 </script>
-
-
 
 <style lang="scss" scoped>
 .process-allocation {
