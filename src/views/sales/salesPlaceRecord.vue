@@ -49,10 +49,7 @@
 
       <el-table-column label="审批状态" align="center" prop="placeStatus">
         <template slot-scope="scope">
-          <el-tag v-if="scope.row.placeStatus === '00'" type="info" effect="dark">待审批</el-tag>
-          <el-tag v-else-if="scope.row.placeStatus === '01'" type="success" effect="dark">通过</el-tag>
-          <el-tag v-else-if="scope.row.placeStatus === '02'" type="danger" effect="dark">拒绝</el-tag>
-          <el-tag v-else type="warning" effect="dark">未知</el-tag>
+          <el-tag :type="statusType(scope.row.placeStatus)" effect="dark">{{ statusText(scope.row.placeStatus) }}</el-tag>
         </template>
       </el-table-column>
 
@@ -118,6 +115,10 @@ export default {
 
   },
   methods: {
+     normalizeStatus(s){ if(s==null) return ''; const x=String(s).trim(); return /^\d$/.test(x)?('0'+x):x; },
+    statusType(s){ const k=this.normalizeStatus(s); const map={ '00':'info','01':'success','02':'danger' }; return map[k]||'warning'; },
+    statusText(s){ const k=this.normalizeStatus(s); const map={ '00':'待审批','01':'通过','02':'拒绝' }; return map[k]||'未知'; },
+
     getSelectOptions() {
       dictInfo("ORDER_TYPE", r => this.orderTypeList = r)
       dictInfo("APPROVAL_STATUS", r => this.approvalList = r)

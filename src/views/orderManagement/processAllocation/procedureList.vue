@@ -244,18 +244,17 @@ export default {
 
          this.saveList.push({
           id: item.id,
-           workOrderId: item.workId || '',    // 有=更新，无=新增
+           workOrderId: item.workId || '',
           deviceId: item.workDeviceId,
-           allocCount: allocTotal             // 【修改点③】传“最终计划数”
-        });
+           allocCount: delta
+         });
       }
 
-       // —— 合计校验（同一工序多行） ——
+
        for (const {sum,max} of groupSum.values()){
          if(sum>max){ this.$message.error(`存在同一工序/图纸的多行合计超出可分配：合计 ${sum} > 可分配 ${max}`); return; }
        }
 
-       // —— 提交 ——
        await submit_alloc_proc({ params:{ shiftType:this.$route.query.shiftType, groupId:this.$route.query.groupId, list:this.saveList }});
        this.$message({type:'success',message:'提交成功'});
        // this.back();
