@@ -84,7 +84,7 @@
     <el-table
       ref="treeTable"
       :data="pageList"
-      :row-key="row => row.id"
+      row-key="_rid"
       lazy
       :load="loadChildren"
       :tree-props="{ children: 'children', hasChildren: 'hasChildren' }"
@@ -92,6 +92,14 @@
       @sort-change="handleSortChange"
 
     >
+
+
+      <el-table-column label="父项序号" width="100" align="center">
+        <template slot-scope="scope">{{ scope.row._groupIndex != null ? scope.row._groupIndex : '-' }}</template>
+      </el-table-column>
+      <el-table-column label="子项序号" type="index" width="100" align="center" :index="indexMethod" />
+
+
 
       <!-- 自定义选择列 -->
       <el-table-column label="选择" width="80">
@@ -103,14 +111,7 @@
         </template>
       </el-table-column>
 
-<!--      <el-table-column-->
-<!--        type="selection"-->
-<!--        width="55"-->
-<!--        @select="handleSelect"-->
-<!--        @select-all="handleSelectAll">-->
-<!--      </el-table-column>-->
 
-<!--      <el-table-column type="selection" width="55"></el-table-column>-->
       <el-table-column label="生产单号" align="center" prop="orderNo" sortable="custom" />
       <el-table-column label="图纸号" align="center" prop="topBomNo" sortable="custom" />
       <el-table-column label="部件名称" align="center" prop="itemName" sortable="custom" />
@@ -177,7 +178,7 @@ export default {
   },
   data() {
     return {
-
+      parentIndexMap: {},
       checkedMap: {}, // id: true/false   自定义复选框
 
 
@@ -226,13 +227,32 @@ export default {
   },
   methods: {
 
-    //树：模拟懒加载）
-    loadChildren(row, resolve) {
-      // 模拟懒加载 —— 实际数据已包含所有 children
-      setTimeout(() => {
-        resolve(row.children || []);
-      }, 0); // 不延迟也可以，立即 resolve
+    // [新增] 递归为每个节点生成稳定且唯一的 row-key（_rid）
+    ensureRowKey(list){
+      const used=new Set();
+      const make=(n,i,prefix)=>{
+        let k = (n.id!=null&&n.id!=='')?('id_'+n.id):(n._rid||`v_${prefix||'r'}_${i}_${n.orderNo||''}_${n.itemNo||''}_${n.bomNo||''}`);
+        while(used.has(k)) k = k + '_' + Math.random().toString(36).slice(2,6);
+        this.$set(n,'_rid',k); used.add(k);
+      };
+      const walk=(arr,prefix)=>{
+        if(!Array.isArray(arr)) return;
+        arr.forEach((n,i)=>{ make(n,i,prefix); n.children&&walk(n.children,n._rid); });
+      };
+      walk(list);
     },
+
+
+    buildParentIndex(){
+      const tag='_groupIndex', mark=(node,idx)=>{ this.$set(node,tag,idx); node.children&&node.children.forEach(c=>mark(c,idx)); };
+      this.pageList.forEach((root,i)=>mark(root,i+1));
+    },
+
+  loadChildren(row, resolve){
+    const kids=row.children||[]; const idx=row._groupIndex;
+    kids.forEach(c=>this.$set(c,'_groupIndex',idx));
+    resolve(kids);
+  },
 
 
     // -// -// -// -// -// -// -// -// -// -// -// -// -// -// -// -// -// -// -// -// -// -// -新增树形组测试// -// -// -// -// -// -// -// -// -// -// -// -// -// -// -// -// -// -// -// -// -// -// -// -// ---
@@ -313,55 +333,40 @@ export default {
      * @param {{ prop: string, order: 'ascending'|'descending'|null }} sort
      */
     handleSortChange({ prop, order }) {
-      // 没有排序，恢复原始顺序
       if (!order) {
-        this.pageList = [...this.originList]
-        return
+        this.pageList = [...this.originList];
+        this.$nextTick(() => this.buildParentIndex()); // [新增] 还原后重算
+        return;
       }
-
-      // 升降序转换
-      const sortFlag = order === 'ascending' ? 1 : -1
-
-      // 按数据类型自动排序，空值排最后
+      const sortFlag = order === 'ascending' ? 1 : -1;
       this.pageList = [...this.pageList].sort((a, b) => {
-        const valA = a[prop]
-        const valB = b[prop]
-
-        if (valA == null && valB != null) return 1
-        if (valB == null && valA != null) return -1
-        if (valA == null && valB == null) return 0
-
-        // 数字比较
-        if (!isNaN(valA) && !isNaN(valB)) {
-          return (Number(valA) - Number(valB)) * sortFlag
-        }
-        // 日期字段名包含 time 或 date，按时间排
-        if (/time|date/i.test(prop)) {
-          return (new Date(valA) - new Date(valB)) * sortFlag
-        }
-        // 字符串比较
-        return valA.toString().localeCompare(valB.toString(), 'zh-Hans-CN') * sortFlag
-      })
+        const valA = a[prop], valB = b[prop];
+        if (valA == null && valB != null) return 1;
+        if (valB == null && valA != null) return -1;
+        if (valA == null && valB == null) return 0;
+        if (!isNaN(valA) && !isNaN(valB)) return (Number(valA) - Number(valB)) * sortFlag;
+        if (/time|date/i.test(prop)) return (new Date(valA) - new Date(valB)) * sortFlag;
+        return valA.toString().localeCompare(valB.toString(), 'zh-Hans-CN') * sortFlag;
+      });
+      this.$nextTick(() => this.buildParentIndex()); // [新增] 排序后重算
     },
 
 
     //初始化和查询
-    getData() {
-      // orderPageList(this.queryParams).then(res => {
-      //   this.pageList = res.data|| []
-      //   console.log("data:" + this.pageList[0].bomNo);
-      //   this.pageTotal = Number(res.page.total_num)
-      // })
+    // [修复] 仅一次请求，完成后重建父项序号
+  getData(){
+    orderPageList(this.queryParams).then(res=>{
+      const arr=Array.isArray(res.data)?res.data:(res.data?.list||[]);
+      this.ensureRowKey(arr);        // [新增] 先生成稳定 row-key
+      this.pageList=arr;
+      this.originList=[...arr];
+      this.pageTotal=Number(res.page?.total_num||0);
+      this.$nextTick(()=>this.buildParentIndex()); // [新增] 再计算父项序号
+    });
+  },
+  indexMethod(i){ return (this.queryParams.pageNum-1)*this.queryParams.pageSize + i + 1; },
 
-      orderPageList(this.queryParams).then(res => {
-        // 适配后端返回结构，确保是数组
-        const arr = Array.isArray(res.data) ? res.data : (res.data?.list || [])
-        this.pageList = arr
-        this.originList = [...arr]  // 拷贝原始顺序
-        this.pageTotal = Number(res.page?.total_num || 0)
-      })
-    },
-    procAlloc() {
+  procAlloc() {
       if (this.selectList.length == 0) {
         this.$message.error('请选择工序分配的生产单！')
         return
