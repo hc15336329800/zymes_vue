@@ -2,7 +2,7 @@ import request from '@/utils/request'
 
 
 // 工序名称与设备ID的固定映射表
-const procedureDeviceMap = {
+export  const procedureDeviceMap = {
   '激光切割下料': '424949962023788544',
   '预装焊接': '424859913508773888',
   '打码': '424949505515741184',
@@ -595,23 +595,23 @@ export function new_audit_delivery_page_list(data) {
 }
 
 // 批量工序分配页面列表
-
-/**
- * 获取工序列表并根据工序名称替换 deviceId
- * @param {Object} params 查询参数
- * @returns {Promise<Object>} 替换后的响应数据
- */
-export function proc_procedure_list(params) {
+export function proc_procedure_list(data) {
   return request({
     url: '/api/order/proc_allocation/dist_list',
-    method: 'get',
-    params,
-  }).then((res) => {
-    const list = (res.data?.data || []).map((item) => ({
-      ...item,
-      deviceId: procedureDeviceMap[item.procedureName] || item.deviceId,
-    }))
-    return { ...res, data: list }
+    method: 'post',
+    data
+  }).then(res => {
+    if (Array.isArray(res.data)) {
+      res.data = res.data.map(item => {
+        const mappedId = procedureDeviceMap[item.procedureName]
+        if (mappedId) {
+          item.deviceId = mappedId
+          if (!item.workDeviceId) item.workDeviceId = mappedId
+        }
+        return item
+      })
+    }
+    return res
   })
 }
 

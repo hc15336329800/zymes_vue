@@ -71,7 +71,7 @@
 
 
 <script>
-import { deleteData, proc_procedure_list, submit_alloc_proc } from '@/api/order'
+import { deleteData, proc_procedure_list, submit_alloc_proc,procedureDeviceMap   } from '@/api/order'
 import { devicePageList } from '@/api/device/deviceInfo' // 使用设备台账接口
 
 
@@ -81,6 +81,7 @@ export default {
 
   data() {
     return {
+      procedureDeviceMap,
       listLoading: false,
       paramForm: {},
       saveList: [],
@@ -105,8 +106,7 @@ export default {
       // deviceOptions: Object.entries(DEVICE_ID_NAME_MAP).map(([value, label]) => ({ value, label })),
 
       deviceList: [],                     // [修改] 台账设备数据（下拉源）
-      procedureDeviceMap: {              // [MOD] 新增：工序名称 → 设备号映射
-      },
+
       deviceIdSet: new Set(),             // [新增] 台账设备ID集合（字符串），用于快速校验
       deviceMap: {}                       // [新增] 台账设备映射：{ id(字符串): name }
     }
