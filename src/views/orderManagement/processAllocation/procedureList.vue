@@ -128,13 +128,12 @@ export default {
     },
 
 // ================= 【设备台账】补充健壮性 =================
-    async getDeviceList(){
-      const query={ page:{page_num:1,page_size:100}, params:{} };
-      const res=await devicePageList(query);
-      const raw=Array.isArray(res&&res.data)?res.data:[];
-      this.deviceList = raw.map(it=>({ code:String(it.id), name:it.deviceName }));
-      this.deviceIdSet = new Set(this.deviceList.map(d=>d.code));
-      this.deviceMap  = this.deviceList.reduce((m,d)=>(m[d.code]=d.name,m),{});
+    async getDeviceList() {
+      const query = { page: { page_num: 1, page_size: 100 }, params: {} }
+      const res = await devicePageList(query)
+      const raw = Array.isArray(res?.data) ? res.data : []
+      this.deviceList = raw.map(it => ({ code: String(it.id), name: it.deviceName }))
+      this.deviceIdSet = new Set(this.deviceList.map(d => d.code))
     },
 
 
@@ -261,37 +260,71 @@ export default {
     },
 
 // ================= 【获取工序分配列表】关键映射 =================
-    async getList(str,id){
-      this.listLoading=true; this.editIdx=null;
-      try{
-        if(str=='clear'){ this.paramForm={}; this.pages={total:0,page_num:1,page_size:100}; }
-        const paramsId=JSON.parse(this.$route.query.id);
-        const res=await proc_procedure_list({ params:{ ids:paramsId, shiftType:this.$route.query.shiftType, groupId:this.$route.query.groupId }});
+//     async getList(str,id){
+//       this.listLoading=true; this.editIdx=null;
+//       try{
+//         if(str=='clear'){ this.paramForm={}; this.pages={total:0,page_num:1,page_size:100}; }
+//         const paramsId=JSON.parse(this.$route.query.id);
+//         const res=await proc_procedure_list({ params:{ ids:paramsId, shiftType:this.$route.query.shiftType, groupId:this.$route.query.groupId }});
+//
+//         if(res && res.data){
+//           this.list=(res.data||[]).map(it=>{
+//             const total = Number(it.totalCount||0);
+//             const allocated = Number(it.workerAllocCount||0);
+//             const wait = Math.max(total - allocated, 0);                         // 【修改】统一“可分配”口径
+//             // 【新增】旧计划数优先级：planTotalCount > workPlanTotalCount > workItemPlan(候选) > assignCount > workerAllocCount > 0
+//             const prevPlan = it.workId
+//               ? Number(it.planTotalCount ?? it.workPlanTotalCount ?? it.workItemPlan ?? it.assignCount ?? it.workerAllocCount ?? 0) || 0
+//               : 0;
+//
+//             const devId = it.deviceId!=null ? String(it.deviceId) : null;
+//             const mappedDev = (devId && this.deviceIdSet.has(devId)) ? devId : null;
+//
+//             return {
+//               ...it,
+//               waitAllocCount: wait,                               // 展示/校验用
+//               workItemCount: this.formatToInt(wait),              // 默认“把剩余可分配一次加满”，也可手改
+//               workDeviceId: mappedDev,
+//               __prevPlanTotalCount: prevPlan                      // 【新增】保存旧计划数，供 save() 使用
+//             };
+//           });
+//         }
+//       } finally { this.listLoading=false; }
+//     },
 
-        if(res && res.data){
-          this.list=(res.data||[]).map(it=>{
-            const total = Number(it.totalCount||0);
-            const allocated = Number(it.workerAllocCount||0);
-            const wait = Math.max(total - allocated, 0);                         // 【修改】统一“可分配”口径
-            // 【新增】旧计划数优先级：planTotalCount > workPlanTotalCount > workItemPlan(候选) > assignCount > workerAllocCount > 0
-            const prevPlan = it.workId
-              ? Number(it.planTotalCount ?? it.workPlanTotalCount ?? it.workItemPlan ?? it.assignCount ?? it.workerAllocCount ?? 0) || 0
-              : 0;
 
-            const devId = it.deviceId!=null ? String(it.deviceId) : null;
-            const mappedDev = (devId && this.deviceIdSet.has(devId)) ? devId : null;
+    async getList(str) {
+      this.listLoading = true
+      try {
+        if (str === 'clear') { /* 重置参数 */ }
+        const ids = JSON.parse(this.$route.query.id)
+        const res = await proc_procedure_list({
+          params: { ids, shiftType: this.$route.query.shiftType, groupId: this.$route.query.groupId }
+        })
+
+        if (res && res.data) {
+          this.list = (res.data || []).map(it => {
+            const total = Number(it.totalCount || 0)
+            const allocated = Number(it.workerAllocCount || 0)
+            const wait = Math.max(total - allocated, 0)
+
+            // 核心：优先使用映射表中的设备 ID
+            const mappedId = this.procedureDeviceMap[it.procedureName]
+            const devId = mappedId || (it.deviceId != null ? String(it.deviceId) : null)
+            const mappedDev = (devId && this.deviceIdSet.has(devId)) ? devId : null
 
             return {
               ...it,
-              waitAllocCount: wait,                               // 展示/校验用
-              workItemCount: this.formatToInt(wait),              // 默认“把剩余可分配一次加满”，也可手改
-              workDeviceId: mappedDev,
-              __prevPlanTotalCount: prevPlan                      // 【新增】保存旧计划数，供 save() 使用
-            };
-          });
+              waitAllocCount: wait,
+              workItemCount: this.formatToInt(wait),
+              workDeviceId: mappedDev      // 默认选中映射后的设备
+            }
+          })
         }
-      } finally { this.listLoading=false; }
-    },
+      } finally {
+        this.listLoading = false
+      }
+  },
 
 
     handleEnter(index) {
@@ -303,9 +336,8 @@ export default {
     }
   },
   async created() {
-    // [修改] 顺序：先加载台账，再加载工序列表，确保自动映射可用
-    await this.getDeviceList()                 // [修改] 页面初始化加载台账数据
-    await this.getList('clear')
+    await this.getDeviceList()   // 先加载设备台账
+    await this.getList('clear')  // 再加载工序列表并映射设备
   },
   async activated() {
     // await this.getGroupSelect()
